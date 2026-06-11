@@ -14,7 +14,9 @@ services:
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
-      - etest_pgdata:/var/lib/postgresql/data
+      # PG 18+ image'larida ma'lumotlar /var/lib/postgresql ostidagi
+      # major-versiya subkatalogida saqlanadi (eski /var/lib/postgresql/data emas).
+      - etest_pgdata:/var/lib/postgresql
     healthcheck:
       test:
         [
