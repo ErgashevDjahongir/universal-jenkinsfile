@@ -1,0 +1,45 @@
+# E-TEST — dev infratuzilma (PostgreSQL 18 + Redis).
+# Ishga tushirish: docker compose up -d
+# Ma'lumotlar nomli volume'larda saqlanadi; backend .env bilan mos kelishi kerak.
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: etest_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-etest}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-etest_dev_password}
+      POSTGRES_DB: ${DB_NAME:-etest}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - etest_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USERNAME:-etest} -d ${DB_NAME:-etest}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: etest_redis
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - etest_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  etest_pgdata:
+  etest_redisdata:

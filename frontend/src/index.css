@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* Dizayn tokenlari frontend-style skili bilan kengaytiriladi.
+   Hozircha bazaviy sozlamalar. */
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
