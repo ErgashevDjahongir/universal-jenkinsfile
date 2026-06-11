@@ -1,5 +1,6 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
+import { QuestionType } from '../../common/enums/question-type.enum';
 import { SessionStatus } from '../../common/enums/session-status.enum';
 import { UserRole } from '../../common/enums/user-role.enum';
 import { UserStatus } from '../../common/enums/user-status.enum';
@@ -12,8 +13,9 @@ function uniqueViolation(): QueryFailedError {
 }
 
 interface Mocks {
-  sessions: { find: jest.Mock; count: jest.Mock };
-  sessionQuestions: { find: jest.Mock };
+  sessions: { find: jest.Mock; count: jest.Mock; findOne: jest.Mock };
+  sessionQuestions: { find: jest.Mock; findOne: jest.Mock };
+  answers: { findOne: jest.Mock; save: jest.Mock; create: jest.Mock };
   codes: { findOne: jest.Mock };
   assignments: { findOne: jest.Mock };
   questions: { find: jest.Mock };
@@ -58,8 +60,13 @@ function build(overrides: Partial<Mocks> = {}): { service: SessionsService; mock
   };
 
   const mocks: Mocks = {
-    sessions: { find: jest.fn().mockResolvedValue([]), count: jest.fn().mockResolvedValue(0) },
-    sessionQuestions: { find: jest.fn().mockResolvedValue([]) },
+    sessions: {
+      find: jest.fn().mockResolvedValue([]),
+      count: jest.fn().mockResolvedValue(0),
+      findOne: jest.fn(),
+    },
+    sessionQuestions: { find: jest.fn().mockResolvedValue([]), findOne: jest.fn() },
+    answers: { findOne: jest.fn(), save: jest.fn(), create: jest.fn() },
     codes: { findOne: jest.fn() },
     assignments: { findOne: jest.fn() },
     questions: { find: jest.fn().mockResolvedValue([]) },
@@ -88,6 +95,7 @@ function build(overrides: Partial<Mocks> = {}): { service: SessionsService; mock
   const service = new SessionsService(
     mocks.sessions as never,
     mocks.sessionQuestions as never,
+    mocks.answers as never,
     mocks.codes as never,
     mocks.assignments as never,
     mocks.questions as never,
@@ -218,5 +226,103 @@ describe('SessionsService.startPreview', () => {
     expect(view.isPreview).toBe(true);
     // Urinish limiti tekshiruvi (sessions.find) preview yo‘lida umuman chaqirilmaydi.
     expect(mocks.sessions.find).not.toHaveBeenCalled();
+  });
+});
+
+function inProgressSession(overrides: Record<string, unknown> = {}) {
+  return {
+    id: '1',
+    userId: '9',
+    assignmentId: '3',
+    status: SessionStatus.IN_PROGRESS,
+    startedAt: new Date(Date.now() - 60_000),
+    deadlineAt: new Date(Date.now() + 600_000),
+    tabSwitches: 0,
+    isPreview: false,
+    ...overrides,
+  };
+}
+
+describe('SessionsService.getExamineeSession', () => {
+  const sessionQuestion = {
+    id: '77',
+    orderIndex: 0,
+    points: '2.00',
+    optionsOrder: ['1', '2'],
+    answer: null,
+    question: {
+      id: '100',
+      type: QuestionType.SINGLE_CHOICE,
+      text: 'Poytaxt?',
+      answerKey: 'MAXFIY_KALIT',
+      explanation: 'MAXFIY_IZOH',
+      options: [
+        { id: '1', text: 'Toshkent', isCorrect: true, orderIndex: 0, matchPair: null },
+        { id: '2', text: 'Buxoro', isCorrect: false, orderIndex: 1, matchPair: null },
+      ],
+    },
+  };
+
+  it('begona sessiyaga kirish → 403', async () => {
+    const { service, mocks } = build();
+    mocks.sessions.findOne.mockResolvedValue(inProgressSession({ userId: 'BOSHQA' }));
+    await expect(service.getExamineeSession('1', '9')).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('javoblar to‘g‘ri javoblarsiz qaytadi (is_correct/answer_key/explanation YO‘Q)', async () => {
+    const { service, mocks } = build();
+    mocks.sessions.findOne.mockResolvedValue(inProgressSession());
+    mocks.assignments.findOne.mockResolvedValue(assignment());
+    mocks.templates.findOne.mockResolvedValue(makeTemplate({ maxTabSwitches: 3 }));
+    mocks.sessionQuestions.find.mockResolvedValue([sessionQuestion]);
+
+    const view = await service.getExamineeSession('1', '9');
+    const serialized = JSON.stringify(view);
+
+    // Variantlar faqat {id, text}; to‘g‘rilik belgisi yo‘q.
+    expect(view.questions[0].options).toEqual([
+      { id: '1', text: 'Toshkent' },
+      { id: '2', text: 'Buxoro' },
+    ]);
+    expect(serialized).not.toContain('isCorrect');
+    expect(serialized).not.toContain('MAXFIY_KALIT');
+    expect(serialized).not.toContain('MAXFIY_IZOH');
+  });
+});
+
+describe('SessionsService.submitAnswer', () => {
+  it('begona sessiya → 403', async () => {
+    const { service, mocks } = build();
+    mocks.sessions.findOne.mockResolvedValue(inProgressSession({ userId: 'BOSHQA' }));
+    await expect(
+      service.submitAnswer('1', '77', { selectedOptionIds: ['1'] }, '9'),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('muddat o‘tgan → javob rad etiladi va sessiya yakunlanadi', async () => {
+    const { service, mocks } = build();
+    mocks.sessions.findOne.mockResolvedValue(
+      inProgressSession({ deadlineAt: new Date(Date.now() - 1000) }),
+    );
+    // finalize() ichidagi tranzaksiyani soddalashtiramiz (yakunlash chaqirilganini tekshiramiz).
+    mocks.dataSource.transaction.mockResolvedValue(undefined);
+
+    await expect(
+      service.submitAnswer('1', '77', { selectedOptionIds: ['1'] }, '9'),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(mocks.dataSource.transaction).toHaveBeenCalled();
+    expect(mocks.answers.save).not.toHaveBeenCalled();
+  });
+
+  it('faol sessiyada javob saqlanadi', async () => {
+    const { service, mocks } = build();
+    mocks.sessions.findOne.mockResolvedValue(inProgressSession());
+    mocks.sessionQuestions.findOne.mockResolvedValue({ id: '77', sessionId: '1' });
+    mocks.answers.findOne.mockResolvedValue(null);
+    mocks.answers.create.mockImplementation((x: unknown) => x);
+
+    const res = await service.submitAnswer('1', '77', { selectedOptionIds: ['1'] }, '9');
+    expect(res).toEqual({ saved: true });
+    expect(mocks.answers.save).toHaveBeenCalled();
   });
 });
