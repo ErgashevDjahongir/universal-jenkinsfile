@@ -1,0 +1,95 @@
+import { useState, type FormEvent } from 'react';
+import { isAxiosError } from 'axios';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/auth/useAuth';
+import { Button, Card, Input } from '@/components/ui';
+import { uz } from '@/i18n/uz';
+
+interface LocationState {
+  from?: { pathname?: string };
+}
+
+export function LoginPage() {
+  const { login, status, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [loginValue, setLoginValue] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Allaqachon kirgan bo'lsa — ichkariga yo'naltir.
+  if (status === 'authenticated' && user) {
+    return <Navigate to="/" replace />;
+  }
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+
+    if (!loginValue.trim()) {
+      setError(uz.auth.requiredLogin);
+      return;
+    }
+    if (!password) {
+      setError(uz.auth.requiredPassword);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await login(loginValue.trim(), password);
+      const state = location.state as LocationState | null;
+      navigate(state?.from?.pathname ?? '/', { replace: true });
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.status === 401) {
+        setError(uz.auth.invalidCredentials);
+      } else {
+        setError(uz.common.connectionError);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="w-full max-w-md">
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-semibold text-slate-900">{uz.app.name}</h1>
+        <p className="mt-1 text-sm text-slate-500">{uz.app.tagline}</p>
+      </div>
+
+      <Card>
+        <h2 className="text-lg font-semibold text-slate-900">{uz.auth.loginTitle}</h2>
+        <p className="mt-1 text-sm text-slate-500">{uz.auth.loginSubtitle}</p>
+
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <Input
+            label={uz.auth.loginLabel}
+            placeholder={uz.auth.loginPlaceholder}
+            autoComplete="username"
+            value={loginValue}
+            onChange={(e) => setLoginValue(e.target.value)}
+            disabled={submitting}
+          />
+          <Input
+            label={uz.auth.passwordLabel}
+            placeholder={uz.auth.passwordPlaceholder}
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={submitting}
+          />
+
+          {error && <p className="text-sm text-red-600">{error}</p>}
+
+          <Button type="submit" className="w-full" loading={submitting} disabled={submitting}>
+            {submitting ? uz.auth.submitting : uz.auth.submit}
+          </Button>
+        </form>
+      </Card>
+    </div>
+  );
+}

@@ -1,0 +1,23 @@
+import { Navigate } from 'react-router-dom';
+import { UserRole } from '@/auth/roles';
+import { useAuth } from '@/auth/useAuth';
+import { Spinner } from '@/components/ui';
+
+/** Ildiz ("/") — autentifikatsiya holati va rolga qarab yo'naltiradi. */
+export function HomeRedirect() {
+  const { status, user } = useAuth();
+
+  if (status === 'loading') {
+    return (
+      <div className="flex min-h-full items-center justify-center bg-slate-50">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Navigate to={user.role === UserRole.EXAMINEE ? '/test' : '/dashboard'} replace />;
+}

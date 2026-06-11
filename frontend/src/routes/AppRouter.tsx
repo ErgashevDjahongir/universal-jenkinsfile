@@ -1,0 +1,57 @@
+import { Route, Routes } from 'react-router-dom';
+import { UserRole } from '@/auth/roles';
+import { AppLayout } from '@/layouts/AppLayout';
+import { AuthLayout } from '@/layouts/AuthLayout';
+import { TestLayout } from '@/layouts/TestLayout';
+import { DashboardPage } from '@/pages/DashboardPage';
+import { ForbiddenPage } from '@/pages/ForbiddenPage';
+import { LoginPage } from '@/pages/LoginPage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
+import { PlaceholderPage } from '@/pages/PlaceholderPage';
+import { TestHomePage } from '@/pages/TestHomePage';
+import { uz } from '@/i18n/uz';
+import { HomeRedirect } from './HomeRedirect';
+import { ProtectedRoute } from './ProtectedRoute';
+
+const STAFF = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.EXPERT];
+const ADMIN = [UserRole.SUPER_ADMIN, UserRole.ADMIN];
+
+export function AppRouter() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomeRedirect />} />
+
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<LoginPage />} />
+      </Route>
+
+      {/* Admin paneli — xodimlar (super-admin, admin, ekspert) */}
+      <Route element={<ProtectedRoute roles={STAFF} />}>
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/questions" element={<PlaceholderPage title={uz.nav.questions} />} />
+          <Route path="/templates" element={<PlaceholderPage title={uz.nav.templates} />} />
+          <Route path="/reports" element={<PlaceholderPage title={uz.nav.reports} />} />
+        </Route>
+      </Route>
+
+      {/* Faqat administratorlar */}
+      <Route element={<ProtectedRoute roles={ADMIN} />}>
+        <Route element={<AppLayout />}>
+          <Route path="/sessions" element={<PlaceholderPage title={uz.nav.sessions} />} />
+          <Route path="/users" element={<PlaceholderPage title={uz.nav.users} />} />
+        </Route>
+      </Route>
+
+      {/* Test topshiruvchi */}
+      <Route element={<ProtectedRoute roles={[UserRole.EXAMINEE]} />}>
+        <Route element={<TestLayout />}>
+          <Route path="/test" element={<TestHomePage />} />
+        </Route>
+      </Route>
+
+      <Route path="/forbidden" element={<ForbiddenPage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+}
