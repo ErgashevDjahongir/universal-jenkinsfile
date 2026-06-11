@@ -43,7 +43,8 @@
       "Bash(docker compose down:*)",
       "Bash(rm:*)",
       "Bash(curl:*)",
-      "Bash(wget:*)"
+      "Bash(wget:*)",
+      "Bash(psql:*)"
     ],
     "deny": [
       "Read(./.env)",
@@ -60,7 +61,6 @@
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git reset --hard:*)",
-      "Bash(psql:* DROP *)",
       "Bash(sudo:*)",
       "Bash(chmod 777:*)"
     ],
