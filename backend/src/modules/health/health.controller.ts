@@ -2,12 +2,14 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
   constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
+  @Public()
   @Get()
   @ApiOperation({ summary: 'Tizim holatini tekshirish (liveness + DB ulanishi)' })
   @ApiResponse({ status: 200, description: 'Tizim ishlamoqda' })

@@ -1,9 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import configuration from './config/configuration';
 import { dataSourceOptions } from './config/data-source';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { RolesGuard } from './common/guards/roles.guard';
+import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
+import { RedisModule } from './modules/redis/redis.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -17,7 +23,15 @@ import { HealthModule } from './modules/health/health.module';
       ...dataSourceOptions,
       autoLoadEntities: true,
     }),
+    RedisModule,
+    UsersModule,
+    AuthModule,
     HealthModule,
+  ],
+  providers: [
+    // Global tartib: avval autentifikatsiya (JwtAuthGuard), keyin rol tekshiruvi (RolesGuard).
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}

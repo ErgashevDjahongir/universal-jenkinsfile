@@ -20,7 +20,9 @@ export interface AppConfig {
   jwt: {
     secret: string;
     expiresIn: string;
-    refreshExpiresIn: string;
+  };
+  session: {
+    idleMinutes: number;
   };
   bcryptCost: number;
 }
@@ -43,7 +45,9 @@ export default (): AppConfig => ({
   jwt: {
     secret: process.env.JWT_SECRET ?? 'change_me_in_production',
     expiresIn: process.env.JWT_EXPIRES_IN ?? '15m',
-    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
+  },
+  session: {
+    idleMinutes: parseInt(process.env.SESSION_IDLE_MINUTES ?? '30', 10),
   },
   bcryptCost: parseInt(process.env.BCRYPT_COST ?? '12', 10),
 });
