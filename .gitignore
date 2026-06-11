@@ -17,6 +17,9 @@ build/
 # Logs
 *.log
 
+# Yuklangan fayllar (savol rasmlari)
+backend/uploads/
+
 # Editor
 .idea/
 .vscode/

@@ -8,7 +8,10 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
+import { QuestionsModule } from './modules/questions/questions.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { SettingsModule } from './modules/settings/settings.service';
+import { SubjectsModule } from './modules/subjects/subjects.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -24,8 +27,11 @@ import { UsersModule } from './modules/users/users.module';
       autoLoadEntities: true,
     }),
     RedisModule,
+    SettingsModule,
     UsersModule,
     AuthModule,
+    SubjectsModule,
+    QuestionsModule,
     HealthModule,
   ],
   providers: [
