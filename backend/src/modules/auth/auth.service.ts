@@ -54,6 +54,15 @@ export class AuthService {
   }
 
   /**
+   * Berilgan foydalanuvchi uchun token juftligi beradi (parol tekshiruvisiz).
+   * Kod orqali kirish oqimida (examinee) ishlatiladi — chaqiruvchi kirish
+   * huquqini (kod haqiqiyligini) o'zi tasdiqlagan bo'lishi shart.
+   */
+  issueForUser(user: User): Promise<AuthResult> {
+    return this.issueTokens(user);
+  }
+
+  /**
    * Login + parolni tekshiradi; blok hisoblagichini boshqaradi.
    * Foydalanuvchini sanab chiqishni oldini olish uchun xato xabarlari umumiy
    * va topilmagan loginda ham bcrypt vaqti sarflanadi (timing oracle yopiq).
