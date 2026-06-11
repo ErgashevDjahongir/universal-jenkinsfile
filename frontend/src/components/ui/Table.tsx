@@ -30,7 +30,7 @@ export function Table<T>({
   onRetry,
 }: TableProps<T>) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
       <DataState
         loading={loading}
         error={error}
@@ -39,24 +39,24 @@ export function Table<T>({
         onRetry={onRetry}
       >
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
-            <thead className="bg-slate-50">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
+            <thead className="bg-gray-50">
               <tr>
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className={cn('px-4 py-3 text-left font-medium text-slate-500', col.className)}
+                    className={cn('px-4 py-3 text-left font-medium text-gray-500', col.className)}
                   >
                     {col.header}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-gray-100">
               {data.map((row) => (
-                <tr key={rowKey(row)} className="hover:bg-slate-50">
+                <tr key={rowKey(row)} className="hover:bg-gray-50">
                   {columns.map((col) => (
-                    <td key={col.key} className={cn('px-4 py-3 text-slate-700', col.className)}>
+                    <td key={col.key} className={cn('px-4 py-3 text-gray-700', col.className)}>
                       {col.render
                         ? col.render(row)
                         : String((row as Record<string, unknown>)[col.key] ?? '')}

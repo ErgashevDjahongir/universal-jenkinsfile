@@ -17,9 +17,9 @@ export function TestLayout() {
   }
 
   return (
-    <div className="flex min-h-full flex-col bg-slate-50">
-      <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6">
-        <span className="text-lg font-semibold text-slate-900">{uz.app.name}</span>
+    <div className="flex min-h-full flex-col bg-gray-50">
+      <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
+        <span className="text-lg font-semibold text-gray-900">{uz.app.name}</span>
         <Button variant="ghost" size="sm" onClick={handleLogout}>
           {uz.common.logout}
         </Button>

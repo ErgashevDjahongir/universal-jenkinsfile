@@ -5,9 +5,9 @@ import { uz } from '@/i18n/uz';
 export function PlaceholderPage({ title }: { title: string }) {
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
       <Card>
-        <p className="text-sm text-slate-400">{uz.common.comingSoon}</p>
+        <p className="text-sm text-gray-400">{uz.common.comingSoon}</p>
       </Card>
     </div>
   );

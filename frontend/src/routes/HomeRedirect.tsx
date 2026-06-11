@@ -9,7 +9,7 @@ export function HomeRedirect() {
 
   if (status === 'loading') {
     return (
-      <div className="flex min-h-full items-center justify-center bg-slate-50">
+      <div className="flex min-h-full items-center justify-center bg-gray-50">
         <Spinner size="lg" />
       </div>
     );

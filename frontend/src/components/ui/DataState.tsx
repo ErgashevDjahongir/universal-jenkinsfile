@@ -1,10 +1,13 @@
 import { type ReactNode } from 'react';
 import { uz } from '@/i18n/uz';
 import { Button } from './Button';
-import { Spinner } from './Spinner';
 
 /**
- * Ma'lumot komponentlari uchun 4 holat asosi: loading / xato / bo'sh / data.
+ * Ma'lumot komponentlari uchun 4 holat asosi (frontend-style skili):
+ *  - loading — skeleton (animate-pulse)
+ *  - xato — danger rang + qayta urinish tugmasi
+ *  - bo'sh — tushuntiruvchi matn + ixtiyoriy amal tugmasi
+ *  - data — asosiy ko'rinish (children)
  * Har bir ma'lumot ko'rsatadigan joyda shu bilan o'rab chiqiladi.
  */
 interface DataStateProps {
@@ -12,6 +15,8 @@ interface DataStateProps {
   error?: string | null;
   isEmpty?: boolean;
   emptyText?: string;
+  /** Bo'sh holatda ko'rsatiladigan amal (masalan "Qo'shish" tugmasi). */
+  emptyAction?: ReactNode;
   onRetry?: () => void;
   children: ReactNode;
 }
@@ -21,20 +26,23 @@ export function DataState({
   error,
   isEmpty,
   emptyText,
+  emptyAction,
   onRetry,
   children,
 }: DataStateProps) {
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" />
+      <div className="space-y-3 p-6" aria-busy="true" aria-live="polite">
+        <div className="h-4 w-1/3 animate-pulse rounded bg-gray-200" />
+        <div className="h-4 animate-pulse rounded bg-gray-200" />
+        <div className="h-4 w-5/6 animate-pulse rounded bg-gray-200" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+      <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
         <p className="text-sm text-red-600">{error}</p>
         {onRetry && (
           <Button variant="secondary" size="sm" onClick={onRetry}>
@@ -47,8 +55,9 @@ export function DataState({
 
   if (isEmpty) {
     return (
-      <div className="py-12 text-center text-sm text-slate-400">
-        {emptyText ?? uz.common.noData}
+      <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+        <p className="text-sm text-gray-500">{emptyText ?? uz.common.noData}</p>
+        {emptyAction}
       </div>
     );
   }

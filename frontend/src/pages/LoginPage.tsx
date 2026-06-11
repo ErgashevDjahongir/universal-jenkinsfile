@@ -56,13 +56,13 @@ export function LoginPage() {
   return (
     <div className="w-full max-w-md">
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-semibold text-slate-900">{uz.app.name}</h1>
-        <p className="mt-1 text-sm text-slate-500">{uz.app.tagline}</p>
+        <h1 className="text-2xl font-semibold text-gray-900">{uz.app.name}</h1>
+        <p className="mt-1 text-sm text-gray-500">{uz.app.tagline}</p>
       </div>
 
       <Card>
-        <h2 className="text-lg font-semibold text-slate-900">{uz.auth.loginTitle}</h2>
-        <p className="mt-1 text-sm text-slate-500">{uz.auth.loginSubtitle}</p>
+        <h2 className="text-lg font-semibold text-gray-900">{uz.auth.loginTitle}</h2>
+        <p className="mt-1 text-sm text-gray-500">{uz.auth.loginSubtitle}</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <Input
