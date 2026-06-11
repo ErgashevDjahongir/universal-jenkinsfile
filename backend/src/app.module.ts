@@ -12,6 +12,7 @@ import { QuestionsModule } from './modules/questions/questions.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { SettingsModule } from './modules/settings/settings.service';
 import { SubjectsModule } from './modules/subjects/subjects.module';
+import { TemplatesModule } from './modules/templates/templates.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -32,6 +33,7 @@ import { UsersModule } from './modules/users/users.module';
     AuthModule,
     SubjectsModule,
     QuestionsModule,
+    TemplatesModule,
     HealthModule,
   ],
   providers: [
