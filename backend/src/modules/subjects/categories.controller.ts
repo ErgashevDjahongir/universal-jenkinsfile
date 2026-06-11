@@ -20,14 +20,16 @@ export class CategoriesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Fan bo‘yicha kategoriyalar' })
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.EXPERT)
+  @ApiOperation({ summary: "Fan bo'yicha kategoriyalar" })
   @ApiQuery({ name: 'subjectId', required: true })
   findBySubject(@Query('subjectId') subjectId: string): Promise<Category[]> {
     return this.categories.findBySubject(subjectId);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Kategoriya ma’lumoti' })
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.EXPERT)
+  @ApiOperation({ summary: "Kategoriya ma'lumoti" })
   findOne(@Param('id') id: string): Promise<Category> {
     return this.categories.findOne(id);
   }

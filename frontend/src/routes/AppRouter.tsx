@@ -9,6 +9,9 @@ import { LoginPage } from '@/pages/LoginPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { PlaceholderPage } from '@/pages/PlaceholderPage';
 import { TestHomePage } from '@/pages/TestHomePage';
+import { QuestionsPage } from '@/pages/questions/QuestionsPage';
+import { SubjectsPage } from '@/pages/questions/SubjectsPage';
+import { QuestionFormPage } from '@/pages/questions/QuestionFormPage';
 import { uz } from '@/i18n/uz';
 import { HomeRedirect } from './HomeRedirect';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -29,7 +32,9 @@ export function AppRouter() {
       <Route element={<ProtectedRoute roles={STAFF} />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/questions" element={<PlaceholderPage title={uz.nav.questions} />} />
+          <Route path="/questions" element={<QuestionsPage />} />
+          <Route path="/questions/new" element={<QuestionFormPage />} />
+          <Route path="/questions/:id/edit" element={<QuestionFormPage />} />
           <Route path="/templates" element={<PlaceholderPage title={uz.nav.templates} />} />
           <Route path="/reports" element={<PlaceholderPage title={uz.nav.reports} />} />
         </Route>
@@ -38,6 +43,7 @@ export function AppRouter() {
       {/* Faqat administratorlar */}
       <Route element={<ProtectedRoute roles={ADMIN} />}>
         <Route element={<AppLayout />}>
+          <Route path="/questions/subjects" element={<SubjectsPage />} />
           <Route path="/sessions" element={<PlaceholderPage title={uz.nav.sessions} />} />
           <Route path="/users" element={<PlaceholderPage title={uz.nav.users} />} />
         </Route>

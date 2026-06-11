@@ -20,19 +20,21 @@ export class SubjectsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Fanlar ro‘yxati' })
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.EXPERT)
+  @ApiOperation({ summary: "Fanlar ro'yxati" })
   findAll(): Promise<Subject[]> {
     return this.subjects.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Fan ma’lumoti' })
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.EXPERT)
+  @ApiOperation({ summary: "Fan ma'lumoti" })
   findOne(@Param('id') id: string): Promise<Subject> {
     return this.subjects.findOne(id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Fanni tahrirlash / faolligini o‘zgartirish' })
+  @ApiOperation({ summary: "Fanni tahrirlash / faolligini o'zgartirish" })
   update(@Param('id') id: string, @Body() dto: UpdateSubjectDto): Promise<Subject> {
     return this.subjects.update(id, dto);
   }
