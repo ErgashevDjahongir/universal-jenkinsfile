@@ -7,7 +7,7 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { ForbiddenPage } from '@/pages/ForbiddenPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
-import { PlaceholderPage } from '@/pages/PlaceholderPage';
+import { ReportsPage } from '@/pages/reports/ReportsPage';
 import { StartPage } from '@/pages/test/StartPage';
 import { TestRunnerPage } from '@/pages/test/TestRunnerPage';
 import { QuestionsPage } from '@/pages/questions/QuestionsPage';
@@ -20,7 +20,6 @@ import { UsersPage } from '@/pages/users/UsersPage';
 import { DepartmentsPage } from '@/pages/users/DepartmentsPage';
 import { SessionsPage } from '@/pages/results/SessionsPage';
 import { SessionDetailPage } from '@/pages/results/SessionDetailPage';
-import { uz } from '@/i18n/uz';
 import { HomeRedirect } from './HomeRedirect';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -51,7 +50,7 @@ export function AppRouter() {
           {/* Natijalar/monitoring — ekspert ham ko'radi (o'zgartirish faqat admin) */}
           <Route path="/sessions" element={<SessionsPage />} />
           <Route path="/results/:id" element={<SessionDetailPage />} />
-          <Route path="/reports" element={<PlaceholderPage title={uz.nav.reports} />} />
+          <Route path="/reports" element={<ReportsPage />} />
         </Route>
       </Route>
 

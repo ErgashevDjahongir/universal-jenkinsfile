@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { QuestionsModule } from './modules/questions/questions.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
 import { SettingsModule } from './modules/settings/settings.service';
 import { SubjectsModule } from './modules/subjects/subjects.module';
@@ -38,6 +39,7 @@ import { UsersModule } from './modules/users/users.module';
     TemplatesModule,
     AssignmentsModule,
     SessionsModule,
+    ReportsModule,
     HealthModule,
   ],
   providers: [
