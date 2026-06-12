@@ -49,13 +49,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('authenticated');
   }, []);
 
+  // Kod orqali kirishda tokenlar allaqachon saqlangan — faqat kontekstni o'rnatamiz.
+  const establishSession = useCallback((nextUser: AuthUser) => {
+    setUser(nextUser);
+    setStatus('authenticated');
+  }, []);
+
   const logout = useCallback(async () => {
     await apiLogout();
     setUser(null);
     setStatus('unauthenticated');
   }, []);
 
-  const value = useMemo(() => ({ user, status, login, logout }), [user, status, login, logout]);
+  const value = useMemo(
+    () => ({ user, status, login, establishSession, logout }),
+    [user, status, login, establishSession, logout],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -1,0 +1,79 @@
+import { uz } from '@/i18n/uz';
+import { cn } from '@/lib/cn';
+import type { AnswerPayload, ExamineeQuestion, NavigationMode } from '@/api/sessions';
+import { isAnswered } from '../answer';
+
+interface QuestionNavProps {
+  questions: ExamineeQuestion[];
+  answers: Record<string, AnswerPayload>;
+  flagged: Set<string>;
+  currentIndex: number;
+  navigation: NavigationMode;
+  onSelect: (index: number) => void;
+}
+
+export function QuestionNav({
+  questions,
+  answers,
+  flagged,
+  currentIndex,
+  navigation,
+  onSelect,
+}: QuestionNavProps) {
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-medium text-gray-900">{uz.test.navTitle}</h3>
+      <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-6">
+        {questions.map((q, i) => {
+          const answered = isAnswered(q, answers[q.sessionQuestionId]);
+          const isFlagged = flagged.has(q.sessionQuestionId);
+          const isCurrent = i === currentIndex;
+          // Faqat oldinga rejimida o'tib bo'lingan savollarga qaytib bo'lmaydi.
+          const locked = navigation === 'forward_only' && i < currentIndex;
+          return (
+            <button
+              key={q.sessionQuestionId}
+              type="button"
+              disabled={locked}
+              onClick={() => onSelect(i)}
+              aria-current={isCurrent ? 'true' : undefined}
+              className={cn(
+                'relative flex h-9 items-center justify-center rounded-md text-sm font-medium transition-colors',
+                answered
+                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+                isCurrent && 'ring-2 ring-blue-500 ring-offset-1',
+                locked && 'cursor-not-allowed opacity-50 hover:bg-gray-100',
+              )}
+            >
+              {i + 1}
+              {isFlagged && (
+                <span
+                  className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-yellow-400"
+                  aria-hidden="true"
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <ul className="space-y-1.5 pt-1 text-xs text-gray-600">
+        <li className="flex items-center gap-2">
+          <span className="h-3 w-3 rounded bg-green-100 ring-1 ring-green-300" />
+          {uz.test.legendAnswered}
+        </li>
+        <li className="flex items-center gap-2">
+          <span className="h-3 w-3 rounded bg-gray-100 ring-1 ring-gray-300" />
+          {uz.test.legendUnanswered}
+        </li>
+        <li className="flex items-center gap-2">
+          <span className="relative h-3 w-3 rounded bg-gray-100 ring-1 ring-gray-300">
+            <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-yellow-400" />
+          </span>
+          {uz.test.legendFlagged}
+        </li>
+      </ul>
+    </div>
+  );
+}

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { UserRole } from '@/auth/roles';
+import { useAuth } from '@/auth/useAuth';
 import { Badge, Button, DataState } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
@@ -94,6 +96,9 @@ function categoryBreakdown(questions: SessionReviewQuestion[]) {
 export function SessionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  // Ekspert faqat tahlilni ko'radi; sessiyani boshqarish — admin.
+  const canManage = user?.role === UserRole.ADMIN || user?.role === UserRole.SUPER_ADMIN;
   const [review, setReview] = useState<SessionReview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -215,7 +220,7 @@ export function SessionDetailPage() {
                 </div>
 
                 {/* Admin actions */}
-                {sess.status === 'in_progress' && (
+                {canManage && sess.status === 'in_progress' && (
                   <div className="flex flex-col gap-2">
                     <Button
                       variant="danger"
@@ -235,7 +240,7 @@ export function SessionDetailPage() {
                     </Button>
                   </div>
                 )}
-                {sess.status !== 'in_progress' && (
+                {canManage && sess.status !== 'in_progress' && (
                   <Button
                     variant="secondary"
                     size="sm"

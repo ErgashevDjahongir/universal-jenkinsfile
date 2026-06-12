@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'node:crypto';
 import { DataSource, EntityManager, In, QueryFailedError, Repository } from 'typeorm';
+import { NavigationMode } from '../../common/enums/navigation-mode.enum';
 import { QuestionType } from '../../common/enums/question-type.enum';
 import { SessionStatus } from '../../common/enums/session-status.enum';
 import { UserRole } from '../../common/enums/user-role.enum';
@@ -90,12 +91,19 @@ export interface ExamineeQuestionView {
 export interface ExamineeSessionView {
   id: string;
   status: SessionStatus;
+  /** Test nomi (kirish/qoidalar ekrani uchun). */
+  assignmentTitle: string;
   startedAt: Date;
   deadlineAt: Date;
   serverNow: Date;
   remainingSeconds: number;
   tabSwitches: number;
   maxTabSwitches: number;
+  /** Shablon sozlamalari — qoidalar ekrani va navigatsiya rejimi uchun. */
+  timeLimitMinutes: number;
+  passingScorePercent: string;
+  navigation: NavigationMode;
+  resultVisibility: ResultVisibility;
   questions: ExamineeQuestionView[];
 }
 
@@ -103,6 +111,8 @@ export interface ExamineeSessionView {
 export interface SessionResultView {
   id: string;
   status: SessionStatus;
+  /** Natija ko'rsatish rejimi — mijoz qaysi ko'rinishni renderlashini biladi. */
+  resultVisibility: ResultVisibility;
   finishedAt: Date | null;
   score: string | null;
   maxScore: string | null;
@@ -282,6 +292,7 @@ export class SessionsService {
     return {
       id: session.id,
       status: session.status,
+      assignmentTitle: assignment.title,
       startedAt: session.startedAt,
       deadlineAt: session.deadlineAt,
       serverNow: now,
@@ -291,6 +302,10 @@ export class SessionsService {
       ),
       tabSwitches: session.tabSwitches,
       maxTabSwitches: template.maxTabSwitches,
+      timeLimitMinutes: template.timeLimitMinutes,
+      passingScorePercent: template.passingScorePercent,
+      navigation: template.navigation,
+      resultVisibility: template.resultVisibility,
       questions: sqs.map((sq) => this.toExamineeQuestion(sq)),
     };
   }
@@ -737,6 +752,7 @@ export class SessionsService {
     return {
       id: session.id,
       status: session.status,
+      resultVisibility: visibility,
       finishedAt: session.finishedAt,
       score: hide ? null : session.score,
       maxScore: hide ? null : session.maxScore,

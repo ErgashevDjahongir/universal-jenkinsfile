@@ -19,5 +19,5 @@ export function HomeRedirect() {
     return <Navigate to="/login" replace />;
   }
 
-  return <Navigate to={user.role === UserRole.EXAMINEE ? '/test' : '/dashboard'} replace />;
+  return <Navigate to={user.role === UserRole.EXAMINEE ? '/start' : '/dashboard'} replace />;
 }

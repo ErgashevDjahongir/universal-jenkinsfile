@@ -111,7 +111,7 @@ export class SessionsController {
 
   @Get()
   @ApiBearerAuth()
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.EXPERT)
   @ApiOperation({ summary: 'Jonli monitoring (standart: faol sessiyalar)' })
   monitor(@Query() filter: SessionFilterDto): Promise<MonitorRow[]> {
     return this.sessions.monitor(filter);
@@ -119,8 +119,8 @@ export class SessionsController {
 
   @Get(':id/review')
   @ApiBearerAuth()
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  @ApiOperation({ summary: 'Admin tahlili: har savol, berilgan va to‘g‘ri javob' })
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.EXPERT)
+  @ApiOperation({ summary: 'Admin/ekspert tahlili: har savol, berilgan va to‘g‘ri javob' })
   review(@Param('id') id: string): Promise<unknown> {
     return this.sessions.adminGetSession(id);
   }

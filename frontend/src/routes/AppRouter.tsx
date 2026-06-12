@@ -8,7 +8,8 @@ import { ForbiddenPage } from '@/pages/ForbiddenPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { PlaceholderPage } from '@/pages/PlaceholderPage';
-import { TestHomePage } from '@/pages/TestHomePage';
+import { StartPage } from '@/pages/test/StartPage';
+import { TestRunnerPage } from '@/pages/test/TestRunnerPage';
 import { QuestionsPage } from '@/pages/questions/QuestionsPage';
 import { SubjectsPage } from '@/pages/questions/SubjectsPage';
 import { QuestionFormPage } from '@/pages/questions/QuestionFormPage';
@@ -33,6 +34,8 @@ export function AppRouter() {
 
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
+        {/* Test topshiruvchi kod orqali kiradi (autentifikatsiyasiz) */}
+        <Route path="/start" element={<StartPage />} />
       </Route>
 
       {/* Admin paneli — xodimlar (super-admin, admin, ekspert) */}
@@ -45,6 +48,9 @@ export function AppRouter() {
           <Route path="/templates" element={<TemplatesPage />} />
           <Route path="/templates/new" element={<TemplateFormPage />} />
           <Route path="/templates/:id/edit" element={<TemplateFormPage />} />
+          {/* Natijalar/monitoring — ekspert ham ko'radi (o'zgartirish faqat admin) */}
+          <Route path="/sessions" element={<SessionsPage />} />
+          <Route path="/results/:id" element={<SessionDetailPage />} />
           <Route path="/reports" element={<PlaceholderPage title={uz.nav.reports} />} />
         </Route>
       </Route>
@@ -53,8 +59,6 @@ export function AppRouter() {
       <Route element={<ProtectedRoute roles={ADMIN} />}>
         <Route element={<AppLayout />}>
           <Route path="/questions/subjects" element={<SubjectsPage />} />
-          <Route path="/sessions" element={<SessionsPage />} />
-          <Route path="/results/:id" element={<SessionDetailPage />} />
           <Route path="/assignments" element={<AssignmentsPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/departments" element={<DepartmentsPage />} />
@@ -64,7 +68,7 @@ export function AppRouter() {
       {/* Test topshiruvchi */}
       <Route element={<ProtectedRoute roles={[UserRole.EXAMINEE]} />}>
         <Route element={<TestLayout />}>
-          <Route path="/test" element={<TestHomePage />} />
+          <Route path="/test/:sessionId" element={<TestRunnerPage />} />
         </Route>
       </Route>
 

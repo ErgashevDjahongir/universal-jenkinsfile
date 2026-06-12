@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { UserRole } from '@/auth/roles';
+import { useAuth } from '@/auth/useAuth';
 import { Badge, Button, Select, Table, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
@@ -44,6 +46,9 @@ function remainingSeconds(deadlineAt: string): number {
 
 export function SessionsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  // Ekspert faqat ko'radi; sessiyani boshqarish (to'xtatish/bekor/qayta urinish) — admin.
+  const canManage = user?.role === UserRole.ADMIN || user?.role === UserRole.SUPER_ADMIN;
   const [tab, setTab] = useState<Tab>('monitoring');
   const [rows, setRows] = useState<MonitorRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -192,30 +197,34 @@ export function SessionsPage() {
           <Button variant="ghost" size="sm" onClick={() => navigate(`/results/${r.id}`)}>
             {uz.sessions.viewDetail}
           </Button>
-          <Button
-            variant="danger"
-            size="sm"
-            loading={actionLoading === r.id + ':terminate'}
-            onClick={() => handleTerminate(r.id)}
-          >
-            {uz.sessions.terminate}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            loading={actionLoading === r.id + ':cancel'}
-            onClick={() => handleCancel(r.id)}
-          >
-            {uz.sessions.cancel}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            loading={actionLoading === r.id + ':retry'}
-            onClick={() => handleAllowRetry(r.id)}
-          >
-            {uz.sessions.allowRetry}
-          </Button>
+          {canManage && (
+            <>
+              <Button
+                variant="danger"
+                size="sm"
+                loading={actionLoading === r.id + ':terminate'}
+                onClick={() => handleTerminate(r.id)}
+              >
+                {uz.sessions.terminate}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                loading={actionLoading === r.id + ':cancel'}
+                onClick={() => handleCancel(r.id)}
+              >
+                {uz.sessions.cancel}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                loading={actionLoading === r.id + ':retry'}
+                onClick={() => handleAllowRetry(r.id)}
+              >
+                {uz.sessions.allowRetry}
+              </Button>
+            </>
+          )}
         </div>
       ),
     },
@@ -255,7 +264,7 @@ export function SessionsPage() {
           <Button variant="ghost" size="sm" onClick={() => navigate(`/results/${r.id}`)}>
             {uz.sessions.viewDetail}
           </Button>
-          {r.status !== 'in_progress' && (
+          {canManage && r.status !== 'in_progress' && (
             <Button
               variant="ghost"
               size="sm"
