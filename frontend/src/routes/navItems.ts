@@ -14,7 +14,8 @@ const STAFF = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.EXPERT];
 export const navItems: NavItem[] = [
   { to: '/dashboard', label: uz.nav.dashboard, roles: STAFF },
   { to: '/questions', label: uz.nav.questions, roles: STAFF },
-  { to: '/templates', label: uz.nav.templates, roles: STAFF },
+  { to: '/templates', label: uz.nav.templates, roles: ADMIN },
+  { to: '/assignments', label: uz.nav.assignments, roles: ADMIN },
   { to: '/sessions', label: uz.nav.sessions, roles: ADMIN },
   { to: '/reports', label: uz.nav.reports, roles: STAFF },
   { to: '/users', label: uz.nav.users, roles: ADMIN },

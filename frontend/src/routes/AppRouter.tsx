@@ -12,6 +12,9 @@ import { TestHomePage } from '@/pages/TestHomePage';
 import { QuestionsPage } from '@/pages/questions/QuestionsPage';
 import { SubjectsPage } from '@/pages/questions/SubjectsPage';
 import { QuestionFormPage } from '@/pages/questions/QuestionFormPage';
+import { TemplatesPage } from '@/pages/templates/TemplatesPage';
+import { TemplateFormPage } from '@/pages/templates/TemplateFormPage';
+import { AssignmentsPage } from '@/pages/assignments/AssignmentsPage';
 import { uz } from '@/i18n/uz';
 import { HomeRedirect } from './HomeRedirect';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -35,7 +38,9 @@ export function AppRouter() {
           <Route path="/questions" element={<QuestionsPage />} />
           <Route path="/questions/new" element={<QuestionFormPage />} />
           <Route path="/questions/:id/edit" element={<QuestionFormPage />} />
-          <Route path="/templates" element={<PlaceholderPage title={uz.nav.templates} />} />
+          <Route path="/templates" element={<TemplatesPage />} />
+          <Route path="/templates/new" element={<TemplateFormPage />} />
+          <Route path="/templates/:id/edit" element={<TemplateFormPage />} />
           <Route path="/reports" element={<PlaceholderPage title={uz.nav.reports} />} />
         </Route>
       </Route>
@@ -45,6 +50,7 @@ export function AppRouter() {
         <Route element={<AppLayout />}>
           <Route path="/questions/subjects" element={<SubjectsPage />} />
           <Route path="/sessions" element={<PlaceholderPage title={uz.nav.sessions} />} />
+          <Route path="/assignments" element={<AssignmentsPage />} />
           <Route path="/users" element={<PlaceholderPage title={uz.nav.users} />} />
         </Route>
       </Route>
