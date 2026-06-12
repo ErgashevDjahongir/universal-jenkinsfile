@@ -1,9 +1,10 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { tokenStorage } from '@/auth/tokenStorage';
 
-// Markazlashgan axios mijozi. Dev'da Vite proxy /api ni backendga yo'naltiradi.
-// Prod'da VITE_API_URL ishlatiladi.
-const baseURL = `${import.meta.env.VITE_API_URL ?? ''}/api`;
+// Markazlashgan axios mijozi.
+// VITE_API_URL to'liq base path sifatida ishlatiladi (masalan, http://localhost:3000/api).
+// O'rnatilmagan holda Vite proxy orqali /api yo'li ishlatiladi.
+const baseURL = import.meta.env.VITE_API_URL ?? '/api';
 
 export const api = axios.create({
   baseURL,

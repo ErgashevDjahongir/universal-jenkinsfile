@@ -6,6 +6,7 @@ export interface AppConfig {
   nodeEnv: string;
   port: number;
   apiPrefix: string;
+  corsOrigin: string | string[];
   database: {
     host: string;
     port: number;
@@ -34,13 +35,18 @@ export default (): AppConfig => {
   }
   if (jwtSecret === 'change_me_in_production') {
     // eslint-disable-next-line no-console
-    console.warn('[XAVFSIZLIK] JWT_SECRET hali ham standart qiymatda — production uchun kuchli kalit o’rnating.');
+    console.warn(
+      '[XAVFSIZLIK] JWT_SECRET hali ham standart qiymatda — production uchun kuchli kalit o’rnating.',
+    );
   }
 
   return {
     nodeEnv: process.env.NODE_ENV ?? 'development',
     port: parseInt(process.env.PORT ?? '3000', 10),
     apiPrefix: process.env.API_PREFIX ?? 'api',
+    corsOrigin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',').map((s) => s.trim())
+      : 'http://localhost:5173',
     database: {
       host: process.env.DB_HOST ?? 'localhost',
       port: parseInt(process.env.DB_PORT ?? '5432', 10),

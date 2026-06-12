@@ -9,6 +9,12 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService<AppConfig, true>);
 
+  const corsOrigin = config.get('corsOrigin', { infer: true });
+  app.enableCors({
+    origin: corsOrigin,
+    credentials: true,
+  });
+
   const apiPrefix = config.get('apiPrefix', { infer: true });
   app.setGlobalPrefix(apiPrefix);
 
