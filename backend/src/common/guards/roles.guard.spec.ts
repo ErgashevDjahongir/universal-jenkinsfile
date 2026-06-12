@@ -18,6 +18,7 @@ const admin: AuthUser = {
   role: UserRole.ADMIN,
   firstName: 'A',
   lastName: 'B',
+  mustChangePassword: false,
 };
 
 describe('RolesGuard', () => {

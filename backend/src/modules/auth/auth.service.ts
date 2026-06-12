@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserStatus } from '../../common/enums/user-status.enum';
 import { messages } from '../../i18n/uz';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { PasswordService } from './services/password.service';
 import { RefreshTokenService } from './services/refresh-token.service';
@@ -60,6 +61,25 @@ export class AuthService {
    */
   issueForUser(user: User): Promise<AuthResult> {
     return this.issueTokens(user);
+  }
+
+  /**
+   * Joriy foydalanuvchi parolini almashtiradi.
+   * Eski parol tekshiriladi; yangi parol kamida 8 belgi va harf+raqam talab qiladi.
+   * Muvaffaqiyatli almashinuvdan keyin must_change_password bayrog'i o'chiriladi.
+   */
+  async changePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+    const user = await this.users.findById(userId);
+    if (!user || !user.passwordHash) {
+      throw new BadRequestException(messages.auth.changePasswordFailed);
+    }
+
+    const matches = await this.passwords.compare(dto.currentPassword, user.passwordHash);
+    if (!matches) {
+      throw new BadRequestException(messages.auth.wrongCurrentPassword);
+    }
+
+    await this.users.updatePassword(userId, dto.newPassword);
   }
 
   /**
@@ -121,6 +141,7 @@ export class AuthService {
       role: user.role,
       firstName: user.firstName,
       lastName: user.lastName,
+      mustChangePassword: user.mustChangePassword,
     };
   }
 }

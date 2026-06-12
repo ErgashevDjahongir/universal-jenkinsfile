@@ -20,6 +20,7 @@ import { UsersPage } from '@/pages/users/UsersPage';
 import { DepartmentsPage } from '@/pages/users/DepartmentsPage';
 import { SessionsPage } from '@/pages/results/SessionsPage';
 import { SessionDetailPage } from '@/pages/results/SessionDetailPage';
+import { ProfilePage } from '@/pages/ProfilePage';
 import { HomeRedirect } from './HomeRedirect';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -35,6 +36,13 @@ export function AppRouter() {
         <Route path="/login" element={<LoginPage />} />
         {/* Test topshiruvchi kod orqali kiradi (autentifikatsiyasiz) */}
         <Route path="/start" element={<StartPage />} />
+      </Route>
+
+      {/* Barcha autentifikatsiya bo'lgan foydalanuvchilar uchun profil */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/profile" element={<ProfilePage />} />
+        </Route>
       </Route>
 
       {/* Admin paneli — xodimlar (super-admin, admin, ekspert) */}

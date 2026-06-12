@@ -9,6 +9,7 @@ export interface AuthUser {
   role: UserRole;
   firstName: string;
   lastName: string;
+  mustChangePassword: boolean;
 }
 
 export interface AuthResult {
@@ -31,6 +32,16 @@ export async function login(loginValue: string, password: string): Promise<AuthR
 export async function fetchMe(): Promise<AuthUser> {
   const { data } = await api.get<AuthUser>('/auth/me');
   return data;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/** Parolni almashtiradi. */
+export async function changePassword(payload: ChangePasswordPayload): Promise<void> {
+  await api.post('/auth/change-password', payload);
 }
 
 /** Chiqish — refresh tokenni serverda bekor qiladi va lokal saqlovni tozalaydi. */

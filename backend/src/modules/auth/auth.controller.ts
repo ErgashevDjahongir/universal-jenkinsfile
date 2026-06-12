@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { AuthService, AuthResult } from './auth.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { AuthUser } from './types/auth-user.interface';
@@ -17,7 +18,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login va parol orqali kirish' })
   @ApiResponse({ status: 200, description: 'Access va refresh token qaytariladi' })
-  @ApiResponse({ status: 401, description: 'Login/parol noto‘g‘ri yoki hisob bloklangan' })
+  @ApiResponse({ status: 401, description: 'Login/parol noto’g’ri yoki hisob bloklangan' })
   login(@Body() dto: LoginDto): Promise<AuthResult> {
     return this.auth.login(dto);
   }
@@ -47,5 +48,18 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Foydalanuvchi konteksti' })
   me(@CurrentUser() user: AuthUser): AuthUser {
     return user;
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Parolni almashtirish (joriy + yangi)' })
+  @ApiResponse({ status: 204, description: 'Parol muvaffaqiyatli almashtirildi' })
+  @ApiResponse({ status: 400, description: 'Joriy parol noto’g’ri yoki yangi parol talablarga javob bermaydi' })
+  async changePassword(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: ChangePasswordDto,
+  ): Promise<void> {
+    await this.auth.changePassword(user.id, dto);
   }
 }

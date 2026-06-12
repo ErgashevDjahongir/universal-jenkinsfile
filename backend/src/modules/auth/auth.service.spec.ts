@@ -26,6 +26,7 @@ function makeUser(overrides: Partial<User> = {}): User {
     failedAttempts: 0,
     lockedUntil: null,
     lastLoginAt: null,
+    mustChangePassword: false,
     createdBy: null,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -35,7 +36,7 @@ function makeUser(overrides: Partial<User> = {}): User {
 
 describe('AuthService — blok logikasi', () => {
   let users: jest.Mocked<
-    Pick<UsersService, 'findByLogin' | 'findById' | 'save' | 'registerFailedAttempt'>
+    Pick<UsersService, 'findByLogin' | 'findById' | 'save' | 'registerFailedAttempt' | 'updatePassword'>
   >;
   let passwords: jest.Mocked<Pick<PasswordService, 'compare' | 'compareDummy'>>;
   let jwt: jest.Mocked<Pick<JwtService, 'signAsync'>>;
@@ -48,6 +49,7 @@ describe('AuthService — blok logikasi', () => {
       findById: jest.fn(),
       save: jest.fn(),
       registerFailedAttempt: jest.fn(),
+      updatePassword: jest.fn().mockResolvedValue(undefined),
     };
     passwords = { compare: jest.fn(), compareDummy: jest.fn().mockResolvedValue(undefined) };
     jwt = { signAsync: jest.fn().mockResolvedValue('access-token') };
@@ -112,5 +114,92 @@ describe('AuthService — blok logikasi', () => {
     expect(users.save).toHaveBeenCalledWith(
       expect.objectContaining({ failedAttempts: 0, lockedUntil: null }),
     );
+  });
+});
+
+describe('AuthService — changePassword', () => {
+  let users: jest.Mocked<
+    Pick<UsersService, 'findByLogin' | 'findById' | 'save' | 'registerFailedAttempt' | 'updatePassword'>
+  >;
+  let passwords: jest.Mocked<Pick<PasswordService, 'compare' | 'compareDummy'>>;
+  let service: AuthService;
+
+  beforeEach(() => {
+    users = {
+      findByLogin: jest.fn(),
+      findById: jest.fn(),
+      save: jest.fn(),
+      registerFailedAttempt: jest.fn(),
+      updatePassword: jest.fn().mockResolvedValue(undefined),
+    };
+    passwords = { compare: jest.fn(), compareDummy: jest.fn().mockResolvedValue(undefined) };
+    const jwt = { signAsync: jest.fn().mockResolvedValue('access-token') };
+    const refresh = {
+      issue: jest.fn().mockResolvedValue('refresh-token'),
+      rotate: jest.fn(),
+      revokeOwned: jest.fn(),
+    };
+    service = new AuthService(
+      users as unknown as UsersService,
+      passwords as unknown as PasswordService,
+      jwt as unknown as JwtService,
+      refresh as unknown as RefreshTokenService,
+    );
+  });
+
+  it('joriy parol noto\'g\'ri bo\'lsa BadRequestException tashlaydi', async () => {
+    const { BadRequestException } = await import('@nestjs/common');
+    const makeUser = (overrides = {}) => ({
+      id: '1', lastName: 'A', firstName: 'B', middleName: null, login: 'u',
+      passwordHash: 'hash', phone: null, email: null, role: 'admin' as any,
+      status: 'active' as any, departmentId: null, positionId: null,
+      isCandidate: false, failedAttempts: 0, lockedUntil: null,
+      lastLoginAt: null, mustChangePassword: false, createdBy: null,
+      createdAt: new Date(), updatedAt: new Date(), ...overrides,
+    });
+
+    users.findById.mockResolvedValue(makeUser() as any);
+    passwords.compare.mockResolvedValue(false);
+
+    await expect(
+      service.changePassword('1', { currentPassword: 'wrong', newPassword: 'New1pass' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(users.updatePassword).not.toHaveBeenCalled();
+  });
+
+  it('passwordHash yo\'q bo\'lsa (examinee) BadRequestException tashlaydi', async () => {
+    const { BadRequestException } = await import('@nestjs/common');
+    const makeUser = (overrides = {}) => ({
+      id: '1', lastName: 'A', firstName: 'B', middleName: null, login: null,
+      passwordHash: null, phone: null, email: null, role: 'examinee' as any,
+      status: 'active' as any, departmentId: null, positionId: null,
+      isCandidate: false, failedAttempts: 0, lockedUntil: null,
+      lastLoginAt: null, mustChangePassword: false, createdBy: null,
+      createdAt: new Date(), updatedAt: new Date(), ...overrides,
+    });
+
+    users.findById.mockResolvedValue(makeUser() as any);
+
+    await expect(
+      service.changePassword('1', { currentPassword: 'any', newPassword: 'New1pass' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('to\'g\'ri joriy parol bilan updatePassword chaqiriladi', async () => {
+    const makeUser = (overrides = {}) => ({
+      id: '1', lastName: 'A', firstName: 'B', middleName: null, login: 'u',
+      passwordHash: 'hash', phone: null, email: null, role: 'admin' as any,
+      status: 'active' as any, departmentId: null, positionId: null,
+      isCandidate: false, failedAttempts: 0, lockedUntil: null,
+      lastLoginAt: null, mustChangePassword: true, createdBy: null,
+      createdAt: new Date(), updatedAt: new Date(), ...overrides,
+    });
+
+    users.findById.mockResolvedValue(makeUser() as any);
+    passwords.compare.mockResolvedValue(true);
+
+    await service.changePassword('1', { currentPassword: 'correct', newPassword: 'New1pass' });
+
+    expect(users.updatePassword).toHaveBeenCalledWith('1', 'New1pass');
   });
 });

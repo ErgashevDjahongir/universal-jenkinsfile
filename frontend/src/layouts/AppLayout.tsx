@@ -49,12 +49,12 @@ export function AppLayout() {
           <span className="text-base font-semibold text-gray-900 md:hidden">{uz.app.name}</span>
           <div className="ml-auto flex items-center gap-4">
             {user && (
-              <div className="text-right">
+              <NavLink to="/profile" className="text-right hover:opacity-80 transition-opacity">
                 <div className="text-sm font-medium text-gray-900">
                   {user.firstName} {user.lastName}
                 </div>
                 <div className="text-xs text-gray-500">{roleLabel(user.role)}</div>
-              </div>
+              </NavLink>
             )}
             <Button variant="secondary" size="sm" onClick={handleLogout}>
               {uz.common.logout}

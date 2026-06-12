@@ -62,6 +62,9 @@ export class User {
   @Column({ name: 'last_login_at', type: 'timestamptz', nullable: true })
   lastLoginAt!: Date | null;
 
+  @Column({ name: 'must_change_password', default: false })
+  mustChangePassword!: boolean;
+
   @Column({ name: 'created_by', type: 'bigint', nullable: true })
   createdBy!: string | null;
 

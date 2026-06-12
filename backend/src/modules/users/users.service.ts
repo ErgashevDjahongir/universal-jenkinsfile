@@ -8,7 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { User } from './entities/user.entity';
 
-const BCRYPT_ROUNDS = 10;
+const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class UsersService {
@@ -94,6 +94,11 @@ export class UsersService {
     if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
     user.status = UserStatus.ACTIVE;
     return this.users.save(user);
+  }
+
+  async updatePassword(userId: string, newPassword: string): Promise<void> {
+    const hash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    await this.users.update({ id: userId }, { passwordHash: hash, mustChangePassword: false });
   }
 
   async registerFailedAttempt(

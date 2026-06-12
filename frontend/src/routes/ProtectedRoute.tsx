@@ -24,6 +24,11 @@ export function ProtectedRoute({ roles }: ProtectedRouteProps) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
+  // Birinchi kirish oqimi: parol almashtirilishi majburiy bo'lsa /profile ga yo'naltir
+  if (user.mustChangePassword && location.pathname !== '/profile') {
+    return <Navigate to="/profile" replace />;
+  }
+
   if (roles && !roles.includes(user.role)) {
     return <Navigate to="/forbidden" replace />;
   }

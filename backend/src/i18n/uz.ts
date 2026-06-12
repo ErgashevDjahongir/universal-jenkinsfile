@@ -5,9 +5,11 @@
  */
 export const messages = {
   auth: {
-    invalidCredentials: 'Login yoki parol noto‘g‘ri',
-    accountLocked: 'Hisob vaqtincha bloklangan. Keyinroq urinib ko‘ring',
+    invalidCredentials: 'Login yoki parol noto’g’ri',
+    accountLocked: 'Hisob vaqtincha bloklangan. Keyinroq urinib ko’ring',
     sessionExpired: 'Sessiya muddati tugagan. Qaytadan kiring',
+    wrongCurrentPassword: 'Joriy parol noto’g’ri',
+    changePasswordFailed: 'Parolni almashtirib bo’lmadi. Qayta urinib ko’ring',
   },
   session: {
     alreadyInProgress: 'Sizda allaqachon faol test sessiyasi mavjud',
