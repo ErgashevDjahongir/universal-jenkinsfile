@@ -4,10 +4,11 @@ import { cn } from '@/lib/cn';
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  hint?: string;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label, error, id, className, ...props },
+  { label, error, hint, id, className, ...props },
   ref,
 ) {
   const autoId = useId();
@@ -33,6 +34,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         )}
         {...props}
       />
+      {hint && !error && <p className="text-xs text-gray-500">{hint}</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
     </div>
   );

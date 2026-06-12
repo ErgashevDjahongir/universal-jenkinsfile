@@ -15,6 +15,10 @@ import { QuestionFormPage } from '@/pages/questions/QuestionFormPage';
 import { TemplatesPage } from '@/pages/templates/TemplatesPage';
 import { TemplateFormPage } from '@/pages/templates/TemplateFormPage';
 import { AssignmentsPage } from '@/pages/assignments/AssignmentsPage';
+import { UsersPage } from '@/pages/users/UsersPage';
+import { DepartmentsPage } from '@/pages/users/DepartmentsPage';
+import { SessionsPage } from '@/pages/results/SessionsPage';
+import { SessionDetailPage } from '@/pages/results/SessionDetailPage';
 import { uz } from '@/i18n/uz';
 import { HomeRedirect } from './HomeRedirect';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -49,9 +53,11 @@ export function AppRouter() {
       <Route element={<ProtectedRoute roles={ADMIN} />}>
         <Route element={<AppLayout />}>
           <Route path="/questions/subjects" element={<SubjectsPage />} />
-          <Route path="/sessions" element={<PlaceholderPage title={uz.nav.sessions} />} />
+          <Route path="/sessions" element={<SessionsPage />} />
+          <Route path="/results/:id" element={<SessionDetailPage />} />
           <Route path="/assignments" element={<AssignmentsPage />} />
-          <Route path="/users" element={<PlaceholderPage title={uz.nav.users} />} />
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/departments" element={<DepartmentsPage />} />
         </Route>
       </Route>
 

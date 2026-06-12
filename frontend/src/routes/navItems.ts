@@ -19,4 +19,5 @@ export const navItems: NavItem[] = [
   { to: '/sessions', label: uz.nav.sessions, roles: ADMIN },
   { to: '/reports', label: uz.nav.reports, roles: STAFF },
   { to: '/users', label: uz.nav.users, roles: ADMIN },
+  { to: '/departments', label: uz.nav.departments, roles: ADMIN },
 ];

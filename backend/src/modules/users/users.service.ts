@@ -1,7 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
 import { In, Repository } from 'typeorm';
+import { UserStatus } from '../../common/enums/user-status.enum';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserFilterDto } from './dto/user-filter.dto';
 import { User } from './entities/user.entity';
+
+const BCRYPT_ROUNDS = 10;
 
 @Injectable()
 export class UsersService {
@@ -18,7 +25,6 @@ export class UsersService {
     return this.users.findOne({ where: { id } });
   }
 
-  /** Berilgan id-lar bo'yicha mavjud foydalanuvchilarni qaytaradi (tartib kafolatlanmaydi). */
   findByIds(ids: string[]): Promise<User[]> {
     if (ids.length === 0) {
       return Promise.resolve([]);
@@ -26,20 +32,70 @@ export class UsersService {
     return this.users.find({ where: { id: In(ids) } });
   }
 
-  findAll(): Promise<User[]> {
-    return this.users.find({ order: { id: 'ASC' } });
+  findAll(filter?: UserFilterDto): Promise<User[]> {
+    const where: Record<string, unknown> = {};
+    if (filter?.role) where['role'] = filter.role;
+    if (filter?.status) where['status'] = filter.status;
+    if (filter?.departmentId) where['departmentId'] = filter.departmentId;
+    return this.users.find({ where, order: { lastName: 'ASC', firstName: 'ASC' } });
   }
 
   save(user: User): Promise<User> {
     return this.users.save(user);
   }
 
-  /**
-   * Noto'g'ri parol urinishini ATOMIK qayd etadi: bitta UPDATE bilan hisoblagichni
-   * oshiradi va chegaraga yetganda hisobni bloklaydi. Konkurent urinishlar
-   * yo'qotilmaydi (read-modify-write poyga muammosini hal qiladi).
-   * maxAttempts/lockMinutes — kod konstantalari (foydalanuvchi kiritmaydi).
-   */
+  async create(dto: CreateUserDto, createdBy?: string): Promise<User> {
+    const user = this.users.create({
+      lastName: dto.lastName,
+      firstName: dto.firstName,
+      middleName: dto.middleName ?? null,
+      login: dto.login ?? null,
+      passwordHash: dto.password ? await bcrypt.hash(dto.password, BCRYPT_ROUNDS) : null,
+      phone: dto.phone ?? null,
+      email: dto.email ?? null,
+      role: dto.role,
+      departmentId: dto.departmentId ?? null,
+      positionId: dto.positionId ?? null,
+      isCandidate: dto.isCandidate ?? false,
+      createdBy: createdBy ?? null,
+    });
+    return this.users.save(user);
+  }
+
+  async update(id: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.users.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+    if (dto.lastName !== undefined) user.lastName = dto.lastName;
+    if (dto.firstName !== undefined) user.firstName = dto.firstName;
+    if (dto.middleName !== undefined) user.middleName = dto.middleName ?? null;
+    if (dto.login !== undefined) user.login = dto.login ?? null;
+    if (dto.password) user.passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+    if (dto.phone !== undefined) user.phone = dto.phone ?? null;
+    if (dto.email !== undefined) user.email = dto.email ?? null;
+    if (dto.role !== undefined) user.role = dto.role;
+    if (dto.departmentId !== undefined) user.departmentId = dto.departmentId ?? null;
+    if (dto.positionId !== undefined) user.positionId = dto.positionId ?? null;
+    if (dto.isCandidate !== undefined) user.isCandidate = dto.isCandidate;
+    return this.users.save(user);
+  }
+
+  async block(id: string): Promise<User> {
+    const user = await this.users.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+    if (user.status === UserStatus.BLOCKED) {
+      throw new BadRequestException('Foydalanuvchi allaqachon bloklangan');
+    }
+    user.status = UserStatus.BLOCKED;
+    return this.users.save(user);
+  }
+
+  async activate(id: string): Promise<User> {
+    const user = await this.users.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+    user.status = UserStatus.ACTIVE;
+    return this.users.save(user);
+  }
+
   async registerFailedAttempt(
     userId: string,
     maxAttempts: number,
