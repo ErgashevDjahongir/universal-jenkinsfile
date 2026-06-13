@@ -3,6 +3,8 @@ import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge, Button, Modal, Pagination, Select, Table, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
+import { useAuth } from '@/auth/useAuth';
+import { UserRole } from '@/auth/roles';
 import {
   deleteCandidate,
   getCandidates,
@@ -29,6 +31,8 @@ const PAGE_LIMIT = 20;
 
 export function CandidatesPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isReadOnly = user?.role === UserRole.EXPERT;
   const [candidates, setCandidates] = useState<CandidateListRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +124,7 @@ export function CandidatesPage() {
     {
       key: 'actions',
       header: '',
-      className: 'w-36',
+      className: isReadOnly ? 'w-12' : 'w-36',
       render: (c) => (
         <div className="flex items-center gap-1">
           <Button
@@ -132,27 +136,31 @@ export function CandidatesPage() {
           >
             <Eye size={15} />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            title={uz.common.edit}
-            aria-label={uz.common.edit}
-            onClick={() => {
-              setEditTarget(c);
-              setFormOpen(true);
-            }}
-          >
-            <Pencil size={15} />
-          </Button>
-          <Button
-            variant="danger"
-            size="icon"
-            title={uz.candidates.delete}
-            aria-label={uz.candidates.delete}
-            onClick={() => setDeleteTarget(c)}
-          >
-            <Trash2 size={15} />
-          </Button>
+          {!isReadOnly && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                title={uz.common.edit}
+                aria-label={uz.common.edit}
+                onClick={() => {
+                  setEditTarget(c);
+                  setFormOpen(true);
+                }}
+              >
+                <Pencil size={15} />
+              </Button>
+              <Button
+                variant="danger"
+                size="icon"
+                title={uz.candidates.delete}
+                aria-label={uz.candidates.delete}
+                onClick={() => setDeleteTarget(c)}
+              >
+                <Trash2 size={15} />
+              </Button>
+            </>
+          )}
         </div>
       ),
     },
@@ -162,17 +170,19 @@ export function CandidatesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">{uz.candidates.title}</h1>
-        <Button
-          size="icon"
-          title={uz.candidates.add}
-          aria-label={uz.candidates.add}
-          onClick={() => {
-            setEditTarget(null);
-            setFormOpen(true);
-          }}
-        >
-          <Plus size={16} />
-        </Button>
+        {!isReadOnly && (
+          <Button
+            size="icon"
+            title={uz.candidates.add}
+            aria-label={uz.candidates.add}
+            onClick={() => {
+              setEditTarget(null);
+              setFormOpen(true);
+            }}
+          >
+            <Plus size={16} />
+          </Button>
+        )}
       </div>
 
       {actionError && (

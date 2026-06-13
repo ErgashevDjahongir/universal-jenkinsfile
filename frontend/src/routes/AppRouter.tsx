@@ -56,6 +56,14 @@ export function AppRouter() {
         </Route>
       </Route>
 
+      {/* Test topshiruvchilar — ekspert read-only ko'radi, admin to'liq boshqaradi. */}
+      <Route element={<ProtectedRoute roles={STAFF} />}>
+        <Route element={<AppLayout />}>
+          <Route path="/candidates" element={<CandidatesPage />} />
+          <Route path="/candidates/:id" element={<CandidateDetailPage />} />
+        </Route>
+      </Route>
+
       {/* Faqat administratorlar — savollar banki, shablonlar, tayinlovlar, foydalanuvchilar.
           Ekspert savollar bankiga (va dashboard'ga) kira olmaydi (qaror: ekspert ko'rinishi). */}
       <Route element={<ProtectedRoute roles={ADMIN} />}>
@@ -69,8 +77,6 @@ export function AppRouter() {
           <Route path="/templates/new" element={<TemplateFormPage />} />
           <Route path="/templates/:id/edit" element={<TemplateFormPage />} />
           <Route path="/assignments" element={<AssignmentsPage />} />
-          <Route path="/candidates" element={<CandidatesPage />} />
-          <Route path="/candidates/:id" element={<CandidateDetailPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/departments" element={<DepartmentsPage />} />
         </Route>

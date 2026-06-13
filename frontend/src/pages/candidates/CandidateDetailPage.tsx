@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Download, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
 import { Badge, Button, Modal } from '@/components/ui';
 import { uz } from '@/i18n/uz';
+import { useAuth } from '@/auth/useAuth';
+import { UserRole } from '@/auth/roles';
 import {
   deleteCandidateDocument,
   downloadCandidateDocument,
@@ -55,6 +57,8 @@ function formatFileSize(bytes: number) {
 export function CandidateDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isReadOnly = user?.role === UserRole.EXPERT;
   const [candidate, setCandidate] = useState<CandidateDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -202,15 +206,17 @@ export function CandidateDetailPage() {
           <ArrowLeft size={16} />
         </Button>
         <h1 className="flex-1 text-2xl font-semibold text-gray-900">{uz.candidates.detailTitle}</h1>
-        <Button
-          variant="ghost"
-          size="icon"
-          title={uz.common.edit}
-          aria-label={uz.common.edit}
-          onClick={() => setEditOpen(true)}
-        >
-          <Pencil size={15} />
-        </Button>
+        {!isReadOnly && (
+          <Button
+            variant="ghost"
+            size="icon"
+            title={uz.common.edit}
+            aria-label={uz.common.edit}
+            onClick={() => setEditOpen(true)}
+          >
+            <Pencil size={15} />
+          </Button>
+        )}
       </div>
 
       {actionError && (
@@ -291,37 +297,43 @@ export function CandidateDetailPage() {
                       >
                         <Download size={15} />
                       </Button>
+                      {!isReadOnly && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title={uz.candidates.replaceDoc}
+                            aria-label={uz.candidates.replaceDoc}
+                            loading={docUploading === type}
+                            onClick={() => openFilePicker(type)}
+                          >
+                            <Upload size={15} />
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="icon"
+                            title={uz.candidates.deleteDoc}
+                            aria-label={uz.candidates.deleteDoc}
+                            onClick={() => setDocDeleteTarget(type)}
+                          >
+                            <Trash2 size={15} />
+                          </Button>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    !isReadOnly && (
                       <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="icon"
-                        title={uz.candidates.replaceDoc}
-                        aria-label={uz.candidates.replaceDoc}
+                        title={uz.candidates.uploadDoc}
+                        aria-label={uz.candidates.uploadDoc}
                         loading={docUploading === type}
                         onClick={() => openFilePicker(type)}
                       >
-                        <Upload size={15} />
+                        <Plus size={15} />
                       </Button>
-                      <Button
-                        variant="danger"
-                        size="icon"
-                        title={uz.candidates.deleteDoc}
-                        aria-label={uz.candidates.deleteDoc}
-                        onClick={() => setDocDeleteTarget(type)}
-                      >
-                        <Trash2 size={15} />
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      title={uz.candidates.uploadDoc}
-                      aria-label={uz.candidates.uploadDoc}
-                      loading={docUploading === type}
-                      onClick={() => openFilePicker(type)}
-                    >
-                      <Plus size={15} />
-                    </Button>
+                    )
                   )}
                 </div>
               </div>
@@ -335,27 +347,28 @@ export function CandidateDetailPage() {
       <div className="rounded-lg border border-gray-200 bg-white p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-medium text-gray-900">{uz.candidates.assignmentTitle}</h2>
-          {candidate.assignment === null ? (
-            <Button
-              size="icon"
-              title={uz.candidates.assign}
-              aria-label={uz.candidates.assign}
-              onClick={() => setAssignOpen(true)}
-            >
-              <Plus size={16} />
-            </Button>
-          ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              title={uz.candidates.assignEdit}
-              aria-label={uz.candidates.assignEdit}
-              disabled={!canEditAssignment}
-              onClick={() => setAssignOpen(true)}
-            >
-              <Pencil size={15} />
-            </Button>
-          )}
+          {!isReadOnly &&
+            (candidate.assignment === null ? (
+              <Button
+                size="icon"
+                title={uz.candidates.assign}
+                aria-label={uz.candidates.assign}
+                onClick={() => setAssignOpen(true)}
+              >
+                <Plus size={16} />
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                title={uz.candidates.assignEdit}
+                aria-label={uz.candidates.assignEdit}
+                disabled={!canEditAssignment}
+                onClick={() => setAssignOpen(true)}
+              >
+                <Pencil size={15} />
+              </Button>
+            ))}
         </div>
         {candidate.assignment ? (
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
