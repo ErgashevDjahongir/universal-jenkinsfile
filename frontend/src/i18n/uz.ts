@@ -117,7 +117,7 @@ export const uz = {
     startError: 'Kirishda xatolik yuz berdi. Qayta urinib koʻring.',
 
     // Qoidalar (intro) ekrani
-    introTitle: 'Test boshlanishidan oldin',
+    introTitle: 'Test jarayonini boshlash',
     rulesTitle: 'Qoidalar va eslatmalar',
     questionCount: 'Savollar soni',
     questionCountValue: '{count} ta',

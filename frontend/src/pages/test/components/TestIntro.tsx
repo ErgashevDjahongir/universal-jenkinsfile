@@ -19,10 +19,7 @@ export function TestIntro({ session, onStart }: TestIntroProps) {
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">{uz.test.introTitle}</h1>
-        <p className="mt-1 text-sm text-gray-600">{session.assignmentTitle}</p>
-      </div>
+      <h1 className="text-center text-2xl font-semibold text-gray-900">{uz.test.introTitle}</h1>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Stat
@@ -35,7 +32,7 @@ export function TestIntro({ session, onStart }: TestIntroProps) {
         />
         <Stat
           label={uz.test.passingScore}
-          value={uz.test.percentValue.replace('{percent}', session.passingScorePercent)}
+          value={parseFloat(session.passingScorePercent).toFixed(0)}
         />
       </div>
 

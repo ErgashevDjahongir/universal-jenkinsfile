@@ -77,7 +77,9 @@ export function DashboardPage() {
   if (!canViewReports) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold text-gray-900">{uz.dashboard.title}</h1>
+        <div className="rounded-lg border border-gray-200 bg-white px-6 py-4">
+          <h1 className="text-2xl font-semibold text-gray-900">{uz.dashboard.title}</h1>
+        </div>
         <div className="rounded-lg border border-gray-200 bg-white p-6">
           <p className="text-sm text-gray-600">
             {uz.auth.welcome}, {user?.firstName}!
@@ -89,7 +91,9 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">{uz.dashboard.title}</h1>
+      <div className="rounded-lg border border-gray-200 bg-white px-6 py-4">
+        <h1 className="text-2xl font-semibold text-gray-900">{uz.dashboard.title}</h1>
+      </div>
 
       <DataState
         loading={loading}
