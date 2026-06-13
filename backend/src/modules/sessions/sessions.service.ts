@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'node:crypto';
 import { DataSource, EntityManager, In, QueryFailedError, Repository } from 'typeorm';
+import { CandidateStatus } from '../../common/enums/candidate-status.enum';
 import { NavigationMode } from '../../common/enums/navigation-mode.enum';
 import { QuestionType } from '../../common/enums/question-type.enum';
 import { SessionStatus } from '../../common/enums/session-status.enum';
@@ -18,6 +19,7 @@ import { messages } from '../../i18n/uz';
 import { AuthResult, AuthService } from '../auth/auth.service';
 import { TestAssignment } from '../assignments/entities/test-assignment.entity';
 import { AccessCode } from '../assignments/entities/access-code.entity';
+import { Candidate } from '../candidates/entities/candidate.entity';
 import { Question } from '../questions/entities/question.entity';
 import { TestTemplate } from '../templates/entities/test-template.entity';
 import { TemplatesService } from '../templates/templates.service';
@@ -172,6 +174,7 @@ export class SessionsService {
     @InjectRepository(AccessCode) private readonly codes: Repository<AccessCode>,
     @InjectRepository(TestAssignment) private readonly assignments: Repository<TestAssignment>,
     @InjectRepository(Question) private readonly questions: Repository<Question>,
+    @InjectRepository(Candidate) private readonly candidates: Repository<Candidate>,
     private readonly templates: TemplatesService,
     private readonly auth: AuthService,
     private readonly dataSource: DataSource,
@@ -197,10 +200,17 @@ export class SessionsService {
 
     const template = await this.templates.findOne(assignment.templateId);
 
-    // Kodga oldindan biriktirilgan foydalanuvchi bo'lsa — uni ishlatamiz, F.I.Sh.
-    // so'ralmaydi; aks holda anonim kod uchun yangi examinee yaratiladi.
-    const assignedUser = code.userId ? await this.loadActiveUser(code.userId) : null;
-    if (!assignedUser) {
+    // Kod candidate'ga bog'langan bo'lsa — topshiruvchi avtomatik aniqlanadi (qaror §10),
+    // F.I.Sh. so'ralmaydi. Aks holda kodga biriktirilgan user yoki anonim ro'yxatga olish.
+    const candidate = code.candidateId ? await this.loadCandidate(code.candidateId) : null;
+
+    // Mavjud examinee: kodga biriktirilgan user yoki candidate'ning oldingi examinee'si
+    // (bitta candidate = bitta examinee — qayta kirishda qayta yaratilmaydi).
+    let assignedUser = code.userId ? await this.loadActiveUser(code.userId) : null;
+    if (!assignedUser && candidate) {
+      assignedUser = await this.findExamineeForCandidate(candidate.id);
+    }
+    if (!assignedUser && !candidate) {
       this.assertRegistrationFields(dto);
     }
 
@@ -212,7 +222,11 @@ export class SessionsService {
     const sealed = await this.selectAndSeal(template, excludeIds);
 
     const { session, user } = await this.dataSource.transaction(async (manager) => {
-      const examinee = assignedUser ?? (await this.createExaminee(manager, dto));
+      const examinee =
+        assignedUser ??
+        (candidate
+          ? await this.createExamineeFromCandidate(manager, candidate)
+          : await this.createExaminee(manager, dto));
 
       // Kodni atomik iste'mol qilamiz: faqat hali ishlatilmagan bo'lsa.
       const consumed = await manager
@@ -234,7 +248,17 @@ export class SessionsService {
         template,
         sealed,
         ctx,
+        candidateId: candidate?.id ?? null,
       });
+
+      // Topshiruvchi testni boshladi (qaror §8): pending → in_progress.
+      if (candidate) {
+        await manager.update(
+          Candidate,
+          { id: candidate.id },
+          { status: CandidateStatus.IN_PROGRESS },
+        );
+      }
       return { session: created, user: examinee };
     });
 
@@ -510,6 +534,7 @@ export class SessionsService {
           this.codes.create({
             assignmentId: session.assignmentId,
             userId: session.userId,
+            candidateId: session.candidateId,
             code: generateAccessCode(),
           }),
         );
@@ -657,6 +682,15 @@ export class SessionsService {
       // Savol statistikasi — is_preview=true sessiyalar KIRMAYDI (qaror §3).
       if (!session.isPreview) {
         await this.bumpQuestionStats(manager, usedIds, correctIds);
+      }
+
+      // Candidate sessiyasi yakunlandi (qaror §8): in_progress → completed.
+      if (session.candidateId) {
+        await manager.update(
+          Candidate,
+          { id: session.candidateId },
+          { status: CandidateStatus.COMPLETED },
+        );
       }
 
       return (await manager.findOne(TestSession, { where: { id: session.id } }))!;
@@ -939,6 +973,55 @@ export class SessionsService {
     return count + 1;
   }
 
+  /** Candidate'ni yuklaydi (kod orqali avtomatik aniqlash uchun). */
+  private async loadCandidate(id: string): Promise<Candidate> {
+    const candidate = await this.candidates.findOne({ where: { id } });
+    if (!candidate) {
+      throw new BadRequestException(messages.accessCode.invalid);
+    }
+    return candidate;
+  }
+
+  /**
+   * Candidate uchun avval yaratilgan examinee'ni topadi (bitta candidate = bitta examinee).
+   * Oldingi sessiya bo'yicha aniqlanadi; topilmasa null (birinchi kirish).
+   */
+  private async findExamineeForCandidate(candidateId: string): Promise<User | null> {
+    const prior = await this.sessions.findOne({
+      where: { candidateId },
+      order: { id: 'DESC' },
+      select: { id: true, userId: true },
+    });
+    if (!prior) {
+      return null;
+    }
+    return this.dataSource.getRepository(User).findOne({ where: { id: prior.userId } });
+  }
+
+  /**
+   * Candidate'dan examinee User yaratadi (sessiya modeli user_id talab qiladi).
+   * Login/parol YO'Q (faqat kod orqali kirish), is_candidate=true (xodimlar ro'yxatida
+   * ko'rinmaydi). F.I.Sh. familiya/ism/sharif bo'yicha bo'linadi.
+   */
+  private async createExamineeFromCandidate(
+    manager: EntityManager,
+    candidate: Candidate,
+  ): Promise<User> {
+    const parts = candidate.fullName.trim().split(/\s+/);
+    const user = manager.create(User, {
+      lastName: parts[0] ?? candidate.fullName,
+      firstName: parts[1] ?? '-',
+      middleName: parts.length > 2 ? parts.slice(2).join(' ') : null,
+      phone: candidate.phone,
+      login: null,
+      passwordHash: null,
+      role: UserRole.EXAMINEE,
+      status: UserStatus.ACTIVE,
+      isCandidate: true,
+    });
+    return manager.save(user);
+  }
+
   private async createExaminee(manager: EntityManager, dto: StartSessionDto): Promise<User> {
     const user = manager.create(User, {
       lastName: dto.lastName as string,
@@ -962,6 +1045,7 @@ export class SessionsService {
       template: TestTemplate;
       sealed: SealedQuestion[];
       ctx: SessionContext;
+      candidateId?: string | null;
     },
   ): Promise<TestSession> {
     const startedAt = new Date();
@@ -978,6 +1062,7 @@ export class SessionsService {
       tabSwitches: 0,
       ipAddress: params.ctx.ip ?? null,
       userAgent: params.ctx.userAgent ?? null,
+      candidateId: params.candidateId ?? null,
     });
 
     let saved: TestSession;

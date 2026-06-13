@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
+import { CandidateStatus } from '../../common/enums/candidate-status.enum';
 import { QuestionType } from '../../common/enums/question-type.enum';
 import { SessionStatus } from '../../common/enums/session-status.enum';
 import { UserRole } from '../../common/enums/user-role.enum';
@@ -19,10 +20,12 @@ interface Mocks {
   codes: { findOne: jest.Mock };
   assignments: { findOne: jest.Mock };
   questions: { find: jest.Mock };
+  candidates: { findOne: jest.Mock };
   templates: { findOne: jest.Mock; selectForSession: jest.Mock };
   auth: { issueForUser: jest.Mock };
   dataSource: { transaction: jest.Mock; getRepository: jest.Mock };
   managerSave: jest.Mock;
+  managerUpdate: jest.Mock;
 }
 
 function makeTemplate(overrides: Record<string, unknown> = {}) {
@@ -35,6 +38,11 @@ function makeTemplate(overrides: Record<string, unknown> = {}) {
     shuffleOptions: false,
     timeLimitMinutes: 60,
     fixedQuestions: [],
+    gradeScale: [],
+    passingScorePercent: '60',
+    negativePoints: '0',
+    partialScoring: false,
+    negativeMarking: false,
     ...overrides,
   };
 }
@@ -46,10 +54,12 @@ function build(overrides: Partial<Mocks> = {}): { service: SessionsService; mock
       if (Array.isArray(entity)) return Promise.resolve(entity);
       return Promise.resolve({ id: '500', ...(entity as Record<string, unknown>) });
     });
+  const managerUpdate = overrides.managerUpdate ?? jest.fn().mockResolvedValue({ affected: 1 });
 
   const manager = {
     create: (_entity: unknown, obj: unknown) => obj,
     save: managerSave,
+    update: managerUpdate,
     getRepository: () => ({ count: jest.fn().mockResolvedValue(0) }),
     createQueryBuilder: () => ({
       update: () => manager.createQueryBuilder(),
@@ -70,6 +80,7 @@ function build(overrides: Partial<Mocks> = {}): { service: SessionsService; mock
     codes: { findOne: jest.fn() },
     assignments: { findOne: jest.fn() },
     questions: { find: jest.fn().mockResolvedValue([]) },
+    candidates: { findOne: jest.fn() },
     templates: { findOne: jest.fn(), selectForSession: jest.fn().mockResolvedValue([]) },
     auth: {
       issueForUser: jest
@@ -89,6 +100,7 @@ function build(overrides: Partial<Mocks> = {}): { service: SessionsService; mock
       }),
     },
     managerSave,
+    managerUpdate,
     ...overrides,
   };
 
@@ -99,6 +111,7 @@ function build(overrides: Partial<Mocks> = {}): { service: SessionsService; mock
     mocks.codes as never,
     mocks.assignments as never,
     mocks.questions as never,
+    mocks.candidates as never,
     mocks.templates as never,
     mocks.auth as never,
     mocks.dataSource as never,
@@ -201,6 +214,78 @@ describe('SessionsService.startByCode', () => {
     expect(result.session.status).toBe(SessionStatus.IN_PROGRESS);
     expect(result.session.isPreview).toBe(false);
     expect(mocks.auth.issueForUser).toHaveBeenCalled();
+  });
+
+  it('candidate kodi: topshiruvchi avtomatik aniqlanadi (F.I.Sh. so‘ralmaydi), status → in_progress', async () => {
+    const { service, mocks } = build();
+    mocks.codes.findOne.mockResolvedValue({
+      id: '7',
+      assignmentId: '3',
+      userId: null,
+      candidateId: '42',
+      usedAt: null,
+    });
+    mocks.candidates.findOne.mockResolvedValue({
+      id: '42',
+      fullName: 'Karimov Aziz Akmalovich',
+      phone: '+998900000000',
+      status: CandidateStatus.PENDING,
+    });
+    // Candidate'ning oldingi sessiyasi yo'q → yangi examinee yaratiladi.
+    mocks.sessions.findOne.mockResolvedValue(null);
+    mocks.assignments.findOne.mockResolvedValue(assignment());
+    mocks.templates.findOne.mockResolvedValue(makeTemplate());
+    mocks.templates.selectForSession.mockResolvedValue(['100']);
+    mocks.questions.find.mockResolvedValue([{ id: '100', points: '2.00', options: [] }]);
+
+    // F.I.Sh. yuborilmaydi — kod orqali avtomatik aniqlanadi.
+    const result = await service.startByCode({ code: 'CAND0001' }, CTX);
+    expect(result.session.status).toBe(SessionStatus.IN_PROGRESS);
+    expect(mocks.auth.issueForUser).toHaveBeenCalled();
+
+    // candidate.status pending → in_progress ga o'tkaziladi.
+    const candidateUpdate = mocks.managerUpdate.mock.calls.find(
+      (c) => (c[2] as { status?: string })?.status === CandidateStatus.IN_PROGRESS,
+    );
+    expect(candidateUpdate).toBeDefined();
+  });
+});
+
+describe('SessionsService.finishByExaminee (candidate)', () => {
+  it('candidate sessiyasi yakunlanganda candidate.status → completed', async () => {
+    const sessionRow = inProgressSession({ candidateId: '42' });
+    const finalRow = { ...sessionRow, status: SessionStatus.COMPLETED, finishedAt: new Date() };
+    const managerUpdate = jest.fn().mockResolvedValue({ affected: 1 });
+    const qb = {
+      setLock: () => qb,
+      where: () => qb,
+      getOne: () => Promise.resolve(sessionRow),
+    };
+    const fakeManager = {
+      createQueryBuilder: () => qb,
+      findOne: jest
+        .fn()
+        .mockResolvedValueOnce(assignment()) // finalize ichidagi TestAssignment
+        .mockResolvedValueOnce(finalRow), // yakuniy sessiya qayta o'qiladi
+      find: jest.fn().mockResolvedValue([]), // session_questions yo'q
+      update: managerUpdate,
+    };
+    const { service, mocks } = build({
+      dataSource: {
+        transaction: jest.fn((cb: (m: unknown) => unknown) => cb(fakeManager)),
+        getRepository: jest.fn(),
+      },
+    });
+    mocks.sessions.findOne.mockResolvedValue(sessionRow);
+    mocks.assignments.findOne.mockResolvedValue(assignment());
+    mocks.templates.findOne.mockResolvedValue(makeTemplate());
+
+    await service.finishByExaminee('1', '9');
+
+    const candidateUpdate = managerUpdate.mock.calls.find(
+      (c) => (c[2] as { status?: string })?.status === CandidateStatus.COMPLETED,
+    );
+    expect(candidateUpdate).toBeDefined();
   });
 });
 

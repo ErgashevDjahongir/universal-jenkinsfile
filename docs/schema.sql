@@ -483,6 +483,8 @@ CREATE INDEX idx_candidate_docs_cand   ON candidate_documents (candidate_id);
 CREATE INDEX idx_assignments_candidate ON test_assignments (candidate_id);
 CREATE INDEX idx_access_codes_cand     ON access_codes (candidate_id);
 CREATE INDEX idx_sessions_candidate    ON test_sessions (candidate_id);
+-- Bitta topshiruvchi = bitta tayinlov (NULL'lar — oddiy user tayinlovlari — cheklanmaydi)
+CREATE UNIQUE INDEX uq_assignments_candidate ON test_assignments (candidate_id) WHERE candidate_id IS NOT NULL;
 
 -- Sessiyalar va natijalar (hisobotlar uchun)
 CREATE INDEX idx_sessions_user       ON test_sessions (user_id, status);

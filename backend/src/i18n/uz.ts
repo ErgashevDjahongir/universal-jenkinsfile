@@ -86,6 +86,17 @@ export const messages = {
     gradeScaleDuplicate: 'Baholash shkalasida bir daraja takrorlangan',
     insufficientBank: 'Bankda yetarli savol yo‘q. {{detail}}',
   },
+  candidate: {
+    notFound: 'Test topshiruvchi topilmadi',
+    documentNotFound: 'Hujjat topilmadi',
+    documentType: 'Faqat PDF hujjat yuklanadi',
+    documentSize: 'Hujjat hajmi {{max}} MB dan oshmasligi kerak',
+    fileRequired: 'Fayl yuborilmadi',
+    invalidDocumentType: 'Hujjat turi noto‘g‘ri (tavsiyanoma, ma’lumotnoma yoki ariza)',
+    alreadyAssigned: 'Bu topshiruvchiga allaqachon tayinlov biriktirilgan',
+    assignmentNotFound: 'Topshiruvchiga tayinlov biriktirilmagan',
+    assignmentStarted: 'Test boshlangan — tayinlovni o‘zgartirib bo‘lmaydi',
+  },
   common: {
     notFound: 'So‘ralgan ma’lumot topilmadi',
     forbidden: 'Bu amalni bajarishga ruxsatingiz yo‘q',

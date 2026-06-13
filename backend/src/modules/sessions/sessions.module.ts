@@ -4,6 +4,7 @@ import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AccessCode } from '../assignments/entities/access-code.entity';
 import { TestAssignment } from '../assignments/entities/test-assignment.entity';
 import { AuthModule } from '../auth/auth.module';
+import { Candidate } from '../candidates/entities/candidate.entity';
 import { Question } from '../questions/entities/question.entity';
 import { TemplatesModule } from '../templates/templates.module';
 import { UsersModule } from '../users/users.module';
@@ -23,6 +24,7 @@ import { VerifyController } from './verify.controller';
       AccessCode,
       TestAssignment,
       Question,
+      Candidate,
     ]),
     TemplatesModule,
     AuthModule,

@@ -7,7 +7,9 @@ import { dataSourceOptions } from './config/data-source';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { AssignmentsModule } from './modules/assignments/assignments.module';
+import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CandidatesModule } from './modules/candidates/candidates.module';
 import { HealthModule } from './modules/health/health.module';
 import { QuestionsModule } from './modules/questions/questions.module';
 import { RedisModule } from './modules/redis/redis.module';
@@ -38,8 +40,10 @@ import { UsersModule } from './modules/users/users.module';
     QuestionsModule,
     TemplatesModule,
     AssignmentsModule,
+    CandidatesModule,
     SessionsModule,
     ReportsModule,
+    AuditModule,
     HealthModule,
   ],
   providers: [

@@ -33,7 +33,9 @@ export class UsersService {
   }
 
   findAll(filter?: UserFilterDto): Promise<User[]> {
-    const where: Record<string, unknown> = {};
+    // Kod orqali kirgan topshiruvchilar uchun avtomatik yaratilgan examinee'lar
+    // (is_candidate=true) xodimlar ro'yxatida ko'rinmaydi — bular candidate dublikatlari.
+    const where: Record<string, unknown> = { isCandidate: false };
     if (filter?.role) where['role'] = filter.role;
     if (filter?.status) where['status'] = filter.status;
     if (filter?.departmentId) where['departmentId'] = filter.departmentId;
