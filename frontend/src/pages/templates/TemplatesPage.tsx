@@ -208,20 +208,12 @@ export function TemplatesPage() {
         title={uz.templates.archive}
         footer={
           <>
-            <Button
-              variant="secondary"
-              size="icon"
-              title={uz.common.cancel}
-              aria-label={uz.common.cancel}
-              onClick={() => setArchiveConfirm(null)}
-            >
-              <X size={16} />
+            <Button variant="secondary" size="sm" onClick={() => setArchiveConfirm(null)}>
+              <X size={14} /> {uz.common.cancel}
             </Button>
             <Button
               variant="danger"
-              size="icon"
-              title={uz.templates.archive}
-              aria-label={uz.templates.archive}
+              size="sm"
               loading={archiveConfirm ? actionLoading === archiveConfirm.id + ':archive' : false}
               onClick={() => {
                 if (archiveConfirm) {
@@ -230,7 +222,7 @@ export function TemplatesPage() {
                 }
               }}
             >
-              <Archive size={16} />
+              <Archive size={14} /> {uz.templates.archive}
             </Button>
           </>
         }

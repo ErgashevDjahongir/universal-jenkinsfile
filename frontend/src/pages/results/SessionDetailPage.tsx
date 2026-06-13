@@ -387,27 +387,19 @@ export function SessionDetailPage() {
         title={uz.sessions.terminate}
         footer={
           <>
-            <Button
-              variant="secondary"
-              size="icon"
-              title={uz.common.cancel}
-              aria-label={uz.common.cancel}
-              onClick={() => setTerminateConfirm(false)}
-            >
-              <X size={16} />
+            <Button variant="secondary" size="sm" onClick={() => setTerminateConfirm(false)}>
+              <X size={14} /> {uz.common.cancel}
             </Button>
             <Button
               variant="danger"
-              size="icon"
-              title={uz.sessions.terminate}
-              aria-label={uz.sessions.terminate}
+              size="sm"
               loading={actionLoading === 'terminate'}
               onClick={() => {
                 setTerminateConfirm(false);
                 void handleTerminate();
               }}
             >
-              <StopCircle size={16} />
+              <StopCircle size={14} /> {uz.sessions.terminate}
             </Button>
           </>
         }
@@ -421,27 +413,19 @@ export function SessionDetailPage() {
         title={uz.sessions.cancel}
         footer={
           <>
-            <Button
-              variant="secondary"
-              size="icon"
-              title={uz.common.cancel}
-              aria-label={uz.common.cancel}
-              onClick={() => setCancelConfirm(false)}
-            >
-              <X size={16} />
+            <Button variant="secondary" size="sm" onClick={() => setCancelConfirm(false)}>
+              <X size={14} /> {uz.common.cancel}
             </Button>
             <Button
               variant="danger"
-              size="icon"
-              title={uz.sessions.cancel}
-              aria-label={uz.sessions.cancel}
+              size="sm"
               loading={actionLoading === 'cancel'}
               onClick={() => {
                 setCancelConfirm(false);
                 void handleCancel();
               }}
             >
-              <XCircle size={16} />
+              <XCircle size={14} /> {uz.sessions.cancel}
             </Button>
           </>
         }

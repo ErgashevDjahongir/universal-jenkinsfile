@@ -643,23 +643,15 @@ export function AssignmentsPage() {
         title={uz.assignments.delete}
         footer={
           <>
-            <Button
-              variant="secondary"
-              size="icon"
-              title={uz.common.cancel}
-              aria-label={uz.common.cancel}
-              onClick={() => setDeleteConfirm(null)}
-            >
-              <X size={16} />
+            <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(null)}>
+              <X size={14} /> {uz.common.cancel}
             </Button>
             <Button
               variant="danger"
-              size="icon"
-              title={uz.assignments.delete}
-              aria-label={uz.assignments.delete}
+              size="sm"
               onClick={() => deleteConfirm && void handleDelete(deleteConfirm)}
             >
-              <Trash2 size={16} />
+              <Trash2 size={14} /> {uz.assignments.delete}
             </Button>
           </>
         }

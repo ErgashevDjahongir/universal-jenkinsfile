@@ -578,27 +578,19 @@ export function QuestionFormPage() {
         title={uz.questions.archive}
         footer={
           <>
-            <Button
-              variant="secondary"
-              size="icon"
-              title={uz.common.cancel}
-              aria-label={uz.common.cancel}
-              onClick={() => setArchiveConfirm(false)}
-            >
-              <X size={16} />
+            <Button variant="secondary" size="sm" onClick={() => setArchiveConfirm(false)}>
+              <X size={14} /> {uz.common.cancel}
             </Button>
             <Button
               variant="danger"
-              size="icon"
-              title={uz.questions.archive}
-              aria-label={uz.questions.archive}
+              size="sm"
               loading={transitioning}
               onClick={() => {
                 setArchiveConfirm(false);
                 void handleTransition('archive');
               }}
             >
-              <Archive size={16} />
+              <Archive size={14} /> {uz.questions.archive}
             </Button>
           </>
         }

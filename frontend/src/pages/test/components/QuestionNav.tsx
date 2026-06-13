@@ -23,7 +23,7 @@ export function QuestionNav({
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-medium text-gray-900">{uz.test.navTitle}</h3>
-      <div className="grid grid-cols-10 gap-1 sm:grid-cols-12 lg:grid-cols-15">
+      <div className="grid grid-cols-10 gap-1 sm:grid-cols-12 lg:grid-cols-12">
         {questions.map((q, i) => {
           const answered = isAnswered(q, answers[q.sessionQuestionId]);
           const isFlagged = flagged.has(q.sessionQuestionId);
