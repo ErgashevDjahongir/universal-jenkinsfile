@@ -10,6 +10,7 @@ import {
 import { GradeValue } from '../../../common/enums/grade-value.enum';
 import { SessionStatus } from '../../../common/enums/session-status.enum';
 import { TestAssignment } from '../../assignments/entities/test-assignment.entity';
+import { Candidate } from '../../candidates/entities/candidate.entity';
 import { SessionQuestion } from './session-question.entity';
 
 /**
@@ -78,12 +79,19 @@ export class TestSession {
   @Column({ name: 'user_agent', type: 'text', nullable: true })
   userAgent!: string | null;
 
+  @Column({ name: 'candidate_id', type: 'bigint', nullable: true })
+  candidateId!: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;
 
   @ManyToOne(() => TestAssignment, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'assignment_id' })
   assignment?: TestAssignment;
+
+  @ManyToOne(() => Candidate, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'candidate_id' })
+  candidate?: Candidate | null;
 
   @OneToMany(() => SessionQuestion, (q) => q.session, { cascade: true })
   questions!: SessionQuestion[];

@@ -6,6 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Candidate } from '../../candidates/entities/candidate.entity';
 import { TestAssignment } from './test-assignment.entity';
 
 /**
@@ -27,6 +28,9 @@ export class AccessCode {
   @Column({ name: 'user_id', type: 'bigint', nullable: true })
   userId!: string | null;
 
+  @Column({ name: 'candidate_id', type: 'bigint', nullable: true })
+  candidateId!: string | null;
+
   @Column({ name: 'used_at', type: 'timestamptz', nullable: true })
   usedAt!: Date | null;
 
@@ -36,4 +40,8 @@ export class AccessCode {
   @ManyToOne(() => TestAssignment, (a) => a.codes, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'assignment_id' })
   assignment?: TestAssignment;
+
+  @ManyToOne(() => Candidate, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'candidate_id' })
+  candidate?: Candidate | null;
 }

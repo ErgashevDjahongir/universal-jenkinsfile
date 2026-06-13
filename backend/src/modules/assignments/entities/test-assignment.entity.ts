@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Candidate } from '../../candidates/entities/candidate.entity';
 import { TestTemplate } from '../../templates/entities/test-template.entity';
 import { AccessCode } from './access-code.entity';
 import { AssignmentTarget } from './assignment-target.entity';
@@ -32,12 +33,19 @@ export class TestAssignment {
   @Column({ name: 'created_by', type: 'bigint', nullable: true })
   createdBy!: string | null;
 
+  @Column({ name: 'candidate_id', type: 'bigint', nullable: true })
+  candidateId!: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;
 
   @ManyToOne(() => TestTemplate, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'template_id' })
   template?: TestTemplate;
+
+  @ManyToOne(() => Candidate, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'candidate_id' })
+  candidate?: Candidate | null;
 
   @OneToMany(() => AssignmentTarget, (t) => t.assignment, { cascade: true })
   targets!: AssignmentTarget[];

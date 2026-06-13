@@ -63,6 +63,19 @@ CREATE TYPE session_status AS ENUM (
 
 CREATE TYPE grade_value AS ENUM ('excellent', 'good', 'satisfactory', 'unsatisfactory');
 
+CREATE TYPE candidate_status AS ENUM (
+    'pending',      -- Hali test topshirmagan
+    'in_progress',  -- Test jarayonida
+    'completed',    -- Test yakunlangan
+    'no_show'       -- Kelmagan
+);
+
+CREATE TYPE document_type AS ENUM (
+    'recommendation', -- Tavsifnoma
+    'reference',      -- Yo'llanma
+    'application'     -- Ariza
+);
+
 -- =====================================================================
 -- 2. TASHKILIY TUZILMA
 -- =====================================================================
@@ -139,6 +152,35 @@ CREATE TABLE group_members (
     added_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (group_id, user_id)
 );
+
+-- =====================================================================
+-- 3a. NOMZODLAR (CANDIDATES)
+--     users jadvalidan alohida; login/parol yo'q — faqat bir martalik kod orqali kiradi
+-- =====================================================================
+
+CREATE TABLE candidates (
+    id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    full_name  VARCHAR(255) NOT NULL,                                 -- To'liq ismi
+    phone      VARCHAR(20)  NOT NULL,
+    status     candidate_status NOT NULL DEFAULT 'pending',
+    created_by BIGINT REFERENCES users(id) ON DELETE SET NULL,       -- Yaratgan admin
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+COMMENT ON TABLE candidates IS 'Ishga qabul qilinayotgan nomzodlar; users jadvalidan alohida, parolsiz';
+
+CREATE TABLE candidate_documents (
+    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    candidate_id  BIGINT NOT NULL REFERENCES candidates(id) ON DELETE RESTRICT,  -- Hujjat tarixi saqlanadi
+    doc_type      document_type NOT NULL,
+    file_path     VARCHAR(500) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    file_size     INTEGER NOT NULL,
+    uploaded_by   BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    uploaded_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (candidate_id, doc_type)                                  -- Har turdан bittadan
+);
+COMMENT ON TABLE candidate_documents IS 'Nomzod hujjatlari (tavsifnoma, yo''llanma, ariza); har turdан bittadan';
 
 -- =====================================================================
 -- 4. SAVOLLAR BANKI
@@ -298,8 +340,9 @@ CREATE TABLE test_assignments (
     title       VARCHAR(255) NOT NULL,             -- Masalan: «2026 II-chorak attestatsiyasi»
     starts_at   TIMESTAMPTZ NOT NULL,              -- Faollik oynasi boshlanishi
     ends_at     TIMESTAMPTZ NOT NULL,              -- Faollik oynasi tugashi
-    created_by  BIGINT REFERENCES users(id) ON DELETE SET NULL,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_by   BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    candidate_id BIGINT REFERENCES candidates(id) ON DELETE SET NULL, -- NULL = oddiy foydalanuvchi tayinlovi
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT chk_window CHECK (ends_at > starts_at)
 );
 COMMENT ON TABLE test_assignments IS 'Test sessiyalarini rejalashtirish (faollik oynasi bilan)';
@@ -322,7 +365,8 @@ CREATE TABLE access_codes (
     id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     assignment_id BIGINT NOT NULL REFERENCES test_assignments(id) ON DELETE CASCADE,
     code          VARCHAR(20) NOT NULL UNIQUE,     -- Bir martalik kirish kodi
-    user_id       BIGINT REFERENCES users(id) ON DELETE SET NULL, -- NULL = o'zini ro'yxatga olish rejimi
+    user_id       BIGINT REFERENCES users(id) ON DELETE SET NULL,       -- NULL = o'zini ro'yxatga olish rejimi
+    candidate_id  BIGINT REFERENCES candidates(id) ON DELETE SET NULL,  -- NULL = oddiy foydalanuvchi
     used_at       TIMESTAMPTZ,                     -- NULL = hali ishlatilmagan
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -347,6 +391,7 @@ CREATE TABLE test_sessions (
     certificate_uid UUID UNIQUE,                    -- QR verifikatsiya UID; muvaffaqiyatli yakunda generatsiya qilinadi
     ip_address      INET,
     user_agent      TEXT,
+    candidate_id    BIGINT REFERENCES candidates(id) ON DELETE SET NULL, -- NULL = oddiy foydalanuvchi sessiyasi
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (assignment_id, user_id, attempt_number)
 );
@@ -431,6 +476,14 @@ CREATE INDEX idx_assignments_window  ON test_assignments (starts_at, ends_at);
 CREATE INDEX idx_targets_user        ON assignment_targets (user_id);
 CREATE INDEX idx_targets_group       ON assignment_targets (group_id);
 
+-- Nomzodlar
+CREATE INDEX idx_candidates_status     ON candidates (status);
+CREATE INDEX idx_candidates_created_by ON candidates (created_by);
+CREATE INDEX idx_candidate_docs_cand   ON candidate_documents (candidate_id);
+CREATE INDEX idx_assignments_candidate ON test_assignments (candidate_id);
+CREATE INDEX idx_access_codes_cand     ON access_codes (candidate_id);
+CREATE INDEX idx_sessions_candidate    ON test_sessions (candidate_id);
+
 -- Sessiyalar va natijalar (hisobotlar uchun)
 CREATE INDEX idx_sessions_user       ON test_sessions (user_id, status);
 CREATE INDEX idx_sessions_assignment ON test_sessions (assignment_id, status);
@@ -458,6 +511,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE TRIGGER trg_candidates_updated      BEFORE UPDATE ON candidates      FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_departments_updated    BEFORE UPDATE ON departments     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_users_updated          BEFORE UPDATE ON users           FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_questions_updated      BEFORE UPDATE ON questions       FOR EACH ROW EXECUTE FUNCTION set_updated_at();
