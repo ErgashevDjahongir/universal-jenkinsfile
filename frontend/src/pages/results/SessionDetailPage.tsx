@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, RotateCcw, StopCircle, X, XCircle } from 'lucide-react';
 import { UserRole } from '@/auth/roles';
 import { useAuth } from '@/auth/useAuth';
-import { Badge, Button, DataState } from '@/components/ui';
+import { Badge, Button, DataState, Modal } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   allowRetry,
@@ -105,6 +106,8 @@ export function SessionDetailPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [retryCode, setRetryCode] = useState<string | null>(null);
+  const [terminateConfirm, setTerminateConfirm] = useState(false);
+  const [cancelConfirm, setCancelConfirm] = useState(false);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -174,8 +177,14 @@ export function SessionDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/sessions')}>
-          ← Orqaga
+        <Button
+          variant="ghost"
+          size="icon"
+          title={uz.common.back}
+          aria-label={uz.common.back}
+          onClick={() => navigate('/sessions')}
+        >
+          <ArrowLeft size={16} />
         </Button>
         <h1 className="text-2xl font-semibold text-gray-900">{uz.sessions.detailTitle}</h1>
       </div>
@@ -228,30 +237,36 @@ export function SessionDetailPage() {
                   <div className="flex flex-col gap-2">
                     <Button
                       variant="danger"
-                      size="sm"
+                      size="icon"
+                      title={uz.sessions.terminate}
+                      aria-label={uz.sessions.terminate}
                       loading={actionLoading === 'terminate'}
-                      onClick={handleTerminate}
+                      onClick={() => setTerminateConfirm(true)}
                     >
-                      {uz.sessions.terminate}
+                      <StopCircle size={16} />
                     </Button>
                     <Button
                       variant="secondary"
-                      size="sm"
+                      size="icon"
+                      title={uz.sessions.cancel}
+                      aria-label={uz.sessions.cancel}
                       loading={actionLoading === 'cancel'}
-                      onClick={handleCancel}
+                      onClick={() => setCancelConfirm(true)}
                     >
-                      {uz.sessions.cancel}
+                      <XCircle size={16} />
                     </Button>
                   </div>
                 )}
                 {canManage && sess.status !== 'in_progress' && (
                   <Button
                     variant="secondary"
-                    size="sm"
+                    size="icon"
+                    title={uz.sessions.allowRetry}
+                    aria-label={uz.sessions.allowRetry}
                     loading={actionLoading === 'retry'}
                     onClick={handleAllowRetry}
                   >
-                    {uz.sessions.allowRetry}
+                    <RotateCcw size={16} />
                   </Button>
                 )}
               </div>
@@ -365,6 +380,74 @@ export function SessionDetailPage() {
           </div>
         )}
       </DataState>
+
+      <Modal
+        open={terminateConfirm}
+        onClose={() => setTerminateConfirm(false)}
+        title={uz.sessions.terminate}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => setTerminateConfirm(false)}
+            >
+              <X size={16} />
+            </Button>
+            <Button
+              variant="danger"
+              size="icon"
+              title={uz.sessions.terminate}
+              aria-label={uz.sessions.terminate}
+              loading={actionLoading === 'terminate'}
+              onClick={() => {
+                setTerminateConfirm(false);
+                void handleTerminate();
+              }}
+            >
+              <StopCircle size={16} />
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-gray-700">{uz.sessions.terminating}</p>
+      </Modal>
+
+      <Modal
+        open={cancelConfirm}
+        onClose={() => setCancelConfirm(false)}
+        title={uz.sessions.cancel}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => setCancelConfirm(false)}
+            >
+              <X size={16} />
+            </Button>
+            <Button
+              variant="danger"
+              size="icon"
+              title={uz.sessions.cancel}
+              aria-label={uz.sessions.cancel}
+              loading={actionLoading === 'cancel'}
+              onClick={() => {
+                setCancelConfirm(false);
+                void handleCancel();
+              }}
+            >
+              <XCircle size={16} />
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-gray-700">{uz.sessions.cancelling}</p>
+      </Modal>
     </div>
   );
 }

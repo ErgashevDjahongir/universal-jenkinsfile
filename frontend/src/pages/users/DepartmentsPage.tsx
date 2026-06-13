@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { Button, Input, Modal, Select, Table, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
@@ -176,11 +177,23 @@ export function DepartmentsPage() {
       className: 'w-40',
       render: (d) => (
         <div className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={() => openDeptForm(d)}>
-            Tahrirlash
+          <Button
+            variant="ghost"
+            size="icon"
+            title={uz.common.edit}
+            aria-label={uz.common.edit}
+            onClick={() => openDeptForm(d)}
+          >
+            <Pencil size={15} />
           </Button>
-          <Button variant="danger" size="sm" onClick={() => setDeptDeleteConfirm(d)}>
-            {uz.departments.delete}
+          <Button
+            variant="danger"
+            size="icon"
+            title={uz.departments.delete}
+            aria-label={uz.departments.delete}
+            onClick={() => setDeptDeleteConfirm(d)}
+          >
+            <Trash2 size={15} />
           </Button>
         </div>
       ),
@@ -204,11 +217,23 @@ export function DepartmentsPage() {
       className: 'w-40',
       render: (p) => (
         <div className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={() => openPosForm(p)}>
-            Tahrirlash
+          <Button
+            variant="ghost"
+            size="icon"
+            title={uz.common.edit}
+            aria-label={uz.common.edit}
+            onClick={() => openPosForm(p)}
+          >
+            <Pencil size={15} />
           </Button>
-          <Button variant="danger" size="sm" onClick={() => setPosDeleteConfirm(p)}>
-            {uz.positions.delete}
+          <Button
+            variant="danger"
+            size="icon"
+            title={uz.positions.delete}
+            aria-label={uz.positions.delete}
+            onClick={() => setPosDeleteConfirm(p)}
+          >
+            <Trash2 size={15} />
           </Button>
         </div>
       ),
@@ -223,12 +248,22 @@ export function DepartmentsPage() {
         </h1>
         <div className="flex gap-2">
           {tab === 'departments' ? (
-            <Button size="sm" onClick={() => openDeptForm(null)}>
-              {uz.departments.add}
+            <Button
+              size="icon"
+              title={uz.departments.add}
+              aria-label={uz.departments.add}
+              onClick={() => openDeptForm(null)}
+            >
+              <Plus size={16} />
             </Button>
           ) : (
-            <Button size="sm" onClick={() => openPosForm(null)}>
-              {uz.positions.add}
+            <Button
+              size="icon"
+              title={uz.positions.add}
+              aria-label={uz.positions.add}
+              onClick={() => openPosForm(null)}
+            >
+              <Plus size={16} />
             </Button>
           )}
         </div>
@@ -289,14 +324,23 @@ export function DepartmentsPage() {
           <>
             <Button
               variant="secondary"
-              size="sm"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
               onClick={() => setDeptForm(false)}
               disabled={deptSaving}
             >
-              {uz.common.cancel}
+              <X size={16} />
             </Button>
-            <Button type="submit" form="dept-form" size="sm" loading={deptSaving}>
-              {deptSaving ? uz.departments.saving : uz.common.save}
+            <Button
+              type="submit"
+              form="dept-form"
+              size="icon"
+              title={uz.common.save}
+              aria-label={uz.common.save}
+              loading={deptSaving}
+            >
+              <Save size={16} />
             </Button>
           </>
         }
@@ -338,11 +382,23 @@ export function DepartmentsPage() {
         title={uz.departments.delete}
         footer={
           <>
-            <Button variant="secondary" size="sm" onClick={() => setDeptDeleteConfirm(null)}>
-              {uz.common.cancel}
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => setDeptDeleteConfirm(null)}
+            >
+              <X size={16} />
             </Button>
-            <Button variant="danger" size="sm" onClick={deleteDept}>
-              {uz.departments.delete}
+            <Button
+              variant="danger"
+              size="icon"
+              title={uz.departments.delete}
+              aria-label={uz.departments.delete}
+              onClick={deleteDept}
+            >
+              <Trash2 size={16} />
             </Button>
           </>
         }
@@ -359,14 +415,23 @@ export function DepartmentsPage() {
           <>
             <Button
               variant="secondary"
-              size="sm"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
               onClick={() => setPosForm(false)}
               disabled={posSaving}
             >
-              {uz.common.cancel}
+              <X size={16} />
             </Button>
-            <Button type="submit" form="pos-form" size="sm" loading={posSaving}>
-              {posSaving ? uz.positions.saving : uz.common.save}
+            <Button
+              type="submit"
+              form="pos-form"
+              size="icon"
+              title={uz.common.save}
+              aria-label={uz.common.save}
+              loading={posSaving}
+            >
+              <Save size={16} />
             </Button>
           </>
         }
@@ -406,11 +471,23 @@ export function DepartmentsPage() {
         title={uz.positions.delete}
         footer={
           <>
-            <Button variant="secondary" size="sm" onClick={() => setPosDeleteConfirm(null)}>
-              {uz.common.cancel}
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => setPosDeleteConfirm(null)}
+            >
+              <X size={16} />
             </Button>
-            <Button variant="danger" size="sm" onClick={deletePos}>
-              {uz.positions.delete}
+            <Button
+              variant="danger"
+              size="icon"
+              title={uz.positions.delete}
+              aria-label={uz.positions.delete}
+              onClick={deletePos}
+            >
+              <Trash2 size={16} />
             </Button>
           </>
         }

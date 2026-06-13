@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BookOpen, Pencil, Plus } from 'lucide-react';
 import { Button, Badge, Select, Table, Pagination, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { useAuth } from '@/auth/useAuth';
@@ -159,8 +160,14 @@ export function QuestionsPage() {
       key: 'actions',
       header: '',
       render: (q) => (
-        <Button variant="ghost" size="sm" onClick={() => navigate(`/questions/${q.id}/edit`)}>
-          Tahrirlash
+        <Button
+          variant="ghost"
+          size="icon"
+          title={uz.common.edit}
+          aria-label={uz.common.edit}
+          onClick={() => navigate(`/questions/${q.id}/edit`)}
+        >
+          <Pencil size={15} />
         </Button>
       ),
       className: 'w-24',
@@ -181,12 +188,23 @@ export function QuestionsPage() {
         </div>
         <div className="flex items-center gap-2">
           {isAdmin && (
-            <Button variant="secondary" size="sm" onClick={() => navigate('/questions/subjects')}>
-              {uz.questions.manageSubjects}
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.questions.manageSubjects}
+              aria-label={uz.questions.manageSubjects}
+              onClick={() => navigate('/questions/subjects')}
+            >
+              <BookOpen size={16} />
             </Button>
           )}
-          <Button size="sm" onClick={() => navigate('/questions/new')}>
-            {uz.questions.add}
+          <Button
+            size="icon"
+            title={uz.questions.add}
+            aria-label={uz.questions.add}
+            onClick={() => navigate('/questions/new')}
+          >
+            <Plus size={16} />
           </Button>
         </div>
       </div>

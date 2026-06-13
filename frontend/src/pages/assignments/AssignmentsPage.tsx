@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Copy, KeyRound, Plus, Save, Trash2, X } from 'lucide-react';
 import {
   Button,
   Badge,
@@ -147,11 +148,23 @@ function CreateAssignmentModal({
       title={uz.assignments.add}
       footer={
         <>
-          <Button variant="secondary" size="sm" onClick={onClose}>
-            {uz.common.cancel}
+          <Button
+            variant="secondary"
+            size="icon"
+            title={uz.common.cancel}
+            aria-label={uz.common.cancel}
+            onClick={onClose}
+          >
+            <X size={16} />
           </Button>
-          <Button size="sm" loading={saving} onClick={handleSave}>
-            {saving ? uz.assignments.saving : uz.common.save}
+          <Button
+            size="icon"
+            title={uz.common.save}
+            aria-label={uz.common.save}
+            loading={saving}
+            onClick={handleSave}
+          >
+            <Save size={16} />
           </Button>
         </>
       }
@@ -206,9 +219,11 @@ function CreateAssignmentModal({
             <button
               type="button"
               onClick={addTarget}
-              className="text-xs text-blue-600 hover:text-blue-800"
+              className="text-blue-500 hover:text-blue-700"
+              title={uz.assignments.targetAdd}
+              aria-label={uz.assignments.targetAdd}
             >
-              {uz.assignments.targetAdd}
+              <Plus size={14} />
             </button>
           </div>
           <div className="space-y-2">
@@ -246,10 +261,11 @@ function CreateAssignmentModal({
                   <button
                     type="button"
                     onClick={() => removeTarget(i)}
-                    className="mt-2 shrink-0 text-sm text-red-500 hover:text-red-700"
+                    className="mt-2 shrink-0 text-red-400 hover:text-red-600"
+                    title={uz.assignments.delete}
                     aria-label={uz.assignments.delete}
                   >
-                    ✕
+                    <X size={14} />
                   </button>
                 )}
               </div>
@@ -275,19 +291,15 @@ function CodesModal({ assignment, users, onClose }: CodesModalProps) {
   const [count, setCount] = useState('10');
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-
   const userNameById = useMemo(() => {
     const map = new Map<string, string>();
     for (const u of users) map.set(u.id, fullName(u));
     return map;
   }, [users]);
 
-  async function copyText(text: string, markId: string) {
+  async function copyText(text: string) {
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedId(markId);
-      setTimeout(() => setCopiedId((cur) => (cur === markId ? null : cur)), 1500);
     } catch {
       // Clipboard mavjud bo'lmasa (xavfsiz bo'lmagan kontekst) — jim o'tamiz.
     }
@@ -296,7 +308,6 @@ function CodesModal({ assignment, users, onClose }: CodesModalProps) {
   useEffect(() => {
     if (!assignment) return;
     setLoading(true);
-    setCopiedId(null);
     listCodes(assignment.id)
       .then(setCodes)
       .catch(() => setCodes([]))
@@ -330,8 +341,14 @@ function CodesModal({ assignment, users, onClose }: CodesModalProps) {
       title={`${uz.assignments.codesTitle}: ${assignment?.title ?? ''}`}
       className="max-w-2xl"
       footer={
-        <Button variant="secondary" size="sm" onClick={onClose}>
-          {uz.common.close}
+        <Button
+          variant="secondary"
+          size="icon"
+          title={uz.common.close}
+          aria-label={uz.common.close}
+          onClick={onClose}
+        >
+          <X size={16} />
         </Button>
       }
     >
@@ -372,8 +389,14 @@ function CodesModal({ assignment, users, onClose }: CodesModalProps) {
             )}
           </div>
           {genError && <p className="text-sm text-red-600">{genError}</p>}
-          <Button size="sm" loading={generating} onClick={handleGenerate}>
-            {generating ? uz.assignments.generating : uz.assignments.generateCodes}
+          <Button
+            size="icon"
+            title={uz.assignments.generateCodes}
+            aria-label={uz.assignments.generateCodes}
+            loading={generating}
+            onClick={handleGenerate}
+          >
+            <KeyRound size={16} />
           </Button>
         </div>
 
@@ -388,10 +411,12 @@ function CodesModal({ assignment, users, onClose }: CodesModalProps) {
               <p className="text-xs text-gray-500">{uz.assignments.codesHint}</p>
               <Button
                 variant="secondary"
-                size="sm"
-                onClick={() => copyText(codes.map((c) => c.code).join('\n'), '__all__')}
+                size="icon"
+                title={uz.assignments.codeCopyAll}
+                aria-label={uz.assignments.codeCopyAll}
+                onClick={() => copyText(codes.map((c) => c.code).join('\n'))}
               >
-                {copiedId === '__all__' ? uz.assignments.codeCopied : uz.assignments.codeCopyAll}
+                <Copy size={14} />
               </Button>
             </div>
             <div className="max-h-72 overflow-y-auto rounded-lg border border-gray-200">
@@ -423,10 +448,12 @@ function CodesModal({ assignment, users, onClose }: CodesModalProps) {
                       <td className="px-3 py-2 text-right">
                         <button
                           type="button"
-                          onClick={() => copyText(c.code, c.id)}
-                          className="text-xs font-medium text-blue-600 hover:text-blue-800"
+                          onClick={() => copyText(c.code)}
+                          className="text-blue-500 hover:text-blue-700"
+                          title={uz.assignments.codeCopy}
+                          aria-label={uz.assignments.codeCopy}
                         >
-                          {copiedId === c.id ? uz.assignments.codeCopied : uz.assignments.codeCopy}
+                          <Copy size={13} />
                         </button>
                       </td>
                     </tr>
@@ -462,6 +489,7 @@ export function AssignmentsPage() {
   const [error, setError] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [codesTarget, setCodesTarget] = useState<TestAssignment | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<TestAssignment | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -490,8 +518,8 @@ export function AssignmentsPage() {
   }, [load]);
 
   async function handleDelete(a: TestAssignment) {
-    if (!window.confirm(uz.assignments.deleteConfirm)) return;
     setDeleteError(null);
+    setDeleteConfirm(null);
     try {
       await deleteAssignment(a.id);
       setAssignments((prev) => prev.filter((x) => x.id !== a.id));
@@ -542,11 +570,23 @@ export function AssignmentsPage() {
       className: 'w-36',
       render: (a) => (
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={() => setCodesTarget(a)}>
-            {uz.assignments.viewCodes}
+          <Button
+            variant="ghost"
+            size="icon"
+            title={uz.assignments.viewCodes}
+            aria-label={uz.assignments.viewCodes}
+            onClick={() => setCodesTarget(a)}
+          >
+            <KeyRound size={15} />
           </Button>
-          <Button variant="danger" size="sm" onClick={() => handleDelete(a)}>
-            {uz.assignments.delete}
+          <Button
+            variant="danger"
+            size="icon"
+            title={uz.assignments.delete}
+            aria-label={uz.assignments.delete}
+            onClick={() => setDeleteConfirm(a)}
+          >
+            <Trash2 size={15} />
           </Button>
         </div>
       ),
@@ -557,8 +597,13 @@ export function AssignmentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">{uz.assignments.title}</h1>
-        <Button size="sm" onClick={() => setCreateOpen(true)}>
-          {uz.assignments.add}
+        <Button
+          size="icon"
+          title={uz.assignments.add}
+          aria-label={uz.assignments.add}
+          onClick={() => setCreateOpen(true)}
+        >
+          <Plus size={16} />
         </Button>
       </div>
 
@@ -591,6 +636,36 @@ export function AssignmentsPage() {
       />
 
       <CodesModal assignment={codesTarget} users={examinees} onClose={() => setCodesTarget(null)} />
+
+      <Modal
+        open={deleteConfirm !== null}
+        onClose={() => setDeleteConfirm(null)}
+        title={uz.assignments.delete}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => setDeleteConfirm(null)}
+            >
+              <X size={16} />
+            </Button>
+            <Button
+              variant="danger"
+              size="icon"
+              title={uz.assignments.delete}
+              aria-label={uz.assignments.delete}
+              onClick={() => deleteConfirm && void handleDelete(deleteConfirm)}
+            >
+              <Trash2 size={16} />
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-gray-700">{uz.assignments.deleteConfirm}</p>
+      </Modal>
     </div>
   );
 }

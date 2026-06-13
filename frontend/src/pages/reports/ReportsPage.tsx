@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Download, Eye, FileDown } from 'lucide-react';
 import { getAssignments, type TestAssignment } from '@/api/assignments';
 import { getDepartments, type Department } from '@/api/departments';
 import {
@@ -172,12 +173,13 @@ export function ReportsPage() {
             <div className="flex items-end gap-2">
               <Button
                 variant="primary"
-                size="sm"
+                size="icon"
+                title={uz.reports.exportExcel}
+                aria-label={uz.reports.exportExcel}
                 loading={exporting}
                 onClick={handleExcelExport}
-                aria-label={uz.reports.exportExcel}
               >
-                {exporting ? uz.reports.exporting : uz.reports.exportExcel}
+                <Download size={16} />
               </Button>
             </div>
           </div>
@@ -285,20 +287,23 @@ export function ReportsPage() {
                       <div className="flex gap-1">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
+                          title={uz.sessions.viewDetail}
+                          aria-label={uz.sessions.viewDetail}
                           onClick={() => navigate(`/results/${row.sessionId}`)}
                         >
-                          {uz.sessions.viewDetail}
+                          <Eye size={15} />
                         </Button>
                         {row.passed && (
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
+                            title={uz.reports.exportPdf}
+                            aria-label={uz.reports.exportPdf}
                             loading={pdfLoading === row.sessionId}
                             onClick={() => handlePdfExport(row.sessionId)}
-                            aria-label={uz.reports.exportPdf}
                           >
-                            {uz.reports.exportPdf}
+                            <FileDown size={15} />
                           </Button>
                         )}
                       </div>

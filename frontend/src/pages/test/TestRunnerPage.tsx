@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { isAxiosError } from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Flag, LogOut, RotateCcw, Send, X } from 'lucide-react';
 import { useAuth } from '@/auth/useAuth';
 import { Button, Modal, Spinner } from '@/components/ui';
 import { uz } from '@/i18n/uz';
@@ -214,8 +215,15 @@ export function TestRunnerPage() {
     return (
       <div className="mx-auto max-w-md py-12 text-center">
         <p className="text-sm text-red-600">{errorMsg}</p>
-        <Button variant="secondary" className="mt-4" onClick={() => navigate('/start')}>
-          {uz.test.exit}
+        <Button
+          variant="secondary"
+          size="icon"
+          className="mt-4"
+          title={uz.test.exit}
+          aria-label={uz.test.exit}
+          onClick={() => navigate('/start')}
+        >
+          <LogOut size={16} />
         </Button>
       </div>
     );
@@ -230,11 +238,23 @@ export function TestRunnerPage() {
       <div className="mx-auto max-w-md space-y-4 py-12 text-center">
         <p className="text-sm text-red-600">{uz.test.resultError}</p>
         <div className="flex justify-center gap-2">
-          <Button variant="secondary" onClick={() => void goToResult()}>
-            {uz.common.retry}
+          <Button
+            variant="secondary"
+            size="icon"
+            title={uz.common.retry}
+            aria-label={uz.common.retry}
+            onClick={() => void goToResult()}
+          >
+            <RotateCcw size={16} />
           </Button>
-          <Button variant="ghost" onClick={handleExit}>
-            {uz.test.exit}
+          <Button
+            variant="ghost"
+            size="icon"
+            title={uz.test.exit}
+            aria-label={uz.test.exit}
+            onClick={handleExit}
+          >
+            <LogOut size={16} />
           </Button>
         </div>
       </div>
@@ -270,19 +290,23 @@ export function TestRunnerPage() {
               <>
                 <Button
                   variant="secondary"
-                  size="sm"
+                  size="icon"
+                  title={uz.common.cancel}
+                  aria-label={uz.common.cancel}
                   disabled={finishing}
                   onClick={() => setShowFinish(false)}
                 >
-                  {uz.common.cancel}
+                  <X size={16} />
                 </Button>
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="icon"
+                  title={uz.test.finish}
+                  aria-label={uz.test.finish}
                   loading={finishing}
                   onClick={handleConfirmFinish}
                 >
-                  {uz.test.finish}
+                  <Send size={16} />
                 </Button>
               </>
             }
@@ -395,10 +419,11 @@ function ActiveTest({
           <button
             type="button"
             onClick={onDismissWarning}
+            title={uz.common.close}
             aria-label={uz.common.close}
             className="shrink-0 text-yellow-700 hover:text-yellow-900"
           >
-            ✕
+            <X size={16} />
           </button>
         </div>
       )}
@@ -428,23 +453,44 @@ function ActiveTest({
 
       {/* Navigatsiya tugmalari */}
       <div className="flex items-center justify-between gap-2">
-        <Button variant="secondary" disabled={!canPrev} onClick={() => onSelect(currentIndex - 1)}>
-          {uz.test.previous}
+        <Button
+          variant="secondary"
+          size="icon"
+          title={uz.test.previous}
+          aria-label={uz.test.previous}
+          disabled={!canPrev}
+          onClick={() => onSelect(currentIndex - 1)}
+        >
+          <ChevronLeft size={16} />
         </Button>
         <Button
           variant={isFlagged ? 'primary' : 'ghost'}
-          size="sm"
+          size="icon"
+          title={isFlagged ? uz.test.unflag : uz.test.flag}
+          aria-label={isFlagged ? uz.test.unflag : uz.test.flag}
           onClick={() => onToggleFlag(q.sessionQuestionId)}
         >
-          {isFlagged ? uz.test.unflag : uz.test.flag}
+          <Flag size={16} />
         </Button>
         {isLast ? (
-          <Button variant="primary" onClick={onFinish}>
-            {uz.test.finish}
+          <Button
+            variant="primary"
+            size="icon"
+            title={uz.test.finish}
+            aria-label={uz.test.finish}
+            onClick={onFinish}
+          >
+            <Send size={16} />
           </Button>
         ) : (
-          <Button variant="secondary" onClick={() => onSelect(currentIndex + 1)}>
-            {uz.test.next}
+          <Button
+            variant="secondary"
+            size="icon"
+            title={uz.test.next}
+            aria-label={uz.test.next}
+            onClick={() => onSelect(currentIndex + 1)}
+          >
+            <ChevronRight size={16} />
           </Button>
         )}
       </div>
@@ -452,8 +498,14 @@ function ActiveTest({
       {/* Oxirgi bo'lmasa ham yakunlash imkoni */}
       {!isLast && (
         <div className="flex justify-center">
-          <Button variant="ghost" size="sm" onClick={onFinish}>
-            {uz.test.finish}
+          <Button
+            variant="ghost"
+            size="icon"
+            title={uz.test.finish}
+            aria-label={uz.test.finish}
+            onClick={onFinish}
+          >
+            <Send size={16} />
           </Button>
         </div>
       )}

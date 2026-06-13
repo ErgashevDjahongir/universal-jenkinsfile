@@ -3,7 +3,7 @@ import { cn } from '@/lib/cn';
 import { Spinner } from './Spinner';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type Size = 'sm' | 'md';
+type Size = 'icon' | 'sm' | 'md';
 
 const variants: Record<Variant, string> = {
   primary: 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:outline-blue-600',
@@ -14,6 +14,7 @@ const variants: Record<Variant, string> = {
 };
 
 const sizes: Record<Size, string> = {
+  icon: 'h-9 w-9 p-0',
   sm: 'h-9 px-3 text-sm',
   md: 'h-11 px-4 text-sm',
 };

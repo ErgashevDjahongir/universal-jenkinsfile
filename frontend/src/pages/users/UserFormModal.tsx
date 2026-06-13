@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Save, X } from 'lucide-react';
 import { Button, Input, Modal, Select } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { type CreateUserDto, type UserListItem, type UserRole } from '@/api/users';
@@ -113,11 +114,25 @@ export function UserFormModal({ open, onClose, onSave, initial, departments, pos
       className="max-w-xl"
       footer={
         <>
-          <Button variant="secondary" size="sm" onClick={onClose} disabled={saving}>
-            {uz.common.cancel}
+          <Button
+            variant="secondary"
+            size="icon"
+            title={uz.common.cancel}
+            aria-label={uz.common.cancel}
+            onClick={onClose}
+            disabled={saving}
+          >
+            <X size={16} />
           </Button>
-          <Button type="submit" form="user-form" size="sm" loading={saving}>
-            {saving ? uz.users.saving : uz.common.save}
+          <Button
+            type="submit"
+            form="user-form"
+            size="icon"
+            title={uz.common.save}
+            aria-label={uz.common.save}
+            loading={saving}
+          >
+            <Save size={16} />
           </Button>
         </>
       }

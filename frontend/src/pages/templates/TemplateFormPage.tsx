@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Check, Database, Plus, Power, Save, Trash2, X } from 'lucide-react';
 import { Button, Input, Select, Modal } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
@@ -162,11 +163,22 @@ function QuestionPickerModal({ open, alreadySelected, onConfirm, onClose }: Pick
           <span className="text-sm text-gray-500">
             {uz.templates.pickerSelected.replace('{count}', String(selected.size))}
           </span>
-          <Button variant="secondary" size="sm" onClick={onClose}>
-            {uz.common.cancel}
+          <Button
+            variant="secondary"
+            size="icon"
+            title={uz.common.cancel}
+            aria-label={uz.common.cancel}
+            onClick={onClose}
+          >
+            <X size={16} />
           </Button>
-          <Button size="sm" onClick={confirm}>
-            {uz.templates.pickerConfirm}
+          <Button
+            size="icon"
+            title={uz.templates.pickerConfirm}
+            aria-label={uz.templates.pickerConfirm}
+            onClick={confirm}
+          >
+            <Check size={16} />
           </Button>
         </>
       }
@@ -508,12 +520,24 @@ export function TemplateFormPage() {
           {isEdit ? uz.templates.edit : uz.templates.add}
         </h1>
         <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" onClick={() => navigate('/templates')}>
-            {uz.common.cancel}
+          <Button
+            variant="secondary"
+            size="icon"
+            title={uz.common.cancel}
+            aria-label={uz.common.cancel}
+            onClick={() => navigate('/templates')}
+          >
+            <X size={16} />
           </Button>
           {!isReadonly && (
-            <Button size="sm" loading={saving} onClick={handleSave}>
-              {saving ? uz.templates.saving : uz.common.save}
+            <Button
+              size="icon"
+              title={uz.common.save}
+              aria-label={uz.common.save}
+              loading={saving}
+              onClick={handleSave}
+            >
+              <Save size={16} />
             </Button>
           )}
         </div>
@@ -709,8 +733,14 @@ export function TemplateFormPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium text-gray-900">{uz.templates.sectionGradeScale}</h2>
           {!isReadonly && (
-            <Button variant="secondary" size="sm" onClick={addGradeRow}>
-              {uz.templates.gradeScaleAdd}
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.templates.gradeScaleAdd}
+              aria-label={uz.templates.gradeScaleAdd}
+              onClick={addGradeRow}
+            >
+              <Plus size={16} />
             </Button>
           )}
         </div>
@@ -753,10 +783,11 @@ export function TemplateFormPage() {
                   <button
                     type="button"
                     onClick={() => removeGradeRow(i)}
-                    className="mb-1 text-sm text-red-500 hover:text-red-700"
-                    aria-label="O'chirish"
+                    title={uz.common.delete}
+                    aria-label={uz.common.delete}
+                    className="mb-1 text-red-500 hover:text-red-700"
                   >
-                    ✕
+                    <Trash2 size={14} />
                   </button>
                 )}
               </div>
@@ -784,8 +815,14 @@ export function TemplateFormPage() {
               {uz.templates.fixedQuestionsTitle}
             </h3>
             {!isReadonly && (
-              <Button variant="secondary" size="sm" onClick={() => setPickerOpen(true)}>
-                {uz.templates.fixedQuestionsAdd}
+              <Button
+                variant="secondary"
+                size="icon"
+                title={uz.templates.fixedQuestionsAdd}
+                aria-label={uz.templates.fixedQuestionsAdd}
+                onClick={() => setPickerOpen(true)}
+              >
+                <Plus size={16} />
               </Button>
             )}
           </div>
@@ -816,10 +853,11 @@ export function TemplateFormPage() {
                     <button
                       type="button"
                       onClick={() => removeFixed(i)}
-                      className="text-xs text-red-500 hover:text-red-700 shrink-0"
-                      aria-label="O'chirish"
+                      title={uz.common.delete}
+                      aria-label={uz.common.delete}
+                      className="shrink-0 text-red-500 hover:text-red-700"
                     >
-                      ✕
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </div>
@@ -835,8 +873,14 @@ export function TemplateFormPage() {
               {uz.templates.selectionRulesTitle}
             </h3>
             {!isReadonly && (
-              <Button variant="secondary" size="sm" onClick={addRule}>
-                {uz.templates.selectionRuleAdd}
+              <Button
+                variant="secondary"
+                size="icon"
+                title={uz.templates.selectionRuleAdd}
+                aria-label={uz.templates.selectionRuleAdd}
+                onClick={addRule}
+              >
+                <Plus size={16} />
               </Button>
             )}
           </div>
@@ -901,10 +945,11 @@ export function TemplateFormPage() {
                       <button
                         type="button"
                         onClick={() => removeRule(i)}
-                        className="mb-1 text-sm text-red-500 hover:text-red-700 shrink-0"
-                        aria-label="O'chirish"
+                        title={uz.common.delete}
+                        aria-label={uz.common.delete}
+                        className="mb-1 shrink-0 text-red-500 hover:text-red-700"
                       >
-                        ✕
+                        <Trash2 size={14} />
                       </button>
                     )}
                   </div>
@@ -924,11 +969,24 @@ export function TemplateFormPage() {
           </p>
 
           <div className="flex flex-wrap gap-3">
-            <Button variant="secondary" size="sm" loading={checking} onClick={handleCheckBank}>
-              {checking ? uz.templates.checking : uz.templates.checkBank}
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.templates.checkBank}
+              aria-label={uz.templates.checkBank}
+              loading={checking}
+              onClick={handleCheckBank}
+            >
+              <Database size={16} />
             </Button>
-            <Button size="sm" loading={activating} onClick={handleActivate}>
-              {activating ? uz.templates.activating : uz.templates.activate}
+            <Button
+              size="icon"
+              title={uz.templates.activate}
+              aria-label={uz.templates.activate}
+              loading={activating}
+              onClick={handleActivate}
+            >
+              <Power size={16} />
             </Button>
           </div>
 

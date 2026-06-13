@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Ban, Pencil, Plus, Power, X } from 'lucide-react';
 import { Badge, Button, Modal, Select, Table, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
@@ -165,32 +166,38 @@ export function UsersPage() {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
+            title={uz.common.edit}
+            aria-label={uz.common.edit}
             onClick={() => {
               setEditTarget(u);
               setFormOpen(true);
             }}
           >
-            Tahrirlash
+            <Pencil size={15} />
           </Button>
           {u.status === 'active' && (
             <Button
               variant="danger"
-              size="sm"
+              size="icon"
+              title={uz.users.block}
+              aria-label={uz.users.block}
               loading={actionLoading === u.id + ':block'}
               onClick={() => setBlockConfirm(u)}
             >
-              {uz.users.block}
+              <Ban size={15} />
             </Button>
           )}
           {u.status === 'blocked' && (
             <Button
               variant="secondary"
-              size="sm"
+              size="icon"
+              title={uz.users.activateUser}
+              aria-label={uz.users.activateUser}
               loading={actionLoading === u.id + ':activate'}
               onClick={() => handleActivate(u.id)}
             >
-              {uz.users.activateUser}
+              <Power size={15} />
             </Button>
           )}
         </div>
@@ -203,13 +210,15 @@ export function UsersPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">{uz.users.title}</h1>
         <Button
-          size="sm"
+          size="icon"
+          title={uz.users.add}
+          aria-label={uz.users.add}
           onClick={() => {
             setEditTarget(null);
             setFormOpen(true);
           }}
         >
-          {uz.users.add}
+          <Plus size={16} />
         </Button>
       </div>
 
@@ -289,15 +298,23 @@ export function UsersPage() {
         title={uz.users.block}
         footer={
           <>
-            <Button variant="secondary" size="sm" onClick={() => setBlockConfirm(null)}>
-              {uz.common.cancel}
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => setBlockConfirm(null)}
+            >
+              <X size={16} />
             </Button>
             <Button
               variant="danger"
-              size="sm"
+              size="icon"
+              title={uz.users.block}
+              aria-label={uz.users.block}
               onClick={() => blockConfirm && handleBlock(blockConfirm)}
             >
-              {uz.users.block}
+              <Ban size={16} />
             </Button>
           </>
         }

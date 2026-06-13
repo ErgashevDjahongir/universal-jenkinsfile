@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, RefreshCw, RotateCcw, StopCircle, X, XCircle } from 'lucide-react';
 import { UserRole } from '@/auth/roles';
 import { useAuth } from '@/auth/useAuth';
-import { Badge, Button, Select, Table, type Column } from '@/components/ui';
+import { Badge, Button, Modal, Select, Table, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   allowRetry,
@@ -57,6 +58,8 @@ export function SessionsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [retryCode, setRetryCode] = useState<{ sessionId: string; code: string } | null>(null);
+  const [terminateConfirm, setTerminateConfirm] = useState<string | null>(null);
+  const [cancelConfirm, setCancelConfirm] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -194,34 +197,46 @@ export function SessionsPage() {
       className: 'w-56',
       render: (r) => (
         <div className="flex flex-wrap gap-1">
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/results/${r.id}`)}>
-            {uz.sessions.viewDetail}
+          <Button
+            variant="ghost"
+            size="icon"
+            title={uz.sessions.viewDetail}
+            aria-label={uz.sessions.viewDetail}
+            onClick={() => navigate(`/results/${r.id}`)}
+          >
+            <Eye size={15} />
           </Button>
           {canManage && (
             <>
               <Button
                 variant="danger"
-                size="sm"
+                size="icon"
+                title={uz.sessions.terminate}
+                aria-label={uz.sessions.terminate}
                 loading={actionLoading === r.id + ':terminate'}
-                onClick={() => handleTerminate(r.id)}
+                onClick={() => setTerminateConfirm(r.id)}
               >
-                {uz.sessions.terminate}
+                <StopCircle size={15} />
               </Button>
               <Button
                 variant="secondary"
-                size="sm"
+                size="icon"
+                title={uz.sessions.cancel}
+                aria-label={uz.sessions.cancel}
                 loading={actionLoading === r.id + ':cancel'}
-                onClick={() => handleCancel(r.id)}
+                onClick={() => setCancelConfirm(r.id)}
               >
-                {uz.sessions.cancel}
+                <XCircle size={15} />
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
+                title={uz.sessions.allowRetry}
+                aria-label={uz.sessions.allowRetry}
                 loading={actionLoading === r.id + ':retry'}
                 onClick={() => handleAllowRetry(r.id)}
               >
-                {uz.sessions.allowRetry}
+                <RotateCcw size={15} />
               </Button>
             </>
           )}
@@ -261,17 +276,25 @@ export function SessionsPage() {
       className: 'w-28',
       render: (r) => (
         <div className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/results/${r.id}`)}>
-            {uz.sessions.viewDetail}
+          <Button
+            variant="ghost"
+            size="icon"
+            title={uz.sessions.viewDetail}
+            aria-label={uz.sessions.viewDetail}
+            onClick={() => navigate(`/results/${r.id}`)}
+          >
+            <Eye size={15} />
           </Button>
           {canManage && r.status !== 'in_progress' && (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
+              title={uz.sessions.allowRetry}
+              aria-label={uz.sessions.allowRetry}
               loading={actionLoading === r.id + ':retry'}
               onClick={() => handleAllowRetry(r.id)}
             >
-              {uz.sessions.allowRetry}
+              <RotateCcw size={15} />
             </Button>
           )}
         </div>
@@ -294,8 +317,14 @@ export function SessionsPage() {
           <p className="text-sm text-green-800">
             {uz.sessions.retryCodeIssued.replace('{code}', retryCode.code)}
           </p>
-          <Button variant="ghost" size="sm" onClick={() => setRetryCode(null)}>
-            {uz.common.close}
+          <Button
+            variant="ghost"
+            size="icon"
+            title={uz.common.close}
+            aria-label={uz.common.close}
+            onClick={() => setRetryCode(null)}
+          >
+            <X size={16} />
           </Button>
         </div>
       )}
@@ -340,8 +369,14 @@ export function SessionsPage() {
               </Select>
             </div>
             <div className="mt-5">
-              <Button variant="secondary" size="sm" onClick={load}>
-                {uz.common.retry}
+              <Button
+                variant="secondary"
+                size="icon"
+                title={uz.common.retry}
+                aria-label={uz.common.retry}
+                onClick={load}
+              >
+                <RefreshCw size={16} />
               </Button>
             </div>
           </div>
@@ -353,8 +388,14 @@ export function SessionsPage() {
           <p className="text-sm text-gray-500">
             {rows.length > 0 ? `${rows.length} ta faol sessiya` : uz.sessions.monitoringEmpty}
           </p>
-          <Button variant="secondary" size="sm" onClick={load}>
-            {uz.common.retry}
+          <Button
+            variant="secondary"
+            size="icon"
+            title={uz.common.retry}
+            aria-label={uz.common.retry}
+            onClick={load}
+          >
+            <RefreshCw size={16} />
           </Button>
         </div>
       )}
@@ -368,6 +409,78 @@ export function SessionsPage() {
         emptyText={tab === 'monitoring' ? uz.sessions.monitoringEmpty : uz.sessions.listEmpty}
         onRetry={load}
       />
+
+      <Modal
+        open={terminateConfirm !== null}
+        onClose={() => setTerminateConfirm(null)}
+        title={uz.sessions.terminate}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => setTerminateConfirm(null)}
+            >
+              <X size={16} />
+            </Button>
+            <Button
+              variant="danger"
+              size="icon"
+              title={uz.sessions.terminate}
+              aria-label={uz.sessions.terminate}
+              loading={terminateConfirm ? actionLoading === terminateConfirm + ':terminate' : false}
+              onClick={() => {
+                if (terminateConfirm) {
+                  void handleTerminate(terminateConfirm);
+                  setTerminateConfirm(null);
+                }
+              }}
+            >
+              <StopCircle size={16} />
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-gray-700">{uz.sessions.terminating}</p>
+      </Modal>
+
+      <Modal
+        open={cancelConfirm !== null}
+        onClose={() => setCancelConfirm(null)}
+        title={uz.sessions.cancel}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => setCancelConfirm(null)}
+            >
+              <X size={16} />
+            </Button>
+            <Button
+              variant="danger"
+              size="icon"
+              title={uz.sessions.cancel}
+              aria-label={uz.sessions.cancel}
+              loading={cancelConfirm ? actionLoading === cancelConfirm + ':cancel' : false}
+              onClick={() => {
+                if (cancelConfirm) {
+                  void handleCancel(cancelConfirm);
+                  setCancelConfirm(null);
+                }
+              }}
+            >
+              <XCircle size={16} />
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-gray-700">{uz.sessions.cancelling}</p>
+      </Modal>
     </div>
   );
 }

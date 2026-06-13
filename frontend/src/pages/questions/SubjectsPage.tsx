@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Pencil, Plus, Save, X } from 'lucide-react';
 import { Button, Input, Modal, Badge, DataState } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
@@ -168,8 +169,13 @@ export function SubjectsPage() {
         <div className="rounded-lg border border-gray-200 bg-white">
           <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
             <span className="text-sm font-medium text-gray-700">{uz.subjects.title}</span>
-            <Button size="sm" onClick={openAddSubject}>
-              {uz.subjects.add}
+            <Button
+              size="icon"
+              title={uz.subjects.add}
+              aria-label={uz.subjects.add}
+              onClick={openAddSubject}
+            >
+              <Plus size={16} />
             </Button>
           </div>
           <DataState
@@ -179,8 +185,13 @@ export function SubjectsPage() {
             emptyText={uz.subjects.emptyText}
             onRetry={loadSubjects}
             emptyAction={
-              <Button size="sm" onClick={openAddSubject}>
-                {uz.subjects.add}
+              <Button
+                size="icon"
+                title={uz.subjects.add}
+                aria-label={uz.subjects.add}
+                onClick={openAddSubject}
+              >
+                <Plus size={16} />
               </Button>
             }
           >
@@ -203,13 +214,15 @@ export function SubjectsPage() {
                     </Badge>
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
+                      title={uz.common.edit}
+                      aria-label={uz.common.edit}
                       onClick={(e) => {
                         e.stopPropagation();
                         openEditSubject(s);
                       }}
                     >
-                      Tahrirlash
+                      <Pencil size={15} />
                     </Button>
                   </div>
                 </li>
@@ -226,8 +239,13 @@ export function SubjectsPage() {
               {uz.subjects.categories}
             </span>
             {selectedSubject && (
-              <Button size="sm" onClick={openAddCategory}>
-                {uz.categories.add}
+              <Button
+                size="icon"
+                title={uz.categories.add}
+                aria-label={uz.categories.add}
+                onClick={openAddCategory}
+              >
+                <Plus size={16} />
               </Button>
             )}
           </div>
@@ -244,8 +262,13 @@ export function SubjectsPage() {
               emptyText={uz.categories.emptyText}
               onRetry={() => loadCategories(selectedSubject.id)}
               emptyAction={
-                <Button size="sm" onClick={openAddCategory}>
-                  {uz.categories.add}
+                <Button
+                  size="icon"
+                  title={uz.categories.add}
+                  aria-label={uz.categories.add}
+                  onClick={openAddCategory}
+                >
+                  <Plus size={16} />
                 </Button>
               }
             >
@@ -274,13 +297,21 @@ export function SubjectsPage() {
           <>
             <Button
               variant="secondary"
-              size="sm"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
               onClick={() => setSubjectModal({ open: false, editing: null })}
             >
-              {uz.common.cancel}
+              <X size={16} />
             </Button>
-            <Button size="sm" loading={subjectSaving} onClick={() => void saveSubject()}>
-              {uz.common.save}
+            <Button
+              size="icon"
+              title={uz.common.save}
+              aria-label={uz.common.save}
+              loading={subjectSaving}
+              onClick={() => void saveSubject()}
+            >
+              <Save size={16} />
             </Button>
           </>
         }
@@ -322,13 +353,21 @@ export function SubjectsPage() {
           <>
             <Button
               variant="secondary"
-              size="sm"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
               onClick={() => setCategoryModal({ open: false, editing: null })}
             >
-              {uz.common.cancel}
+              <X size={16} />
             </Button>
-            <Button size="sm" loading={categorySaving} onClick={() => void saveCategory()}>
-              {uz.common.save}
+            <Button
+              size="icon"
+              title={uz.common.save}
+              aria-label={uz.common.save}
+              loading={categorySaving}
+              onClick={() => void saveCategory()}
+            >
+              <Save size={16} />
             </Button>
           </>
         }
@@ -395,8 +434,14 @@ function CategoryRow({
             </Badge>
           )}
         </div>
-        <Button variant="ghost" size="sm" onClick={() => onEdit(category)}>
-          Tahrirlash
+        <Button
+          variant="ghost"
+          size="icon"
+          title={uz.common.edit}
+          aria-label={uz.common.edit}
+          onClick={() => onEdit(category)}
+        >
+          <Pencil size={15} />
         </Button>
       </li>
       {children.map((child) => (

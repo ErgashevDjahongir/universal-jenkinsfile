@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Badge, Select, Table, type Column } from '@/components/ui';
+import { Archive, Pencil, Plus, Power, X } from 'lucide-react';
+import { Button, Badge, Modal, Select, Table, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   getTemplates,
@@ -30,6 +31,7 @@ export function TemplatesPage() {
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [archiveConfirm, setArchiveConfirm] = useState<TestTemplate | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -117,27 +119,37 @@ export function TemplatesPage() {
         <div className="flex items-center gap-1">
           {t.status === 'draft' && (
             <>
-              <Button variant="ghost" size="sm" onClick={() => navigate(`/templates/${t.id}/edit`)}>
-                Tahrirlash
+              <Button
+                variant="ghost"
+                size="icon"
+                title={uz.common.edit}
+                aria-label={uz.common.edit}
+                onClick={() => navigate(`/templates/${t.id}/edit`)}
+              >
+                <Pencil size={15} />
               </Button>
               <Button
                 variant="primary"
-                size="sm"
+                size="icon"
+                title={uz.templates.activate}
+                aria-label={uz.templates.activate}
                 loading={actionLoading === t.id + ':activate'}
                 onClick={() => handleActivate(t.id)}
               >
-                {uz.templates.activate}
+                <Power size={15} />
               </Button>
             </>
           )}
           {t.status === 'active' && (
             <Button
               variant="danger"
-              size="sm"
+              size="icon"
+              title={uz.templates.archive}
+              aria-label={uz.templates.archive}
               loading={actionLoading === t.id + ':archive'}
-              onClick={() => handleArchive(t.id)}
+              onClick={() => setArchiveConfirm(t)}
             >
-              {uz.templates.archive}
+              <Archive size={15} />
             </Button>
           )}
         </div>
@@ -149,8 +161,13 @@ export function TemplatesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">{uz.templates.title}</h1>
-        <Button size="sm" onClick={() => navigate('/templates/new')}>
-          {uz.templates.add}
+        <Button
+          size="icon"
+          title={uz.templates.add}
+          aria-label={uz.templates.add}
+          onClick={() => navigate('/templates/new')}
+        >
+          <Plus size={16} />
         </Button>
       </div>
 
@@ -184,6 +201,42 @@ export function TemplatesPage() {
         emptyText={uz.templates.emptyText}
         onRetry={load}
       />
+
+      <Modal
+        open={archiveConfirm !== null}
+        onClose={() => setArchiveConfirm(null)}
+        title={uz.templates.archive}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => setArchiveConfirm(null)}
+            >
+              <X size={16} />
+            </Button>
+            <Button
+              variant="danger"
+              size="icon"
+              title={uz.templates.archive}
+              aria-label={uz.templates.archive}
+              loading={archiveConfirm ? actionLoading === archiveConfirm.id + ':archive' : false}
+              onClick={() => {
+                if (archiveConfirm) {
+                  void handleArchive(archiveConfirm.id);
+                  setArchiveConfirm(null);
+                }
+              }}
+            >
+              <Archive size={16} />
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-gray-700">{uz.templates.archiving}</p>
+      </Modal>
     </div>
   );
 }

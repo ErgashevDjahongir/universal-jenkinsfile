@@ -1,6 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Input, Select, Badge } from '@/components/ui';
+import {
+  Archive,
+  ArrowLeft,
+  CheckCircle,
+  ImagePlus,
+  Plus,
+  Power,
+  Save,
+  Trash2,
+  X,
+} from 'lucide-react';
+import { Button, Input, Modal, Select, Badge } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { useAuth } from '@/auth/useAuth';
 import { UserRole } from '@/auth/roles';
@@ -90,6 +101,7 @@ export function QuestionFormPage() {
   const [transitioning, setTransitioning] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [archiveConfirm, setArchiveConfirm] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -271,8 +283,14 @@ export function QuestionFormPage() {
         <h1 className="text-2xl font-semibold text-gray-900">
           {isEdit ? uz.questions.edit : uz.questions.add}
         </h1>
-        <Button variant="secondary" size="sm" onClick={() => navigate('/questions')}>
-          ← Orqaga
+        <Button
+          variant="secondary"
+          size="icon"
+          title={uz.common.back}
+          aria-label={uz.common.back}
+          onClick={() => navigate('/questions')}
+        >
+          <ArrowLeft size={16} />
         </Button>
       </div>
 
@@ -309,31 +327,37 @@ export function QuestionFormPage() {
           </Badge>
           {canApprove && (
             <Button
-              size="sm"
+              size="icon"
               variant="secondary"
+              title={uz.questions.approve}
+              aria-label={uz.questions.approve}
               loading={transitioning}
               onClick={() => void handleTransition('approve')}
             >
-              {uz.questions.approve}
+              <CheckCircle size={15} />
             </Button>
           )}
           {canActivate && (
             <Button
-              size="sm"
+              size="icon"
+              title={uz.questions.activate}
+              aria-label={uz.questions.activate}
               loading={transitioning}
               onClick={() => void handleTransition('activate')}
             >
-              {uz.questions.activate}
+              <Power size={15} />
             </Button>
           )}
           {canArchive && (
             <Button
-              size="sm"
+              size="icon"
               variant="danger"
+              title={uz.questions.archive}
+              aria-label={uz.questions.archive}
               loading={transitioning}
-              onClick={() => void handleTransition('archive')}
+              onClick={() => setArchiveConfirm(true)}
             >
-              {uz.questions.archive}
+              <Archive size={15} />
             </Button>
           )}
         </div>
@@ -480,11 +504,23 @@ export function QuestionFormPage() {
 
         {!isArchived && (
           <div className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-4">
-            <Button variant="secondary" size="sm" onClick={() => navigate('/questions')}>
-              {uz.common.cancel}
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => navigate('/questions')}
+            >
+              <X size={16} />
             </Button>
-            <Button size="sm" loading={saving} onClick={() => void handleSave()}>
-              {uz.common.save}
+            <Button
+              size="icon"
+              title={uz.common.save}
+              aria-label={uz.common.save}
+              loading={saving}
+              onClick={() => void handleSave()}
+            >
+              <Save size={16} />
             </Button>
           </div>
         )}
@@ -521,11 +557,13 @@ export function QuestionFormPage() {
               />
               <Button
                 variant="secondary"
-                size="sm"
+                size="icon"
+                title={uz.questions.uploadImage}
+                aria-label={uz.questions.uploadImage}
                 loading={uploading}
                 onClick={() => fileRef.current?.click()}
               >
-                {uz.questions.uploadImage}
+                <ImagePlus size={16} />
               </Button>
               <span className="text-xs text-gray-400">{uz.questions.uploadImageHint}</span>
               {errors.upload && <span className="text-xs text-red-600">{errors.upload}</span>}
@@ -533,6 +571,40 @@ export function QuestionFormPage() {
           )}
         </div>
       )}
+
+      <Modal
+        open={archiveConfirm}
+        onClose={() => setArchiveConfirm(false)}
+        title={uz.questions.archive}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => setArchiveConfirm(false)}
+            >
+              <X size={16} />
+            </Button>
+            <Button
+              variant="danger"
+              size="icon"
+              title={uz.questions.archive}
+              aria-label={uz.questions.archive}
+              loading={transitioning}
+              onClick={() => {
+                setArchiveConfirm(false);
+                void handleTransition('archive');
+              }}
+            >
+              <Archive size={16} />
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-gray-700">{uz.templates.archiving}</p>
+      </Modal>
     </div>
   );
 }
@@ -633,10 +705,11 @@ function OptionsEditor({
               <button
                 type="button"
                 onClick={() => onRemove(i)}
-                aria-label="O'chirish"
+                title={uz.common.delete}
+                aria-label={uz.common.delete}
                 className="mt-2 text-gray-400 hover:text-red-500"
               >
-                ✕
+                <Trash2 size={14} />
               </button>
             )}
           </div>
@@ -644,8 +717,15 @@ function OptionsEditor({
       </div>
 
       {canAdd && (
-        <Button variant="ghost" size="sm" onClick={onAdd} className="mt-1">
-          {uz.questions.addOption}
+        <Button
+          variant="ghost"
+          size="icon"
+          title={uz.questions.addOption}
+          aria-label={uz.questions.addOption}
+          onClick={onAdd}
+          className="mt-1"
+        >
+          <Plus size={15} />
         </Button>
       )}
     </div>

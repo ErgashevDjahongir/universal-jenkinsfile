@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import { roleLabel } from '@/auth/roles';
 import { useAuth } from '@/auth/useAuth';
 import { Button } from '@/components/ui';
@@ -59,8 +60,14 @@ export function AppLayout() {
                 <div className="text-xs text-gray-500">{roleLabel(user.role)}</div>
               </NavLink>
             )}
-            <Button variant="secondary" size="sm" onClick={handleLogout}>
-              {uz.common.logout}
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.logout}
+              aria-label={uz.common.logout}
+              onClick={handleLogout}
+            >
+              <LogOut size={16} />
             </Button>
           </div>
         </header>
