@@ -111,9 +111,18 @@ docker compose up -d                 # PostgreSQL 18 + Redis
   kiritgan ma'lumot hech qachon so'rovga to'g'ridan-to'g'ri qo'shilmaydi
 - Fayl yuklash (savol rasmlari): faqat png/jpg, maks. 2 MB, nomini qayta nomlash
 - `.env` fayllar hech qachon commit qilinmaydi
+- **Ekspert candidates ga nisbatan READ-ONLY:** ekspert hech qanday yozish amali
+  bajara olmaydi (qo'shish, hujjat yuklash, tayinlash, tahrirlash, o'chirish) —
+  bu server tomonida `RolesGuard` bilan ta'minlanadi, frontenda yashirish yetarli emas
+- **PDF hujjatlar himoyalangan:** `candidate_documents` fayllari ommaviy URL orqali
+  ochiq bo'lmaydi; faqat `JwtAuthGuard` orqali autentifikatsiyadan o'tgan
+  administrator va ekspert kira oladi
 
 ## Domen qoidalari (biznes-logika)
 
+- **Test topshiruvchilar (candidates) `users` dan alohida `candidates` jadvalida
+  saqlanadi.** Ular tizimga login/parol bilan kirmaydi — faqat bir martalik kod
+  orqali kiradi. Candidate entity va user entity hech qachon birlashtirilmaydi.
 - Savol holatlari: `draft → approved → active → archived`; arxivlangan savol
   yangi testlarga tushmaydi, eski natijalarda saqlanadi
 - Avtomatik tanlashda bankda yetarli savol bo'lmasa — xato qaytar, jim davom etma

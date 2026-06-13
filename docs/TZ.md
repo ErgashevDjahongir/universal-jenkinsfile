@@ -11,12 +11,12 @@ nomzodlarni saralash, natijalarni markazlashgan saqlash va tahlil, shaffoflik.
 
 ## 2. Rollar
 
-| Rol | Vakolatlar |
-|---|---|
-| super_admin | To'liq boshqaruv: foydalanuvchilar, sozlamalar, audit, backup |
-| admin (HR) | Savollar banki, test shablonlari, topshiruvchilar, sessiyalar, natijalar va eksport |
-| expert | Faqat o'z fanlari bo'yicha savol kiritish/tahrirlash (tasdiqlash jarayoni bilan) |
-| examinee | Testga kirish, topshirish, o'z natijasini ko'rish |
+| Rol         | Vakolatlar                                                                          |
+| ----------- | ----------------------------------------------------------------------------------- |
+| super_admin | To'liq boshqaruv: foydalanuvchilar, sozlamalar, audit, backup                       |
+| admin (HR)  | Savollar banki, test shablonlari, topshiruvchilar, sessiyalar, natijalar va eksport |
+| expert      | Faqat o'z fanlari bo'yicha savol kiritish/tahrirlash (tasdiqlash jarayoni bilan)    |
+| examinee    | Testga kirish, topshirish, o'z natijasini ko'rish                                   |
 
 ## 3. Avtorizatsiya va identifikatsiya
 
@@ -52,6 +52,7 @@ nomzodlarni saralash, natijalarni markazlashgan saqlash va tahlil, shaffoflik.
 - Savol statistikasi: necha marta tushgan, to'g'ri yechilish foizi
 
 ### Ball belgilash
+
 - Har savolga individual ball; berilmasa standart qiymat (sozlamada)
 - Qiyinlikka ko'ra avtomatik taklif: easy=1, medium=2, hard=3 (sozlanadi)
 - multiple_choice'da qisman baholash rejimi (proporsional)
@@ -61,10 +62,12 @@ nomzodlarni saralash, natijalarni markazlashgan saqlash va tahlil, shaffoflik.
 ## 6. Test shablonlari
 
 ### Savol tanlash usullari
+
 - Qo'lda (aniq ro'yxat), avtomatik (qoidalar bo'yicha tasodifiy), aralash
   (majburiy + avtomatik)
 
 ### Avtomatik tanlash qoidalari
+
 - Jami savollar soni; kategoriya kesimida taqsimot (masalan 10+10+10);
   qiyinlik kesimida taqsimot (masalan 40/40/20%)
 - Bankda yetarli savol bo'lmasa — saqlashdan oldin xato/ogohlantirish,
@@ -73,6 +76,7 @@ nomzodlarni saralash, natijalarni markazlashgan saqlash va tahlil, shaffoflik.
 - Qayta topshirishda avvalgi urinish savollari imkon qadar takrorlanmaydi
 
 ### Shablon parametrlari
+
 - Vaqt limiti (daqiqa, 1–600); o'tish bali (% yoki absolyut)
 - Urinishlar soni va urinishlar orasidagi minimal interval
 - Navigatsiya: erkin / faqat oldinga
@@ -133,14 +137,14 @@ joylarni hal qiladi. Ziddiyat bo'lsa, bu bo'lim ustun.
    (TZ §3 dagi "bcrypt/argon2" o'rniga). `CLAUDE.md` ustun.
 
 3. **Sinov (preview) rejimi.** `test_sessions.is_preview BOOLEAN NOT NULL
-   DEFAULT FALSE` ustuni qo'shildi. `is_preview = TRUE` sessiyalar:
+DEFAULT FALSE` ustuni qo'shildi. `is_preview = TRUE` sessiyalar:
    - `questions.times_used` / `times_correct` statistikasiga kirmaydi;
    - umumiy hisobotlarda ko'rinmaydi;
    - `max_attempts` urinishlar limitida hisoblanmaydi;
    - faqat `admin` / `super_admin` ocha oladi.
 
 4. **PDF bayonnoma QR verifikatsiyasi.** `test_sessions.certificate_uid UUID
-   UNIQUE` ustuni qo'shildi; sessiya muvaffaqiyatli yakunlanganda generatsiya
+UNIQUE` ustuni qo'shildi; sessiya muvaffaqiyatli yakunlanganda generatsiya
    qilinadi (preview va o'tmagan sessiyalarda emas). Ommaviy endpoint:
    `GET /verify/:uid` — auth'siz, rate-limit bilan, faqat minimal ma'lumot
    qaytaradi: F.I.Sh., test nomi, sana, ball, o'tdi/o'tmadi. Topilmasa 404.
@@ -151,7 +155,7 @@ joylarni hal qiladi. Ziddiyat bo'lsa, bu bo'lim ustun.
    Normalizatsiya: `trim` + `lowercase` + ketma-ket bo'shliqlarni bittaga
    tushirish (ikkala tomonda ham). Javob variantlardan BITTASIGA to'liq mos
    kelsa — to'g'ri (to'liq ball); aks holda 0. Qisman ball yo'q.
-   *(Backlog, 2-bosqich: ekspert tomonidan qo'lda tekshirish rejimi.)*
+   _(Backlog, 2-bosqich: ekspert tomonidan qo'lda tekshirish rejimi.)_
 
 6. **O'zini ro'yxatga olish oqimi (TZ §3b).** (1) topshiruvchi kod + F.I.Sh. +
    telefon yuboradi → (2) `users` da `role = examinee`, `login = NULL` yozuv
@@ -176,5 +180,112 @@ joylarni hal qiladi. Ziddiyat bo'lsa, bu bo'lim ustun.
 
 9. **Parallel sessiya taqiqi — DB darajasida** (Redis lock emas):
    `CREATE UNIQUE INDEX uq_sessions_one_in_progress ON test_sessions (user_id)
-   WHERE status = 'in_progress';`. Insert paytidagi unique buzilishi ilovada
+WHERE status = 'in_progress';`. Insert paytidagi unique buzilishi ilovada
    `409 Conflict` + tushunarli o'zbekcha xabarga aylantiriladi.
+
+---
+
+## Test topshiruvchilar workflow
+
+> Manba: `docs/E-TEST_Topshiruvchilar_workflow_reja.docx` (v1.0, 2026-06-13)
+
+### Asosiy qarorlar
+
+| №   | Mavzu                   | Qaror                                                                                                                                         |
+| --- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Toifa ajratish          | Test topshiruvchilar xodimlardan (`users`) **alohida jadvalda** (`candidates`) saqlanadi; login bilan kirmaydi, faqat bir martalik kod orqali |
+| 2   | Kim kiritadi            | Administrator test topshiruvchini oldindan kiritadi: F.I.Sh., telefon va 3 ta PDF hujjat                                                      |
+| 3   | Hujjatlar               | Tavsiyanoma, ma'lumotnoma, ariza — har biri PDF; administrator yuklaydi                                                                       |
+| 4   | Tayinlov soni           | Bitta test topshiruvchiga bitta tayinlov                                                                                                      |
+| 5   | Ro'yxatda ko'rinish     | Tayinlov biriktirilgandan so'ng ro'yxatda paydo bo'ladi                                                                                       |
+| 6   | Kim ko'radi             | Administrator va ekspert ro'yxatni ko'radi; ekspert barcha topshiruvchilarni ko'radi (fan bo'yicha cheklov yo'q)                              |
+| 7   | Ekspert huquqi          | Ekspert faqat **read-only**: ko'rish, yuklab olish; hech narsa kiritish/o'zgartirish/o'chirish taqiqlanadi                                    |
+| 8   | Holat oqimi             | `pending → in_progress → completed / no_show`; tugash vaqti o'tganda avtomatik                                                                |
+| 9   | Ma'lumot saqlanishi     | Yakunlangandan keyin ham hujjat va ma'lumotlar saqlanadi (o'chirilmaydi)                                                                      |
+| 10  | Kod bilan kirish        | Topshiruvchi kod bilan kirganda avtomatik ro'yxatdan topiladi — F.I.Sh. qo'lda kiritiImaydi                                                   |
+| 11  | Tayinlovni o'zgartirish | Faqat **boshlanmagan** tayinlov tahrirlanadi (vaqt, shablon, nom)                                                                             |
+| 12  | Terminologiya           | UI'da "Fan" → "Yo'nalish" (faqat ko'rinadigan matn; kodda `subject` qoladi)                                                                   |
+
+### Ma'lumotlar bazasi o'zgarishlari
+
+**Yangi jadval: `candidates`**
+
+| Ustun      | Turi          | Izoh                                                |
+| ---------- | ------------- | --------------------------------------------------- |
+| id         | UUID/serial   | Birlamchi kalit                                     |
+| full_name  | VARCHAR       | F.I.Sh. (majburiy)                                  |
+| phone      | VARCHAR       | Telefon (majburiy)                                  |
+| status     | ENUM          | `pending` / `in_progress` / `completed` / `no_show` |
+| created_by | FK → users.id | Kiritgan administrator                              |
+| created_at | TIMESTAMP     | —                                                   |
+| updated_at | TIMESTAMP     | —                                                   |
+
+**Yangi jadval: `candidate_documents`**
+
+| Ustun         | Turi               | Izoh                                           |
+| ------------- | ------------------ | ---------------------------------------------- |
+| id            | UUID/serial        | Birlamchi kalit                                |
+| candidate_id  | FK → candidates.id | Qaysi topshiruvchiga tegishli                  |
+| doc_type      | ENUM               | `recommendation` / `reference` / `application` |
+| file_path     | VARCHAR            | Saqlangan fayl yo'li                           |
+| original_name | VARCHAR            | Asl fayl nomi                                  |
+| file_size     | INT                | Fayl hajmi (bayt)                              |
+| uploaded_by   | FK → users.id      | Yuklagan administrator                         |
+| uploaded_at   | TIMESTAMP          | —                                              |
+
+**Mavjud jadvallarga qo'shimcha**
+
+- `test_assignments`: `candidate_id` (FK → candidates.id) — tayinlov candidatega bog'lanadi (mavjud user bog'lanishi saqlanadi)
+- `access_codes`: `candidate_id` bog'lanishi — kod candidatega beriladi
+- `test_sessions`: `candidate_id` (FK) — sessiya qaysi topshiruvchiga tegishli
+
+Barcha yangi ustunlar NULL bo'lishiga ruxsat beriladi (orqaga moslik).
+
+### Holat oqimi
+
+| Holat         | Qachon                                           | Ko'rinish                        |
+| ------------- | ------------------------------------------------ | -------------------------------- |
+| `pending`     | Tayinlov biriktirilgan, topshiruvchi boshlamagan | Joriy ro'yxat                    |
+| `in_progress` | Topshiruvchi kod bilan kirib testni boshlagan    | Joriy ro'yxat + jonli monitoring |
+| `completed`   | Topshiruvchi testni yakunlagan                   | Natijalar                        |
+| `no_show`     | Tugash vaqti o'tdi, topshiruvchi kirmagan        | Natijalar                        |
+
+### Rollar va ruxsatlar
+
+**Administrator:**
+
+- Topshiruvchi qo'shish/tahrirlash, PDF hujjat yuklash
+- Tayinlov biriktirish (shablon + vaqt oralig'i), bir martalik kod generatsiyasi
+- Boshlanmagan tayinlovni tahrirlash
+
+**Ekspert (faqat ko'rish):**
+
+- Topshiruvchilar ro'yxati va kartochkasini ko'rish, hujjatlarni yuklab olish
+- Jonli monitoring, natijalar va hisobotlarni ko'rish
+- Hech qanday POST/PATCH/DELETE amali yo'q — server tomonida guard bilan ta'minlanadi
+
+**Test topshiruvchi (kod bilan kirish):**
+
+- Bir martalik kod kiritadi → avtomatik topshiruvchi aniqlanadi
+- Test boshlash → topshirish → natijani ko'rish (mavjud jarayon)
+
+### Xavfsizlik talablari
+
+- PDF hujjat fayllari himoyalangan; faqat autentifikatsiyadan o'tgan admin/ekspert kira oladi — ommaviy URL yo'q
+- Fayl tekshiruvi: faqat PDF (MIME + kengaytma), maksimal hajm cheklovi, fayl qayta nomlanadi (asl nom `original_name`da saqlanadi)
+- Ekspert uchun barcha yozish endpointlari (POST/PATCH/DELETE candidates/documents/assignments) server tomonida taqiqlanadi
+- Topshiruvchining shaxsiy ma'lumotlari boshqa topshiruvchilarga ko'rinmaydi
+- Kod bilan kirishda faqat o'sha topshiruvchining sessiyasi ochiladi
+- Barcha o'zgartiruvchi amallar (qo'shish, yuklash, tayinlash) audit jurnaliga yoziladi
+
+### Amalga oshirish bosqichlari
+
+| Bosqich | Mazmun                                                                               |
+| ------- | ------------------------------------------------------------------------------------ |
+| A       | Terminologiya: UI'da "Fan" → "Yo'nalish" (faqat `uz.ts`)                             |
+| B       | DB: `candidates`, `candidate_documents` jadvallari + FK + migratsiya                 |
+| C       | Backend: candidates moduli (CRUD), hujjat yuklash, tayinlov, holat oqimi, kod-kirish |
+| D       | Admin frontend: ro'yxat, qo'shish/tahrirlash, hujjat yuklash, tayinlash, kartochka   |
+| E       | Ekspert frontend: ro'yxat va kartochka (read-only)                                   |
+| F       | Kod-kirish frontend: avtomatik topshiruvchi aniqlash                                 |
+| G       | Yakuniy: holat avtomatik o'tishi (tugash vaqti), xavfsizlik audit, sinov             |
