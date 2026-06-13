@@ -22,7 +22,7 @@ import { QuestionFilterDto } from './dto/question-filter.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { Question } from './entities/question.entity';
 import { QuestionAttachment } from './entities/question-attachment.entity';
-import { QuestionsService, UploadedImage } from './questions.service';
+import { PaginatedQuestions, QuestionsService, UploadedImage } from './questions.service';
 
 @ApiTags('questions')
 @ApiBearerAuth()
@@ -38,9 +38,24 @@ export class QuestionsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Savollar ro‘yxati (filtrlar bilan)' })
-  findAll(@Query() filter: QuestionFilterDto, @CurrentUser() user: AuthUser): Promise<Question[]> {
+  @ApiOperation({ summary: 'Savollar ro‘yxati (filtrlar + sahifalash)' })
+  findAll(
+    @Query() filter: QuestionFilterDto,
+    @CurrentUser() user: AuthUser,
+  ): Promise<PaginatedQuestions> {
     return this.questions.findAll(filter, user);
+  }
+
+  // Diqqat: `:id` dan OLDIN — aks holda «counts» id deb qabul qilinadi.
+  @Get('counts')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Faol savollar soni (jami, fan va kategoriya bo‘yicha)' })
+  activeCounts(): Promise<{
+    total: number;
+    bySubject: { subjectId: string; count: number }[];
+    byCategory: { categoryId: string; count: number }[];
+  }> {
+    return this.questions.activeCounts();
   }
 
   @Get(':id')

@@ -81,8 +81,40 @@ export interface QuestionFilter {
   type?: QuestionType;
 }
 
+export interface PaginatedQuestions {
+  items: Question[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+/** Sahifalangan savollar ro'yxati (savollar banki). */
+export async function getQuestionsPage(
+  filter: QuestionFilter,
+  page: number,
+  limit: number,
+): Promise<PaginatedQuestions> {
+  const { data } = await api.get<PaginatedQuestions>('/questions', {
+    params: { ...filter, page, limit },
+  });
+  return data;
+}
+
+/** Filtrlangan barcha savollar (sahifalashsiz) — masalan shablon savol tanlash. */
 export async function getQuestions(filter?: QuestionFilter): Promise<Question[]> {
-  const { data } = await api.get<Question[]>('/questions', { params: filter });
+  const { data } = await api.get<PaginatedQuestions>('/questions', { params: filter });
+  return data.items;
+}
+
+export interface QuestionCounts {
+  total: number;
+  bySubject: { subjectId: string; count: number }[];
+  byCategory: { categoryId: string; count: number }[];
+}
+
+/** Faol savollar soni: jami, fan va kategoriya bo'yicha. */
+export async function getQuestionCounts(): Promise<QuestionCounts> {
+  const { data } = await api.get<QuestionCounts>('/questions/counts');
   return data;
 }
 

@@ -141,7 +141,7 @@ export function SessionsPage() {
       header: uz.sessions.examinee,
       render: (r) => (
         <div>
-          <div className="font-medium text-gray-900">ID: {r.userId}</div>
+          <div className="font-medium text-gray-900">{r.fullName || r.userId}</div>
           <div className="text-xs text-gray-500">
             {r.isPreview
               ? uz.sessions.preview
@@ -234,7 +234,7 @@ export function SessionsPage() {
     {
       key: 'user',
       header: uz.sessions.examinee,
-      render: (r) => <span className="text-sm text-gray-900">ID: {r.userId}</span>,
+      render: (r) => <span className="text-sm text-gray-900">{r.fullName || r.userId}</span>,
     },
     {
       key: 'status',

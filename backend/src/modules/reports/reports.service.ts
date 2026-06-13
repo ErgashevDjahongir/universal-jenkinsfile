@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import { QuestionStatus } from '../../common/enums/question-status.enum';
 import { SessionStatus } from '../../common/enums/session-status.enum';
 import { TemplateStatus } from '../../common/enums/template-status.enum';
 import { messages } from '../../i18n/uz';
@@ -92,7 +93,7 @@ export class ReportsService {
 
   async getDashboard(): Promise<DashboardStats> {
     const [totalQuestions, activeTemplates, todaySessions, pendingAssignments] = await Promise.all([
-      this.questions.count(),
+      this.questions.count({ where: { status: QuestionStatus.ACTIVE } }),
       this.templates.count({ where: { status: TemplateStatus.ACTIVE } }),
       this.countTodaySessions(),
       this.countPendingAssignments(),

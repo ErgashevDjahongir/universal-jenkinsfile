@@ -29,4 +29,14 @@ export class QuestionFilterDto {
   @IsOptional()
   @IsEnum(QuestionType)
   type?: QuestionType;
+
+  @ApiPropertyOptional({ description: 'Sahifa raqami (1-dan). Berilmasa — 1.' })
+  @IsOptional()
+  @IsNumberString()
+  page?: string;
+
+  @ApiPropertyOptional({ description: 'Sahifadagi yozuvlar soni. Berilmasa — barchasi.' })
+  @IsOptional()
+  @IsNumberString()
+  limit?: string;
 }

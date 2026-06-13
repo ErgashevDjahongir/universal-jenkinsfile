@@ -1,18 +1,22 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Badge, Select, Table, type Column } from '@/components/ui';
+import { Button, Badge, Select, Table, Pagination, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { useAuth } from '@/auth/useAuth';
 import { UserRole } from '@/auth/roles';
 import { getSubjects, getCategories, type Subject, type Category } from '@/api/subjects';
 import {
-  getQuestions,
+  getQuestionsPage,
+  getQuestionCounts,
   type Question,
   type QuestionFilter,
   type QuestionStatus,
   type DifficultyLevel,
   type QuestionType,
+  type QuestionCounts,
 } from '@/api/questions';
+
+const PAGE_SIZE = 20;
 
 const STATUS_LABELS: Record<QuestionStatus, string> = {
   draft: uz.questions.statusDraft,
@@ -52,13 +56,19 @@ export function QuestionsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [filter, setFilter] = useState<QuestionFilter>({});
+  const [page, setPage] = useState(1);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [total, setTotal] = useState(0);
+  const [counts, setCounts] = useState<QuestionCounts | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getSubjects()
       .then(setSubjects)
+      .catch(() => {});
+    getQuestionCounts()
+      .then(setCounts)
       .catch(() => {});
   }, []);
 
@@ -72,6 +82,18 @@ export function QuestionsPage() {
     }
   }, [filter.subjectId]);
 
+  // Fan/kategoriya yonida ko'rsatish uchun faol savollar sonini tezkor xaritalar.
+  const subjectCount = useMemo(() => {
+    const map = new Map<string, number>();
+    counts?.bySubject.forEach((r) => map.set(r.subjectId, r.count));
+    return map;
+  }, [counts]);
+  const categoryCount = useMemo(() => {
+    const map = new Map<string, number>();
+    counts?.byCategory.forEach((r) => map.set(r.categoryId, r.count));
+    return map;
+  }, [counts]);
+
   const loadQuestions = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -79,20 +101,24 @@ export function QuestionsPage() {
       const cleanFilter = Object.fromEntries(
         Object.entries(filter).filter(([, v]) => v !== '' && v !== undefined),
       ) as QuestionFilter;
-      setQuestions(await getQuestions(cleanFilter));
+      const res = await getQuestionsPage(cleanFilter, page, PAGE_SIZE);
+      setQuestions(res.items);
+      setTotal(res.total);
     } catch {
       setError(uz.common.error);
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [filter, page]);
 
   useEffect(() => {
     void loadQuestions();
   }, [loadQuestions]);
 
+  // Filtr o'zgarsa — 1-sahifaga qaytamiz.
   function setFilterField<K extends keyof QuestionFilter>(key: K, value: QuestionFilter[K]) {
     setFilter((prev) => ({ ...prev, [key]: value || undefined }));
+    setPage(1);
   }
 
   const columns: Column<Question>[] = [
@@ -144,7 +170,15 @@ export function QuestionsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">{uz.questions.title}</h1>
+        <div className="flex items-baseline gap-3">
+          <h1 className="text-2xl font-semibold text-gray-900">{uz.questions.title}</h1>
+          {counts && (
+            <span className="text-sm text-gray-500">
+              {uz.questions.activeTotal}:{' '}
+              <span className="font-medium text-gray-900">{counts.total}</span>
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           {isAdmin && (
             <Button variant="secondary" size="sm" onClick={() => navigate('/questions/subjects')}>
@@ -175,6 +209,7 @@ export function QuestionsPage() {
             {subjects.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
+                {subjectCount.has(s.id) ? ` (${subjectCount.get(s.id)})` : ''}
               </option>
             ))}
           </Select>
@@ -189,6 +224,7 @@ export function QuestionsPage() {
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
+                {categoryCount.has(c.id) ? ` (${categoryCount.get(c.id)})` : ''}
               </option>
             ))}
           </Select>
@@ -245,6 +281,8 @@ export function QuestionsPage() {
         emptyText={uz.questions.emptyText}
         onRetry={loadQuestions}
       />
+
+      <Pagination page={page} total={total} limit={PAGE_SIZE} onChange={setPage} />
     </div>
   );
 }

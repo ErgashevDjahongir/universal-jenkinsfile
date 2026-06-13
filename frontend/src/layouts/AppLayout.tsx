@@ -3,6 +3,7 @@ import { roleLabel } from '@/auth/roles';
 import { useAuth } from '@/auth/useAuth';
 import { Button } from '@/components/ui';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { Logo } from '@/components/Logo';
 import { cn } from '@/lib/cn';
 import { uz } from '@/i18n/uz';
 import { navItems } from '@/routes/navItems';
@@ -24,7 +25,7 @@ export function AppLayout() {
     <div className="flex min-h-full bg-gray-50">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-gray-200 bg-white md:flex">
         <div className="flex h-16 items-center px-6">
-          <span className="text-lg font-semibold text-gray-900">{uz.app.name}</span>
+          <Logo className="h-7 w-auto" />
         </div>
         <nav className="flex-1 space-y-1 px-3 py-4">
           {visibleItems.map((item) => (
@@ -48,7 +49,7 @@ export function AppLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-16 items-center border-b border-gray-200 bg-white px-6">
-          <span className="text-base font-semibold text-gray-900 md:hidden">{uz.app.name}</span>
+          <Logo className="h-6 w-auto md:hidden" />
           <div className="ml-auto flex items-center gap-4">
             {user && (
               <NavLink to="/profile" className="text-right hover:opacity-80 transition-opacity">

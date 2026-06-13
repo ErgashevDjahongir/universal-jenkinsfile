@@ -22,6 +22,7 @@ import { Question } from '../questions/entities/question.entity';
 import { TestTemplate } from '../templates/entities/test-template.entity';
 import { TemplatesService } from '../templates/templates.service';
 import { User } from '../users/entities/user.entity';
+import { UsersService } from '../users/users.service';
 import { PreviewSessionDto } from './dto/preview-session.dto';
 import { SessionFilterDto } from './dto/session-filter.dto';
 import { StartSessionDto } from './dto/start-session.dto';
@@ -120,6 +121,8 @@ export interface SessionResultView {
   passed: boolean | null;
   grade: string | null;
   certificateUid: string | null;
+  correctCount: number | null;
+  totalCount: number | null;
 }
 
 /** Admin monitoring qatori. */
@@ -127,6 +130,7 @@ export interface MonitorRow {
   id: string;
   assignmentId: string;
   userId: string;
+  fullName: string;
   status: SessionStatus;
   attemptNumber: number;
   isPreview: boolean;
@@ -171,6 +175,7 @@ export class SessionsService {
     private readonly templates: TemplatesService,
     private readonly auth: AuthService,
     private readonly dataSource: DataSource,
+    private readonly usersService: UsersService,
   ) {}
 
   /**
@@ -418,10 +423,18 @@ export class SessionsService {
       },
       order: { startedAt: 'ASC' },
     });
+
+    const uniqueIds = [...new Set(rows.map((s) => s.userId))];
+    const users = uniqueIds.length > 0 ? await this.usersService.findByIds(uniqueIds) : [];
+    const nameMap = new Map(
+      users.map((u) => [u.id, [u.lastName, u.firstName, u.middleName].filter(Boolean).join(' ')]),
+    );
+
     return rows.map((s) => ({
       id: s.id,
       assignmentId: s.assignmentId,
       userId: s.userId,
+      fullName: nameMap.get(s.userId) ?? s.userId,
       status: s.status,
       attemptNumber: s.attemptNumber,
       isPreview: s.isPreview,
@@ -434,13 +447,17 @@ export class SessionsService {
   /** Admin uchun to'liq tahlil: har savol, berilgan va to'g'ri javob. */
   async adminGetSession(sessionId: string): Promise<unknown> {
     const session = await this.getSessionOrFail(sessionId);
+    const user = await this.usersService.findById(session.userId);
+    const userFullName = user
+      ? [user.lastName, user.firstName, user.middleName].filter(Boolean).join(' ')
+      : null;
     const sqs = await this.sessionQuestions.find({
       where: { sessionId },
       relations: { question: { options: true }, answer: true },
       order: { orderIndex: 'ASC' },
     });
     return {
-      session,
+      session: { ...session, userFullName },
       questions: sqs.map((sq) => {
         const q = sq.question!;
         return {
@@ -747,8 +764,29 @@ export class SessionsService {
     return view;
   }
 
-  private toResultView(session: TestSession, visibility: ResultVisibility): SessionResultView {
+  private async toResultView(
+    session: TestSession,
+    visibility: ResultVisibility,
+  ): Promise<SessionResultView> {
     const hide = visibility === ResultVisibility.HIDDEN;
+    let correctCount: number | null = null;
+    let totalCount: number | null = null;
+
+    if (session.status !== SessionStatus.CANCELLED) {
+      const sqs = await this.sessionQuestions.find({
+        where: { sessionId: session.id },
+        select: { id: true },
+      });
+      totalCount = sqs.length;
+      if (sqs.length > 0) {
+        correctCount = await this.answers.count({
+          where: { sessionQuestionId: In(sqs.map((sq) => sq.id)), isCorrect: true },
+        });
+      } else {
+        correctCount = 0;
+      }
+    }
+
     return {
       id: session.id,
       status: session.status,
@@ -760,6 +798,8 @@ export class SessionsService {
       passed: hide ? null : session.passed,
       grade: hide ? null : session.grade,
       certificateUid: hide ? null : session.certificateUid,
+      correctCount,
+      totalCount,
     };
   }
 

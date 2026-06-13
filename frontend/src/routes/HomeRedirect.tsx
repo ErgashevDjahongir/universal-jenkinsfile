@@ -19,5 +19,12 @@ export function HomeRedirect() {
     return <Navigate to="/login" replace />;
   }
 
-  return <Navigate to={user.role === UserRole.EXAMINEE ? '/start' : '/dashboard'} replace />;
+  // Examinee — kod orqali test; ekspert — monitoring (dashboard admin-only); qolgan — dashboard.
+  const target =
+    user.role === UserRole.EXAMINEE
+      ? '/start'
+      : user.role === UserRole.EXPERT
+        ? '/sessions'
+        : '/dashboard';
+  return <Navigate to={target} replace />;
 }

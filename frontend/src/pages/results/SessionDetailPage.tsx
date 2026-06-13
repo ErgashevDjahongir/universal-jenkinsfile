@@ -168,6 +168,8 @@ export function SessionDetailPage() {
   const sess = review?.session;
   const questions = review?.questions ?? [];
   const breakdown = categoryBreakdown(questions);
+  const correctCount = questions.filter((q) => q.isCorrect === true).length;
+  const totalQCount = questions.length;
 
   return (
     <div className="space-y-6">
@@ -198,7 +200,7 @@ export function SessionDetailPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
                     <span className="text-gray-500">{uz.sessions.examinee}:</span>
-                    <span className="text-gray-900">ID {sess.userId}</span>
+                    <span className="text-gray-900">{sess.userFullName || sess.userId}</span>
                     <span className="text-gray-500">{uz.sessions.startedAt}:</span>
                     <span className="text-gray-900">{formatDate(sess.startedAt)}</span>
                     <span className="text-gray-500">{uz.sessions.finishedAt}:</span>
@@ -215,6 +217,8 @@ export function SessionDetailPage() {
                         .replace('{max}', sess.maxScore ?? '—')
                         .replace('{percent}', sess.percent ?? '—')}
                       {sess.grade && ` · ${uz.sessions.grade.replace('{grade}', sess.grade)}`}
+                      {totalQCount > 0 &&
+                        ` · ${uz.sessions.correctCountShort.replace('{correct}', String(correctCount)).replace('{total}', String(totalQCount))}`}
                     </p>
                   )}
                 </div>

@@ -102,6 +102,7 @@ function build(overrides: Partial<Mocks> = {}): { service: SessionsService; mock
     mocks.templates as never,
     mocks.auth as never,
     mocks.dataSource as never,
+    { findById: jest.fn(), findByIds: jest.fn().mockResolvedValue([]) } as never,
   );
   return { service, mocks };
 }

@@ -35,6 +35,14 @@ export interface UploadedImage {
   buffer: Buffer;
 }
 
+/** Sahifalangan savollar ro'yxati (savollar banki uchun). */
+export interface PaginatedQuestions {
+  items: Question[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 const ALLOWED_IMAGE_TYPES: Record<string, string> = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
@@ -107,7 +115,11 @@ export class QuestionsService {
     return this.findOne(id, user);
   }
 
-  async findAll(filter: QuestionFilterDto, user: AuthUser): Promise<Question[]> {
+  async findAll(filter: QuestionFilterDto, user: AuthUser): Promise<PaginatedQuestions> {
+    const page = filter.page ? Math.max(1, Number(filter.page)) : 1;
+    const limit = filter.limit ? Math.max(1, Number(filter.limit)) : undefined;
+    const empty: PaginatedQuestions = { items: [], total: 0, page, limit: limit ?? 0 };
+
     const qb = this.questions
       .createQueryBuilder('q')
       .leftJoinAndSelect('q.options', 'o')
@@ -117,10 +129,10 @@ export class QuestionsService {
     if (user.role === UserRole.EXPERT) {
       const assigned = (await this.expertSubjects.listForExpert(user.id)).map((e) => e.subjectId);
       if (assigned.length === 0) {
-        return [];
+        return empty;
       }
       if (filter.subjectId && !assigned.includes(filter.subjectId)) {
-        return [];
+        return empty;
       }
       qb.andWhere('q.subjectId IN (:...assigned)', { assigned });
     }
@@ -137,7 +149,47 @@ export class QuestionsService {
       );
     }
 
-    return qb.getMany();
+    // To'liq son (LIMIT/OFFSET'dan oldin); join'lar tufayli getManyAndCount o'rniga alohida.
+    const total = await qb.getCount();
+    if (limit !== undefined) {
+      qb.skip((page - 1) * limit).take(limit);
+    }
+    const items = await qb.getMany();
+    return { items, total, page, limit: limit ?? total };
+  }
+
+  /**
+   * Faol (status=active) savollar soni: jami, fan bo'yicha va kategoriya bo'yicha.
+   * Savollar banki sahifasida fan/kategoriya yonida ko'rsatish uchun.
+   */
+  async activeCounts(): Promise<{
+    total: number;
+    bySubject: { subjectId: string; count: number }[];
+    byCategory: { categoryId: string; count: number }[];
+  }> {
+    const bySubjectRaw = await this.questions
+      .createQueryBuilder('q')
+      .select('q.subject_id', 'subjectId')
+      .addSelect('COUNT(*)', 'count')
+      .where('q.status = :status', { status: QuestionStatus.ACTIVE })
+      .groupBy('q.subject_id')
+      .getRawMany<{ subjectId: string; count: string }>();
+
+    const byCategoryRaw = await this.questions
+      .createQueryBuilder('q')
+      .innerJoin('question_categories', 'qc', 'qc.question_id = q.id')
+      .select('qc.category_id', 'categoryId')
+      .addSelect('COUNT(*)', 'count')
+      .where('q.status = :status', { status: QuestionStatus.ACTIVE })
+      .groupBy('qc.category_id')
+      .getRawMany<{ categoryId: string; count: string }>();
+
+    const total = bySubjectRaw.reduce((sum, r) => sum + Number(r.count), 0);
+    return {
+      total,
+      bySubject: bySubjectRaw.map((r) => ({ subjectId: r.subjectId, count: Number(r.count) })),
+      byCategory: byCategoryRaw.map((r) => ({ categoryId: r.categoryId, count: Number(r.count) })),
+    };
   }
 
   async findOne(id: string, user: AuthUser): Promise<Question> {

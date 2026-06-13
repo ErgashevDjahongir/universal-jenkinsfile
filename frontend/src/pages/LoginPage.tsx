@@ -3,6 +3,7 @@ import { isAxiosError } from 'axios';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/useAuth';
 import { Button, Card, Input } from '@/components/ui';
+import { Logo } from '@/components/Logo';
 import { uz } from '@/i18n/uz';
 
 interface LocationState {
@@ -55,9 +56,9 @@ export function LoginPage() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="mb-6 text-center">
-        <h1 className="text-2xl font-semibold text-gray-900">{uz.app.name}</h1>
-        <p className="mt-1 text-sm text-gray-500">{uz.app.tagline}</p>
+      <div className="mb-6 flex flex-col items-center text-center">
+        <Logo className="h-10 w-auto" />
+        <p className="mt-2 text-sm text-gray-500">{uz.app.tagline}</p>
       </div>
 
       <Card>

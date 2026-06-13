@@ -49,7 +49,16 @@ export function TestResult({ result, onExit }: TestResultProps) {
               label={uz.test.resultPercent}
               value={uz.test.percentValue.replace('{percent}', result.percent ?? '—')}
             />
-            <Stat label={uz.test.resultGrade} value={result.grade ?? '—'} />
+            <Stat
+              label={uz.test.resultCorrectCount}
+              value={
+                result.correctCount != null && result.totalCount != null
+                  ? uz.test.correctCountValue
+                      .replace('{correct}', String(result.correctCount))
+                      .replace('{total}', String(result.totalCount))
+                  : '—'
+              }
+            />
           </div>
 
           {result.certificateUid && (

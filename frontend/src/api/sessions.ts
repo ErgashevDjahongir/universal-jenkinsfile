@@ -14,6 +14,7 @@ export interface MonitorRow {
   id: string;
   assignmentId: string;
   userId: string;
+  fullName?: string;
   status: SessionStatus;
   attemptNumber: number;
   isPreview: boolean;
@@ -57,6 +58,7 @@ export interface SessionReview {
     id: string;
     assignmentId: string;
     userId: string;
+    userFullName?: string | null;
     status: SessionStatus;
     attemptNumber: number;
     isPreview: boolean;
@@ -170,6 +172,8 @@ export interface SessionResult {
   passed: boolean | null;
   grade: string | null;
   certificateUid: string | null;
+  correctCount?: number | null;
+  totalCount?: number | null;
 }
 
 /** Kod orqali kirish so'rovi (anonim kod uchun F.I.Sh./telefon majburiy). */

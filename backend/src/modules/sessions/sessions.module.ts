@@ -6,6 +6,7 @@ import { TestAssignment } from '../assignments/entities/test-assignment.entity';
 import { AuthModule } from '../auth/auth.module';
 import { Question } from '../questions/entities/question.entity';
 import { TemplatesModule } from '../templates/templates.module';
+import { UsersModule } from '../users/users.module';
 import { SessionAnswer } from './entities/session-answer.entity';
 import { SessionQuestion } from './entities/session-question.entity';
 import { TestSession } from './entities/test-session.entity';
@@ -25,6 +26,7 @@ import { VerifyController } from './verify.controller';
     ]),
     TemplatesModule,
     AuthModule,
+    UsersModule,
   ],
   controllers: [SessionsController, VerifyController],
   providers: [SessionsService, RateLimitGuard],

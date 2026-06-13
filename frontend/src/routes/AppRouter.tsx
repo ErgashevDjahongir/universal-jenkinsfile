@@ -45,27 +45,27 @@ export function AppRouter() {
         </Route>
       </Route>
 
-      {/* Admin paneli — xodimlar (super-admin, admin, ekspert) */}
+      {/* Natijalar/monitoring — ekspert ham ko'radi (o'zgartirish faqat admin) */}
       <Route element={<ProtectedRoute roles={STAFF} />}>
         <Route element={<AppLayout />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/questions" element={<QuestionsPage />} />
-          <Route path="/questions/new" element={<QuestionFormPage />} />
-          <Route path="/questions/:id/edit" element={<QuestionFormPage />} />
-          <Route path="/templates" element={<TemplatesPage />} />
-          <Route path="/templates/new" element={<TemplateFormPage />} />
-          <Route path="/templates/:id/edit" element={<TemplateFormPage />} />
-          {/* Natijalar/monitoring — ekspert ham ko'radi (o'zgartirish faqat admin) */}
           <Route path="/sessions" element={<SessionsPage />} />
           <Route path="/results/:id" element={<SessionDetailPage />} />
           <Route path="/reports" element={<ReportsPage />} />
         </Route>
       </Route>
 
-      {/* Faqat administratorlar */}
+      {/* Faqat administratorlar — savollar banki, shablonlar, tayinlovlar, foydalanuvchilar.
+          Ekspert savollar bankiga (va dashboard'ga) kira olmaydi (qaror: ekspert ko'rinishi). */}
       <Route element={<ProtectedRoute roles={ADMIN} />}>
         <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/questions" element={<QuestionsPage />} />
+          <Route path="/questions/new" element={<QuestionFormPage />} />
+          <Route path="/questions/:id/edit" element={<QuestionFormPage />} />
           <Route path="/questions/subjects" element={<SubjectsPage />} />
+          <Route path="/templates" element={<TemplatesPage />} />
+          <Route path="/templates/new" element={<TemplateFormPage />} />
+          <Route path="/templates/:id/edit" element={<TemplateFormPage />} />
           <Route path="/assignments" element={<AssignmentsPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/departments" element={<DepartmentsPage />} />
