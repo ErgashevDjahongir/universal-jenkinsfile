@@ -23,7 +23,7 @@ export function QuestionNav({
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-medium text-gray-900">{uz.test.navTitle}</h3>
-      <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-6">
+      <div className="grid grid-cols-10 gap-1 sm:grid-cols-12 lg:grid-cols-15">
         {questions.map((q, i) => {
           const answered = isAnswered(q, answers[q.sessionQuestionId]);
           const isFlagged = flagged.has(q.sessionQuestionId);
@@ -38,7 +38,7 @@ export function QuestionNav({
               onClick={() => onSelect(i)}
               aria-current={isCurrent ? 'true' : undefined}
               className={cn(
-                'relative flex h-9 items-center justify-center rounded-md text-sm font-medium transition-colors',
+                'relative flex h-8 items-center justify-center rounded text-xs font-medium transition-colors',
                 answered
                   ? 'bg-green-100 text-green-700 hover:bg-green-200'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200',

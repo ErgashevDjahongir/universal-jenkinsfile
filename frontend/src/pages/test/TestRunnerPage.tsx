@@ -455,42 +455,30 @@ function ActiveTest({
       <div className="flex items-center justify-between gap-2">
         <Button
           variant="secondary"
-          size="icon"
-          title={uz.test.previous}
-          aria-label={uz.test.previous}
+          size="sm"
           disabled={!canPrev}
           onClick={() => onSelect(currentIndex - 1)}
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={15} />
+          {uz.test.previous}
         </Button>
         <Button
           variant={isFlagged ? 'primary' : 'ghost'}
-          size="icon"
-          title={isFlagged ? uz.test.unflag : uz.test.flag}
-          aria-label={isFlagged ? uz.test.unflag : uz.test.flag}
+          size="sm"
           onClick={() => onToggleFlag(q.sessionQuestionId)}
         >
-          <Flag size={16} />
+          <Flag size={15} />
+          {isFlagged ? uz.test.unflag : uz.test.flag}
         </Button>
         {isLast ? (
-          <Button
-            variant="primary"
-            size="icon"
-            title={uz.test.finish}
-            aria-label={uz.test.finish}
-            onClick={onFinish}
-          >
-            <Send size={16} />
+          <Button variant="primary" size="sm" onClick={onFinish}>
+            <Send size={15} />
+            {uz.test.finish}
           </Button>
         ) : (
-          <Button
-            variant="secondary"
-            size="icon"
-            title={uz.test.next}
-            aria-label={uz.test.next}
-            onClick={() => onSelect(currentIndex + 1)}
-          >
-            <ChevronRight size={16} />
+          <Button variant="secondary" size="sm" onClick={() => onSelect(currentIndex + 1)}>
+            {uz.test.next}
+            <ChevronRight size={15} />
           </Button>
         )}
       </div>
@@ -498,14 +486,9 @@ function ActiveTest({
       {/* Oxirgi bo'lmasa ham yakunlash imkoni */}
       {!isLast && (
         <div className="flex justify-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            title={uz.test.finish}
-            aria-label={uz.test.finish}
-            onClick={onFinish}
-          >
-            <Send size={16} />
+          <Button variant="ghost" size="sm" onClick={onFinish}>
+            <Send size={15} />
+            {uz.test.finish}
           </Button>
         </div>
       )}

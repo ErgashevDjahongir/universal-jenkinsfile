@@ -11,7 +11,7 @@ export function TestLayout() {
       <header className="flex h-14 items-center justify-center border-b border-gray-200 bg-white px-4">
         <Logo className="h-6 w-auto" />
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 p-4 sm:p-6">
+      <main className="mx-auto w-full max-w-5xl flex-1 p-4 sm:p-6">
         <Outlet />
       </main>
     </div>
