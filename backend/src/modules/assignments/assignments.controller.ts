@@ -43,6 +43,13 @@ export class AssignmentsController {
     return this.assignments.findAll(filter);
   }
 
+  // Diqqat: `:id` marshrutidan OLDIN turishi shart, aks holda «groups» id deb qabul qilinadi.
+  @Get('groups')
+  @ApiOperation({ summary: 'Guruhlar ro‘yxati (maqsad tanlash uchun, a’zolar soni bilan)' })
+  listGroups(): Promise<{ id: string; name: string; memberCount: number }[]> {
+    return this.assignments.listGroups();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Tayinlov ma’lumoti (maqsadlar + kodlar)' })
   findOne(@Param('id') id: string): Promise<TestAssignment> {

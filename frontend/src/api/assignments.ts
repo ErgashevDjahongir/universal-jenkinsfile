@@ -93,3 +93,14 @@ export async function listCodes(id: string): Promise<AccessCode[]> {
   const { data } = await api.get<AccessCode[]>(`/assignments/${id}/codes`);
   return data;
 }
+
+export interface UserGroup {
+  id: string;
+  name: string;
+  memberCount: number;
+}
+
+export async function getGroups(): Promise<UserGroup[]> {
+  const { data } = await api.get<UserGroup[]>('/assignments/groups');
+  return data;
+}

@@ -1,5 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Button, Badge, Input, Select, Table, Modal, type Column } from '@/components/ui';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  Button,
+  Badge,
+  Input,
+  Select,
+  Combobox,
+  Table,
+  Modal,
+  type Column,
+  type ComboboxOption,
+} from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   getAssignments,
@@ -7,21 +17,38 @@ import {
   deleteAssignment,
   generateCodes,
   listCodes,
+  getGroups,
   type TestAssignment,
   type AccessCode,
   type AssignmentTargetDto,
+  type UserGroup,
 } from '@/api/assignments';
 import { getTemplates, type TestTemplate } from '@/api/templates';
+import { getUsers, type UserListItem } from '@/api/users';
 
 // ---- tayinlov yaratish modali ----
 interface CreateModalProps {
   open: boolean;
   templates: TestTemplate[];
+  users: UserListItem[];
+  groups: UserGroup[];
   onCreated: (a: TestAssignment) => void;
   onClose: () => void;
 }
 
-function CreateAssignmentModal({ open, templates, onCreated, onClose }: CreateModalProps) {
+/** Foydalanuvchi to'liq ismi (F.I.Sh.). */
+function fullName(u: UserListItem): string {
+  return [u.lastName, u.firstName, u.middleName].filter(Boolean).join(' ');
+}
+
+function CreateAssignmentModal({
+  open,
+  templates,
+  users,
+  groups,
+  onCreated,
+  onClose,
+}: CreateModalProps) {
   const [templateId, setTemplateId] = useState('');
   const [title, setTitle] = useState('');
   const [startsAt, setStartsAt] = useState('');
@@ -47,11 +74,39 @@ function CreateAssignmentModal({ open, templates, onCreated, onClose }: CreateMo
     setTargets((prev) => [...prev, { type: 'user', value: '' }]);
   }
   function updateTarget(i: number, patch: Partial<{ type: 'user' | 'group'; value: string }>) {
-    setTargets((prev) => prev.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
+    setTargets((prev) =>
+      prev.map((t, idx) => {
+        if (idx !== i) return t;
+        // Tur o'zgarsa, eski tanlangan id (foydalanuvchi/guruh) yaroqsiz — tozalaymiz.
+        if (patch.type !== undefined && patch.type !== t.type) {
+          return { type: patch.type, value: '' };
+        }
+        return { ...t, ...patch };
+      }),
+    );
   }
   function removeTarget(i: number) {
     setTargets((prev) => prev.filter((_, idx) => idx !== i));
   }
+
+  const userOptions: ComboboxOption[] = useMemo(
+    () =>
+      users.map((u) => ({
+        value: u.id,
+        label: fullName(u),
+        sublabel: u.login ?? undefined,
+      })),
+    [users],
+  );
+  const groupOptions: ComboboxOption[] = useMemo(
+    () =>
+      groups.map((g) => ({
+        value: g.id,
+        label: g.name,
+        sublabel: uz.assignments.groupMembers.replace('{count}', String(g.memberCount)),
+      })),
+    [groups],
+  );
 
   async function handleSave() {
     setError(null);
@@ -158,29 +213,41 @@ function CreateAssignmentModal({ open, templates, onCreated, onClose }: CreateMo
           </div>
           <div className="space-y-2">
             {targets.map((t, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Select
-                  value={t.type}
-                  onChange={(e) => updateTarget(i, { type: e.target.value as 'user' | 'group' })}
-                >
-                  <option value="user">Foydalanuvchi</option>
-                  <option value="group">Guruh</option>
-                </Select>
-                <Input
-                  placeholder={
-                    t.type === 'user'
-                      ? uz.assignments.targetUserPlaceholder
-                      : uz.assignments.targetGroupPlaceholder
-                  }
-                  value={t.value}
-                  onChange={(e) => updateTarget(i, { value: e.target.value })}
-                />
+              <div key={i} className="flex items-start gap-2">
+                <div className="w-36 shrink-0">
+                  <Select
+                    value={t.type}
+                    onChange={(e) => updateTarget(i, { type: e.target.value as 'user' | 'group' })}
+                  >
+                    <option value="user">{uz.assignments.targetTypeUser}</option>
+                    <option value="group">{uz.assignments.targetTypeGroup}</option>
+                  </Select>
+                </div>
+                <div className="min-w-0 flex-1">
+                  {t.type === 'user' ? (
+                    <Combobox
+                      options={userOptions}
+                      value={t.value}
+                      onChange={(value) => updateTarget(i, { value })}
+                      placeholder={uz.assignments.targetUserPlaceholder}
+                      emptyText={uz.assignments.targetUserEmpty}
+                    />
+                  ) : (
+                    <Combobox
+                      options={groupOptions}
+                      value={t.value}
+                      onChange={(value) => updateTarget(i, { value })}
+                      placeholder={uz.assignments.targetGroupPlaceholder}
+                      emptyText={uz.assignments.targetGroupEmpty}
+                    />
+                  )}
+                </div>
                 {targets.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeTarget(i)}
-                    className="text-sm text-red-500 hover:text-red-700 shrink-0"
-                    aria-label="O'chirish"
+                    className="mt-2 shrink-0 text-sm text-red-500 hover:text-red-700"
+                    aria-label={uz.assignments.delete}
                   >
                     ✕
                   </button>
@@ -197,20 +264,39 @@ function CreateAssignmentModal({ open, templates, onCreated, onClose }: CreateMo
 // ---- kirish kodlari modali ----
 interface CodesModalProps {
   assignment: TestAssignment | null;
+  users: UserListItem[];
   onClose: () => void;
 }
 
-function CodesModal({ assignment, onClose }: CodesModalProps) {
+function CodesModal({ assignment, users, onClose }: CodesModalProps) {
   const [codes, setCodes] = useState<AccessCode[]>([]);
   const [loading, setLoading] = useState(false);
   const [genMode, setGenMode] = useState<'perUser' | 'count'>('perUser');
   const [count, setCount] = useState('10');
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const userNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const u of users) map.set(u.id, fullName(u));
+    return map;
+  }, [users]);
+
+  async function copyText(text: string, markId: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(markId);
+      setTimeout(() => setCopiedId((cur) => (cur === markId ? null : cur)), 1500);
+    } catch {
+      // Clipboard mavjud bo'lmasa (xavfsiz bo'lmagan kontekst) — jim o'tamiz.
+    }
+  }
 
   useEffect(() => {
     if (!assignment) return;
     setLoading(true);
+    setCopiedId(null);
     listCodes(assignment.id)
       .then(setCodes)
       .catch(() => setCodes([]))
@@ -297,31 +383,57 @@ function CodesModal({ assignment, onClose }: CodesModalProps) {
         ) : codes.length === 0 ? (
           <p className="text-sm text-gray-400">{uz.assignments.codesEmpty}</p>
         ) : (
-          <div className="max-h-72 overflow-y-auto rounded-lg border border-gray-200">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Kod</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-                    Foydalanuvchi
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Holat</th>
-                </tr>
-              </thead>
-              <tbody>
-                {codes.map((c) => (
-                  <tr key={c.id} className="border-t border-gray-100">
-                    <td className="px-3 py-2 font-mono text-gray-900">{c.code}</td>
-                    <td className="px-3 py-2 text-gray-600">{c.userId ?? '—'}</td>
-                    <td className="px-3 py-2">
-                      <Badge variant={c.usedAt ? 'neutral' : 'success'}>
-                        {c.usedAt ? uz.assignments.codeUsed : uz.assignments.codeUnused}
-                      </Badge>
-                    </td>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">{uz.assignments.codesHint}</p>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => copyText(codes.map((c) => c.code).join('\n'), '__all__')}
+              >
+                {copiedId === '__all__' ? uz.assignments.codeCopied : uz.assignments.codeCopyAll}
+              </Button>
+            </div>
+            <div className="max-h-72 overflow-y-auto rounded-lg border border-gray-200">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Kod</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                      Foydalanuvchi
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Holat</th>
+                    <th className="px-3 py-2" />
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {codes.map((c) => (
+                    <tr key={c.id} className="border-t border-gray-100">
+                      <td className="px-3 py-2 font-mono text-base font-semibold tracking-wider text-gray-900">
+                        {c.code}
+                      </td>
+                      <td className="px-3 py-2 text-gray-600">
+                        {c.userId ? (userNameById.get(c.userId) ?? `#${c.userId}`) : '—'}
+                      </td>
+                      <td className="px-3 py-2">
+                        <Badge variant={c.usedAt ? 'neutral' : 'success'}>
+                          {c.usedAt ? uz.assignments.codeUsed : uz.assignments.codeUnused}
+                        </Badge>
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          type="button"
+                          onClick={() => copyText(c.code, c.id)}
+                          className="text-xs font-medium text-blue-600 hover:text-blue-800"
+                        >
+                          {copiedId === c.id ? uz.assignments.codeCopied : uz.assignments.codeCopy}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
@@ -344,6 +456,8 @@ function formatDate(iso: string) {
 export function AssignmentsPage() {
   const [assignments, setAssignments] = useState<TestAssignment[]>([]);
   const [activeTemplates, setActiveTemplates] = useState<TestTemplate[]>([]);
+  const [examinees, setExaminees] = useState<UserListItem[]>([]);
+  const [groups, setGroups] = useState<UserGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -354,12 +468,16 @@ export function AssignmentsPage() {
     setLoading(true);
     setError(null);
     try {
-      const [asgn, tmpls] = await Promise.all([
+      const [asgn, tmpls, usrs, grps] = await Promise.all([
         getAssignments(),
         getTemplates({ status: 'active' }),
+        getUsers({ role: 'examinee' }),
+        getGroups(),
       ]);
       setAssignments(asgn);
       setActiveTemplates(tmpls);
+      setExaminees(usrs);
+      setGroups(grps);
     } catch {
       setError(uz.common.error);
     } finally {
@@ -463,6 +581,8 @@ export function AssignmentsPage() {
       <CreateAssignmentModal
         open={createOpen}
         templates={activeTemplates}
+        users={examinees}
+        groups={groups}
         onCreated={(a) => {
           setAssignments((prev) => [a, ...prev]);
           setCreateOpen(false);
@@ -470,7 +590,7 @@ export function AssignmentsPage() {
         onClose={() => setCreateOpen(false)}
       />
 
-      <CodesModal assignment={codesTarget} onClose={() => setCodesTarget(null)} />
+      <CodesModal assignment={codesTarget} users={examinees} onClose={() => setCodesTarget(null)} />
     </div>
   );
 }

@@ -150,6 +150,23 @@ export class AssignmentsService {
     return this.codes.find({ where: { assignmentId: id }, order: { id: 'ASC' } });
   }
 
+  /** Maqsad sifatida tanlash uchun guruhlar ro'yxati (a'zolar soni bilan). */
+  async listGroups(): Promise<{ id: string; name: string; memberCount: number }[]> {
+    const groups = await this.groups.find({ order: { name: 'ASC' } });
+    if (groups.length === 0) {
+      return [];
+    }
+    const counts = await this.groupMembers
+      .createQueryBuilder('gm')
+      .select('gm.group_id', 'groupId')
+      .addSelect('COUNT(*)', 'count')
+      .where('gm.group_id IN (:...ids)', { ids: groups.map((g) => g.id) })
+      .groupBy('gm.group_id')
+      .getRawMany<{ groupId: string; count: string }>();
+    const byId = new Map(counts.map((c) => [c.groupId, Number(c.count)]));
+    return groups.map((g) => ({ id: g.id, name: g.name, memberCount: byId.get(g.id) ?? 0 }));
+  }
+
   // ---- yordamchilar ----
 
   private async assertActiveTemplate(templateId: string): Promise<void> {

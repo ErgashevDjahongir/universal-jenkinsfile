@@ -7,3 +7,4 @@ export { Modal } from './Modal';
 export { Spinner } from './Spinner';
 export { DataState } from './DataState';
 export { Select } from './Select';
+export { Combobox, type ComboboxOption } from './Combobox';
