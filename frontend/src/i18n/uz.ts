@@ -112,9 +112,14 @@ export const uz = {
     phonePlaceholder: '+998 XX XXX XX XX',
     codeRequired: 'Kirish kodini kiriting',
     registrationFieldsRequired: 'Familiya, ism va telefon raqamini kiriting',
-    codeInvalid: 'Kod notoʻgʻri yoki allaqachon ishlatilgan',
-    windowClosed: 'Test oynasi hozir ochiq emas',
+    codeInvalid: 'Kirish kodi notoʻgʻri',
+    codeAlreadyUsed: 'Bu kod allaqachon ishlatilgan',
+    windowNotOpen: 'Test topshirish vaqti hali boshlanmagan',
+    windowClosed: 'Test muddati tugagan',
     alreadyActive: 'Sizda allaqachon faol sessiya bor',
+    maxAttempts: 'Ruxsat etilgan urinishlar soni tugadi',
+    intervalNotPassed: 'Keyingi urinishgacha vaqt oʻtmagan',
+    examineeLabel: 'Topshiruvchi',
     startError: 'Kirishda xatolik yuz berdi. Qayta urinib koʻring.',
 
     // Qoidalar (intro) ekrani

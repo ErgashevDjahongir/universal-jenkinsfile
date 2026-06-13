@@ -7,6 +7,18 @@ import { Logo } from '@/components/Logo';
 import { uz } from '@/i18n/uz';
 import { startSession, type StartSessionPayload } from '@/api/sessions';
 
+/** Backend xato xabarini uz.ts kalidiga moslashtiradi. */
+function mapServerError(msg: string): string {
+  if (msg.includes('allaqachon ishlatilgan')) return uz.test.codeAlreadyUsed;
+  if (msg.includes('hali boshlanmagan')) return uz.test.windowNotOpen;
+  if (msg.includes('muddati tugagan')) return uz.test.windowClosed;
+  if (msg.includes('allaqachon faol')) return uz.test.alreadyActive;
+  if (msg.includes('Urinishlar soni')) return uz.test.maxAttempts;
+  if (msg.includes('urinishgacha')) return uz.test.intervalNotPassed;
+  // accessCode.invalid va boshqa noma'lum 400 xatolar
+  return uz.test.codeInvalid;
+}
+
 export function StartPage() {
   const navigate = useNavigate();
   const { establishSession } = useAuth();
@@ -48,14 +60,14 @@ export function StartPage() {
       navigate(`/test/${sessionId}`, { replace: true });
     } catch (err) {
       if (isAxiosError(err)) {
-        const msg = (err.response?.data as { message?: string } | undefined)?.message;
-        // Anonim kod — F.I.Sh./telefon talab qilinadi: maydonlarni ochamiz.
-        if (err.response?.status === 400 && msg?.includes('familiya') && !showRegistration) {
+        const msg = (err.response?.data as { message?: string } | undefined)?.message ?? '';
+        // Anonim kod — F.I.Sh./telefon talab qilinadi: ro'yxatga olish formasini ochamiz.
+        if (err.response?.status === 400 && msg.includes('familiya') && !showRegistration) {
           setShowRegistration(true);
           setError(uz.test.registrationFieldsRequired);
           return;
         }
-        setError(msg ?? uz.test.startError);
+        setError(err.response?.status === 400 ? mapServerError(msg) : uz.test.startError);
         return;
       }
       setError(uz.common.connectionError);
