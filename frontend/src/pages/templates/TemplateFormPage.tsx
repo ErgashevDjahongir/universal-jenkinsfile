@@ -899,7 +899,7 @@ export function TemplateFormPage() {
                     onChange={(e) => onRuleSubjectChange(i, e.target.value)}
                     disabled={isReadonly}
                   >
-                    <option value="">Fan tanlang</option>
+                    <option value="">Yoʼnalish tanlang</option>
                     {allSubjects.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.name}

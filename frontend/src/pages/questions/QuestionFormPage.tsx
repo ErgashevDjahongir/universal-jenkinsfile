@@ -186,7 +186,7 @@ export function QuestionFormPage() {
 
   function validate(): boolean {
     const errs: Record<string, string> = {};
-    if (!subjectId) errs.subjectId = 'Fan tanlanishi shart';
+    if (!subjectId) errs.subjectId = 'Yoʼnalish tanlanishi shart';
     if (!text.trim()) errs.text = 'Savol matni kiritilishi shart';
     if (type !== 'short_answer' && options.some((o) => !o.text.trim())) {
       errs.options = "Barcha variantlar to'g'rilanishi shart";
@@ -376,7 +376,7 @@ export function QuestionFormPage() {
             disabled={isArchived}
             error={errors.subjectId}
           >
-            <option value="">— Fan tanlang —</option>
+            <option value="">— Yoʼnalish tanlang —</option>
             {subjects.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
