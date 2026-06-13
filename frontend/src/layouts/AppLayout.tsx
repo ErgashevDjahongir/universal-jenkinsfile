@@ -1,7 +1,8 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { roleLabel } from '@/auth/roles';
 import { useAuth } from '@/auth/useAuth';
 import { Button } from '@/components/ui';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { cn } from '@/lib/cn';
 import { uz } from '@/i18n/uz';
 import { navItems } from '@/routes/navItems';
@@ -10,6 +11,7 @@ import { navItems } from '@/routes/navItems';
 export function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const visibleItems = navItems.filter((item) => user && item.roles.includes(user.role));
 
@@ -64,7 +66,11 @@ export function AppLayout() {
 
         <main className="flex-1 overflow-auto">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <Outlet />
+            {/* Sahifa qulasa, layout (sidebar/header) saqlanib qoladi va
+                boshqa bo'limga o'tish mumkin; marshrut o'zgarsa chegara tiklanadi. */}
+            <ErrorBoundary key={location.pathname}>
+              <Outlet />
+            </ErrorBoundary>
           </div>
         </main>
       </div>

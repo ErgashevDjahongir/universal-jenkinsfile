@@ -22,6 +22,9 @@ export const uz = {
     noData: 'Ma’lumot yo‘q',
     logout: 'Chiqish',
     comingSoon: 'Bu bo‘lim tez orada tayyor bo‘ladi.',
+    crashTitle: 'Sahifani ochishda xatolik yuz berdi',
+    crashHint: 'Sahifani qayta yuklab ko‘ring yoki boshqa bo‘limga o‘ting.',
+    reload: 'Qayta yuklash',
   },
   auth: {
     loginTitle: 'Tizimga kirish',

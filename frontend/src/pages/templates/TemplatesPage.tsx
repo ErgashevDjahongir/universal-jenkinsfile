@@ -105,7 +105,7 @@ export function TemplatesPage() {
       header: 'Savollar',
       render: (t) => (
         <span className="text-xs text-gray-500">
-          {t.fixedQuestions.length} ta qo'lda + {t.selectionRules.length} ta qoida
+          {(t.fixedQuestions ?? []).length} ta qo'lda + {(t.selectionRules ?? []).length} ta qoida
         </span>
       ),
     },

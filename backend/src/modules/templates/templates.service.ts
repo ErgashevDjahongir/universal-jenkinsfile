@@ -62,6 +62,9 @@ export class TemplatesService {
   findAll(filter: TemplateFilterDto): Promise<TestTemplate[]> {
     return this.templates.find({
       where: filter.status ? { status: filter.status } : {},
+      // Ro'yxat sahifasi fixedQuestions/selectionRules sonini ko'rsatadi —
+      // relations'siz bu massivlar undefined bo'lib, frontend qulaydi.
+      relations: { fixedQuestions: true, selectionRules: true },
       order: { id: 'DESC' },
     });
   }
