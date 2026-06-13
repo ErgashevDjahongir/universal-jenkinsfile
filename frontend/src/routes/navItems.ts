@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   Home,
+  UserCheck,
   Users,
 } from 'lucide-react';
 import { UserRole } from '@/auth/roles';
@@ -31,6 +32,7 @@ export const navItems: NavItem[] = [
   { to: '/assignments', label: uz.nav.assignments, roles: ADMIN, icon: ClipboardCheck },
   { to: '/sessions', label: uz.nav.sessions, roles: STAFF_WITH_EXPERT, icon: Activity },
   { to: '/reports', label: uz.nav.reports, roles: STAFF_WITH_EXPERT, icon: BarChart2 },
+  { to: '/candidates', label: uz.nav.candidates, roles: ADMIN, icon: UserCheck },
   { to: '/users', label: uz.nav.users, roles: ADMIN, icon: Users },
   { to: '/departments', label: uz.nav.departments, roles: ADMIN, icon: Building2 },
 ];

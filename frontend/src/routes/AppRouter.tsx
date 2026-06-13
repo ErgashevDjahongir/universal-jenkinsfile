@@ -18,6 +18,8 @@ import { TemplateFormPage } from '@/pages/templates/TemplateFormPage';
 import { AssignmentsPage } from '@/pages/assignments/AssignmentsPage';
 import { UsersPage } from '@/pages/users/UsersPage';
 import { DepartmentsPage } from '@/pages/users/DepartmentsPage';
+import { CandidatesPage } from '@/pages/candidates/CandidatesPage';
+import { CandidateDetailPage } from '@/pages/candidates/CandidateDetailPage';
 import { SessionsPage } from '@/pages/results/SessionsPage';
 import { SessionDetailPage } from '@/pages/results/SessionDetailPage';
 import { ProfilePage } from '@/pages/ProfilePage';
@@ -67,6 +69,8 @@ export function AppRouter() {
           <Route path="/templates/new" element={<TemplateFormPage />} />
           <Route path="/templates/:id/edit" element={<TemplateFormPage />} />
           <Route path="/assignments" element={<AssignmentsPage />} />
+          <Route path="/candidates" element={<CandidatesPage />} />
+          <Route path="/candidates/:id" element={<CandidateDetailPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/departments" element={<DepartmentsPage />} />
         </Route>
