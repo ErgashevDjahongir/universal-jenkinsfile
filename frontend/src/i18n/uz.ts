@@ -94,7 +94,7 @@ export const uz = {
   },
   test: {
     // Kirish (kod kiritish)
-    entryTitle: 'Test sinoviga kirish',
+    entryTitle: 'Test jarayonlariga kirish',
     entrySubtitle: 'Sizga berilgan bir martalik kodni kiriting',
     codeLabel: 'Kirish kodi',
     codePlaceholder: 'Masalan: ABCD-1234',

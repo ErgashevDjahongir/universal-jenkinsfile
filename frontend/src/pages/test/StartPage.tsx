@@ -67,13 +67,12 @@ export function StartPage() {
   return (
     <div className="w-full max-w-md">
       <div className="mb-6 flex flex-col items-center text-center">
-        <Logo className="h-10 w-auto" />
-        <p className="mt-2 text-sm text-gray-500">{uz.app.tagline}</p>
+        <Logo className="h-16 w-auto" />
       </div>
 
       <Card>
-        <h2 className="text-lg font-semibold text-gray-900">{uz.test.entryTitle}</h2>
-        <p className="mt-1 text-sm text-gray-500">{uz.test.entrySubtitle}</p>
+        <h2 className="text-center text-2xl font-bold text-gray-900">{uz.test.entryTitle}</h2>
+        <p className="mt-1 text-center text-sm text-gray-500">{uz.test.entrySubtitle}</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <Input
