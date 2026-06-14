@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, RefreshCw, RotateCcw, StopCircle, X, XCircle } from 'lucide-react';
 import { UserRole } from '@/auth/roles';
 import { useAuth } from '@/auth/useAuth';
-import { Badge, Button, Modal, Select, Table, type Column } from '@/components/ui';
+import { Badge, Button, Modal, PageHeader, Select, Table, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   allowRetry,
@@ -306,7 +306,7 @@ export function SessionsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">{uz.sessions.title}</h1>
+      <PageHeader title={uz.sessions.title} />
 
       {actionError && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

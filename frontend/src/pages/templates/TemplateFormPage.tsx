@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Check, Database, Plus, Power, Save, Trash2, X } from 'lucide-react';
-import { Button, Input, Select, Modal } from '@/components/ui';
+import { Button, Input, Select, Modal, PageHeader } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   getTemplate,
@@ -515,33 +515,33 @@ export function TemplateFormPage() {
   return (
     <div className="space-y-6">
       {/* Sarlavha */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {isEdit ? uz.templates.edit : uz.templates.add}
-        </h1>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="icon"
-            title={uz.common.cancel}
-            aria-label={uz.common.cancel}
-            onClick={() => navigate('/templates')}
-          >
-            <X size={16} />
-          </Button>
-          {!isReadonly && (
+      <PageHeader
+        title={isEdit ? uz.templates.edit : uz.templates.add}
+        actions={
+          <>
             <Button
+              variant="secondary"
               size="icon"
-              title={uz.common.save}
-              aria-label={uz.common.save}
-              loading={saving}
-              onClick={handleSave}
+              title={uz.common.cancel}
+              aria-label={uz.common.cancel}
+              onClick={() => navigate('/templates')}
             >
-              <Save size={16} />
+              <X size={16} />
             </Button>
-          )}
-        </div>
-      </div>
+            {!isReadonly && (
+              <Button
+                size="icon"
+                title={uz.common.save}
+                aria-label={uz.common.save}
+                loading={saving}
+                onClick={handleSave}
+              >
+                <Save size={16} />
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {saveError && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

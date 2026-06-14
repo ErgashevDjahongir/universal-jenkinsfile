@@ -11,7 +11,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { Button, Input, Modal, Select, Badge } from '@/components/ui';
+import { Button, Input, Modal, Select, Badge, PageHeader } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { useAuth } from '@/auth/useAuth';
 import { UserRole } from '@/auth/roles';
@@ -279,20 +279,20 @@ export function QuestionFormPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {isEdit ? uz.questions.edit : uz.questions.add}
-        </h1>
-        <Button
-          variant="secondary"
-          size="icon"
-          title={uz.common.back}
-          aria-label={uz.common.back}
-          onClick={() => navigate('/questions')}
-        >
-          <ArrowLeft size={16} />
-        </Button>
-      </div>
+      <PageHeader
+        title={isEdit ? uz.questions.edit : uz.questions.add}
+        actions={
+          <Button
+            variant="secondary"
+            size="icon"
+            title={uz.common.back}
+            aria-label={uz.common.back}
+            onClick={() => navigate('/questions')}
+          >
+            <ArrowLeft size={16} />
+          </Button>
+        }
+      />
 
       {errors.global && (
         <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">

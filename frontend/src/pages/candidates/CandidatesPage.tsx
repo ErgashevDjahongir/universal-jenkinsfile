@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Badge, Button, Modal, Pagination, Select, Table, type Column } from '@/components/ui';
+import {
+  Badge,
+  Button,
+  Modal,
+  PageHeader,
+  Pagination,
+  Select,
+  Table,
+  type Column,
+} from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { useAuth } from '@/auth/useAuth';
 import { UserRole } from '@/auth/roles';
@@ -182,22 +191,24 @@ export function CandidatesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">{uz.candidates.title}</h1>
-        {!isReadOnly && (
-          <Button
-            size="icon"
-            title={uz.candidates.add}
-            aria-label={uz.candidates.add}
-            onClick={() => {
-              setEditTarget(null);
-              setFormOpen(true);
-            }}
-          >
-            <Plus size={16} />
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title={uz.candidates.title}
+        actions={
+          !isReadOnly && (
+            <Button
+              size="icon"
+              title={uz.candidates.add}
+              aria-label={uz.candidates.add}
+              onClick={() => {
+                setEditTarget(null);
+                setFormOpen(true);
+              }}
+            >
+              <Plus size={16} />
+            </Button>
+          )
+        }
+      />
 
       {actionError && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

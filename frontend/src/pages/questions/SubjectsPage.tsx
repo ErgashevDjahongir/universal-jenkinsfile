@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Pencil, Plus, Save, X } from 'lucide-react';
-import { Button, Input, Modal, Badge, DataState } from '@/components/ui';
+import { Button, Input, Modal, Badge, DataState, PageHeader } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   getSubjects,
@@ -162,7 +162,7 @@ export function SubjectsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">{uz.subjects.title}</h1>
+      <PageHeader title={uz.subjects.title} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Fanlar paneli */}

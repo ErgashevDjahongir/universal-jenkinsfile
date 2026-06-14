@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Archive, Pencil, Plus, Power, X } from 'lucide-react';
-import { Button, Badge, Modal, Select, Table, type Column } from '@/components/ui';
+import { Button, Badge, Modal, PageHeader, Select, Table, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   getTemplates,
@@ -159,17 +159,19 @@ export function TemplatesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">{uz.templates.title}</h1>
-        <Button
-          size="icon"
-          title={uz.templates.add}
-          aria-label={uz.templates.add}
-          onClick={() => navigate('/templates/new')}
-        >
-          <Plus size={16} />
-        </Button>
-      </div>
+      <PageHeader
+        title={uz.templates.title}
+        actions={
+          <Button
+            size="icon"
+            title={uz.templates.add}
+            aria-label={uz.templates.add}
+            onClick={() => navigate('/templates/new')}
+          >
+            <Plus size={16} />
+          </Button>
+        }
+      />
 
       {actionError && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

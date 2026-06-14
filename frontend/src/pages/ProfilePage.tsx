@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { changePassword } from '@/api/auth';
 import { useAuth } from '@/auth/useAuth';
-import { Button, Input } from '@/components/ui';
+import { Button, Input, PageHeader } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).+$/;
@@ -64,7 +64,7 @@ export function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">{uz.profile.title}</h1>
+      <PageHeader title={uz.profile.title} />
 
       {isMustChange && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">

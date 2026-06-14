@@ -13,7 +13,7 @@ import {
   type ReportFilter,
 } from '@/api/reports';
 import { getTemplates, type TestTemplate } from '@/api/templates';
-import { Badge, Button, Select } from '@/components/ui';
+import { Badge, Button, PageHeader, Select } from '@/components/ui';
 import { DataState } from '@/components/ui/DataState';
 import { uz } from '@/i18n/uz';
 
@@ -104,7 +104,7 @@ export function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">{uz.reports.title}</h1>
+      <PageHeader title={uz.reports.title} />
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-gray-200">

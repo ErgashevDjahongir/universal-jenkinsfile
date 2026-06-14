@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Pencil, Plus } from 'lucide-react';
-import { Button, Badge, Select, Table, Pagination, type Column } from '@/components/ui';
+import { Button, Badge, Select, Table, Pagination, PageHeader, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { useAuth } from '@/auth/useAuth';
 import { UserRole } from '@/auth/roles';
@@ -176,38 +176,40 @@ export function QuestionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-baseline gap-3">
-          <h1 className="text-2xl font-semibold text-gray-900">{uz.questions.title}</h1>
-          {counts && (
+      <PageHeader
+        title={uz.questions.title}
+        aside={
+          counts && (
             <span className="text-sm text-gray-500">
               {uz.questions.activeTotal}:{' '}
               <span className="font-medium text-gray-900">{counts.total}</span>
             </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {isAdmin && (
+          )
+        }
+        actions={
+          <>
+            {isAdmin && (
+              <Button
+                variant="secondary"
+                size="icon"
+                title={uz.questions.manageSubjects}
+                aria-label={uz.questions.manageSubjects}
+                onClick={() => navigate('/questions/subjects')}
+              >
+                <BookOpen size={16} />
+              </Button>
+            )}
             <Button
-              variant="secondary"
               size="icon"
-              title={uz.questions.manageSubjects}
-              aria-label={uz.questions.manageSubjects}
-              onClick={() => navigate('/questions/subjects')}
+              title={uz.questions.add}
+              aria-label={uz.questions.add}
+              onClick={() => navigate('/questions/new')}
             >
-              <BookOpen size={16} />
+              <Plus size={16} />
             </Button>
-          )}
-          <Button
-            size="icon"
-            title={uz.questions.add}
-            aria-label={uz.questions.add}
-            onClick={() => navigate('/questions/new')}
-          >
-            <Plus size={16} />
-          </Button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Filtrlar */}
       <div className="rounded-lg border border-gray-200 bg-white p-4">

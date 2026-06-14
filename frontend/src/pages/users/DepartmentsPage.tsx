@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Pencil, Plus, Save, Trash2, X } from 'lucide-react';
-import { Button, Input, Modal, Select, Table, type Column } from '@/components/ui';
+import { Button, Input, Modal, PageHeader, Select, Table, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   createDepartment,
@@ -242,12 +242,10 @@ export function DepartmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {tab === 'departments' ? uz.departments.title : uz.positions.title}
-        </h1>
-        <div className="flex gap-2">
-          {tab === 'departments' ? (
+      <PageHeader
+        title={tab === 'departments' ? uz.departments.title : uz.positions.title}
+        actions={
+          tab === 'departments' ? (
             <Button
               size="icon"
               title={uz.departments.add}
@@ -265,9 +263,9 @@ export function DepartmentsPage() {
             >
               <Plus size={16} />
             </Button>
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

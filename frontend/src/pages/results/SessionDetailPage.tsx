@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, StopCircle, X, XCircle } from 'lucide-react';
 import { UserRole } from '@/auth/roles';
 import { useAuth } from '@/auth/useAuth';
-import { Badge, Button, DataState, Modal } from '@/components/ui';
+import { Badge, Button, DataState, Modal, PageHeader } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   allowRetry,
@@ -178,18 +178,20 @@ export function SessionDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          title={uz.common.back}
-          aria-label={uz.common.back}
-          onClick={() => navigate('/sessions')}
-        >
-          <ArrowLeft size={16} />
-        </Button>
-        <h1 className="text-2xl font-semibold text-gray-900">{uz.sessions.detailTitle}</h1>
-      </div>
+      <PageHeader
+        leading={
+          <Button
+            variant="ghost"
+            size="icon"
+            title={uz.common.back}
+            aria-label={uz.common.back}
+            onClick={() => navigate('/sessions')}
+          >
+            <ArrowLeft size={16} />
+          </Button>
+        }
+        title={uz.sessions.detailTitle}
+      />
 
       <DataState loading={loading} error={error} onRetry={load} isEmpty={!review}>
         {review && sess && (

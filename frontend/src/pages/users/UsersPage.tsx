@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Ban, Pencil, Plus, Power, X } from 'lucide-react';
-import { Badge, Button, Modal, Select, Table, type Column } from '@/components/ui';
+import { Badge, Button, Modal, PageHeader, Select, Table, type Column } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   activateUser,
@@ -207,20 +207,22 @@ export function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">{uz.users.title}</h1>
-        <Button
-          size="icon"
-          title={uz.users.add}
-          aria-label={uz.users.add}
-          onClick={() => {
-            setEditTarget(null);
-            setFormOpen(true);
-          }}
-        >
-          <Plus size={16} />
-        </Button>
-      </div>
+      <PageHeader
+        title={uz.users.title}
+        actions={
+          <Button
+            size="icon"
+            title={uz.users.add}
+            aria-label={uz.users.add}
+            onClick={() => {
+              setEditTarget(null);
+              setFormOpen(true);
+            }}
+          >
+            <Plus size={16} />
+          </Button>
+        }
+      />
 
       {actionError && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

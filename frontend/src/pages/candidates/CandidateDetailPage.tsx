@@ -12,7 +12,7 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import { Badge, Button, Modal } from '@/components/ui';
+import { Badge, Button, Modal, PageHeader } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { useAuth } from '@/auth/useAuth';
 import { UserRole } from '@/auth/roles';
@@ -229,29 +229,33 @@ export function CandidateDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          title={uz.common.back}
-          aria-label={uz.common.back}
-          onClick={() => navigate('/candidates')}
-        >
-          <ArrowLeft size={16} />
-        </Button>
-        <h1 className="flex-1 text-2xl font-semibold text-gray-900">{uz.candidates.detailTitle}</h1>
-        {!isReadOnly && (
+      <PageHeader
+        leading={
           <Button
             variant="ghost"
             size="icon"
-            title={uz.common.edit}
-            aria-label={uz.common.edit}
-            onClick={() => setEditOpen(true)}
+            title={uz.common.back}
+            aria-label={uz.common.back}
+            onClick={() => navigate('/candidates')}
           >
-            <Pencil size={15} />
+            <ArrowLeft size={16} />
           </Button>
-        )}
-      </div>
+        }
+        title={uz.candidates.detailTitle}
+        actions={
+          !isReadOnly && (
+            <Button
+              variant="ghost"
+              size="icon"
+              title={uz.common.edit}
+              aria-label={uz.common.edit}
+              onClick={() => setEditOpen(true)}
+            >
+              <Pencil size={15} />
+            </Button>
+          )
+        }
+      />
 
       {actionError && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
