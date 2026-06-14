@@ -155,7 +155,7 @@ describe('AuthService — changePassword', () => {
 
   it("joriy parol noto'g'ri bo'lsa BadRequestException tashlaydi", async () => {
     const { BadRequestException } = await import('@nestjs/common');
-    const makeUser = (overrides = {}) => ({
+    const makeUser = (overrides: Partial<User> = {}): User => ({
       id: '1',
       lastName: 'A',
       firstName: 'B',
@@ -164,8 +164,8 @@ describe('AuthService — changePassword', () => {
       passwordHash: 'hash',
       phone: null,
       email: null,
-      role: 'admin' as any,
-      status: 'active' as any,
+      role: UserRole.ADMIN,
+      status: UserStatus.ACTIVE,
       departmentId: null,
       positionId: null,
       isCandidate: false,
@@ -190,7 +190,7 @@ describe('AuthService — changePassword', () => {
 
   it("passwordHash yo'q bo'lsa (examinee) BadRequestException tashlaydi", async () => {
     const { BadRequestException } = await import('@nestjs/common');
-    const makeUser = (overrides = {}) => ({
+    const makeUser = (overrides: Partial<User> = {}): User => ({
       id: '1',
       lastName: 'A',
       firstName: 'B',
@@ -199,8 +199,8 @@ describe('AuthService — changePassword', () => {
       passwordHash: null,
       phone: null,
       email: null,
-      role: 'examinee' as any,
-      status: 'active' as any,
+      role: UserRole.EXAMINEE,
+      status: UserStatus.ACTIVE,
       departmentId: null,
       positionId: null,
       isCandidate: false,
@@ -222,7 +222,7 @@ describe('AuthService — changePassword', () => {
   });
 
   it("to'g'ri joriy parol bilan updatePassword chaqiriladi", async () => {
-    const makeUser = (overrides = {}) => ({
+    const makeUser = (overrides: Partial<User> = {}): User => ({
       id: '1',
       lastName: 'A',
       firstName: 'B',
@@ -231,8 +231,8 @@ describe('AuthService — changePassword', () => {
       passwordHash: 'hash',
       phone: null,
       email: null,
-      role: 'admin' as any,
-      status: 'active' as any,
+      role: UserRole.ADMIN,
+      status: UserStatus.ACTIVE,
       departmentId: null,
       positionId: null,
       isCandidate: false,

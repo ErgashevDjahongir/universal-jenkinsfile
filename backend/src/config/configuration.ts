@@ -1,6 +1,6 @@
 /**
- * Markazlashgan konfiguratsiya: muhit o’zgaruvchilarini tiplangan obyektga yig’adi.
- * `@nestjs/config` orqali `ConfigService` bilan o’qiladi.
+ * Markazlashgan konfiguratsiya: muhit o'zgaruvchilarini tiplangan obyektga yig'adi.
+ * `@nestjs/config` orqali `ConfigService` bilan o'qiladi.
  */
 export interface AppConfig {
   nodeEnv: string;
@@ -29,18 +29,28 @@ export interface AppConfig {
 }
 
 export default (): AppConfig => {
+  const nodeEnv = process.env.NODE_ENV ?? 'development';
+  const isProd = nodeEnv === 'production';
+
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
-    throw new Error('JWT_SECRET env o’zgaruvchisi o’rnatilmagan. .env faylini tekshiring.');
+    throw new Error("JWT_SECRET env o'zgaruvchisi o'rnatilmagan. .env faylini tekshiring.");
   }
   if (jwtSecret === 'change_me_in_production') {
     console.warn(
-      '[XAVFSIZLIK] JWT_SECRET hali ham standart qiymatda — production uchun kuchli kalit o’rnating.',
+      "[XAVFSIZLIK] JWT_SECRET hali ham standart qiymatda — production uchun kuchli kalit o'rnating.",
     );
   }
 
+  if (!process.env.DB_PASSWORD && isProd) {
+    throw new Error("DB_PASSWORD env o'zgaruvchisi production muhitida majburiy.");
+  }
+  if (!process.env.DB_PASSWORD && !isProd) {
+    console.warn("[XAVFSIZLIK] DB_PASSWORD o'rnatilmagan — standart dev paroli ishlatilmoqda.");
+  }
+
   return {
-    nodeEnv: process.env.NODE_ENV ?? 'development',
+    nodeEnv,
     port: parseInt(process.env.PORT ?? '3000', 10),
     apiPrefix: process.env.API_PREFIX ?? 'api',
     corsOrigin: process.env.CORS_ORIGIN

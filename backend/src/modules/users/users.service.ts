@@ -8,7 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { User } from './entities/user.entity';
 
-const BCRYPT_ROUNDS = 12;
+const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_COST ?? '12', 10);
 
 @Injectable()
 export class UsersService {

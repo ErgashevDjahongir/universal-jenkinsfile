@@ -156,7 +156,11 @@ export class CandidatesService {
     const rows = await this.candidates.find({
       where: {
         ...statusFilter,
-        ...(filter.search ? { fullName: ILike(`%${filter.search}%`) } : {}),
+        ...(filter.search
+          ? {
+              fullName: ILike(`%${filter.search.replace(/%/g, '\\%').replace(/_/g, '\\_')}%`),
+            }
+          : {}),
       },
       order: { id: 'DESC' },
     });

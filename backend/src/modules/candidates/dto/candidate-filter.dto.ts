@@ -20,7 +20,8 @@ export class CandidateFilterDto {
 
   @ApiPropertyOptional({
     enum: CandidateView,
-    description: "current — aktiv (pending+in_progress); archived — yakunlangan (completed+no_show)",
+    description:
+      'current — aktiv (pending+in_progress); archived — yakunlangan (completed+no_show)',
   })
   @IsOptional()
   @IsEnum(CandidateView)
