@@ -310,6 +310,128 @@ describe('SessionsService.finishByExaminee (candidate)', () => {
   });
 });
 
+/** To'liq baholanadigan bitta savol: to'g'ri variant tanlangan (single_choice, 2 ball). */
+function gradeableSessionQuestion() {
+  return {
+    id: '77',
+    questionId: '100',
+    orderIndex: 0,
+    points: '2.00',
+    optionsOrder: ['1', '2'],
+    answer: { id: 'a1', selectedOptions: { selectedOptionIds: ['1'] }, answerText: null },
+    question: {
+      id: '100',
+      type: QuestionType.SINGLE_CHOICE,
+      answerKey: null,
+      options: [
+        { id: '1', isCorrect: true, orderIndex: 0, matchPair: null },
+        { id: '2', isCorrect: false, orderIndex: 1, matchPair: null },
+      ],
+    },
+  };
+}
+
+/** finalize ichidagi manager.update chaqiruvlarini yig'uvchi soxta manager. */
+function buildFinalizeManager(sessionRow: Record<string, unknown>, sqs: unknown[]) {
+  const finalRow = { ...sessionRow };
+  const updateCalls: { patch: Record<string, unknown> }[] = [];
+  const qb = {
+    setLock: () => qb,
+    where: () => qb,
+    getOne: () => Promise.resolve(sessionRow),
+    update: () => qb,
+    set: () => qb,
+    whereInIds: () => qb,
+    execute: jest.fn().mockResolvedValue({ affected: 1 }),
+  };
+  const manager = {
+    createQueryBuilder: () => qb,
+    findOne: jest.fn().mockResolvedValueOnce(assignment()).mockResolvedValueOnce(finalRow),
+    find: jest.fn().mockResolvedValue(sqs),
+    update: jest.fn((_entity: unknown, _crit: unknown, patch: Record<string, unknown>) => {
+      updateCalls.push({ patch });
+      return Promise.resolve({ affected: 1 });
+    }),
+  };
+  return { manager, updateCalls };
+}
+
+describe('SessionsService.finishByExaminee — vaqt tugashi natijasi (b1)', () => {
+  function run(sessionRow: Record<string, unknown>) {
+    const sq = gradeableSessionQuestion();
+    const { manager, updateCalls } = buildFinalizeManager(sessionRow, [sq]);
+    const { service, mocks } = build({
+      dataSource: {
+        transaction: jest.fn((cb: (m: unknown) => unknown) => cb(manager)),
+        getRepository: jest.fn(),
+      },
+    });
+    mocks.sessions.findOne.mockResolvedValue(sessionRow);
+    mocks.assignments.findOne.mockResolvedValue(assignment());
+    mocks.templates.findOne.mockResolvedValue(makeTemplate());
+    return { service, updateCalls };
+  }
+  const sessionUpdate = (calls: { patch: Record<string, unknown> }[]) =>
+    calls.find((c) => c.patch.status !== undefined && c.patch.score !== undefined)?.patch;
+  const answerUpdate = (calls: { patch: Record<string, unknown> }[]) =>
+    calls.find((c) => c.patch.isCorrect !== undefined)?.patch;
+
+  it("topshiruvchi O'ZI vaqtida yakunlasa → normal baholash (COMPLETED)", async () => {
+    // deadline kelajakda — muddat o'tmagan.
+    const { service, updateCalls } = run(
+      inProgressSession({ deadlineAt: new Date(Date.now() + 600_000) }),
+    );
+    await service.finishByExaminee('1', '9');
+
+    const su = sessionUpdate(updateCalls);
+    expect(su?.status).toBe(SessionStatus.COMPLETED);
+    expect(su?.score).toBe('2.00');
+    expect(su?.maxScore).toBe('2.00');
+    expect(su?.percent).toBe('100.00');
+    expect(su?.passed).toBe(true);
+    // Javob baholandi (to'g'ri deb belgilandi).
+    expect(answerUpdate(updateCalls)?.isCorrect).toBe(true);
+  });
+
+  it('VAQT TUGAB ketganda yakunlansa → natija NOL (EXPIRED, 0 ball/0 foiz/o‘tmagan)', async () => {
+    // deadline o'tgan — timeout.
+    const { service, updateCalls } = run(
+      inProgressSession({ deadlineAt: new Date(Date.now() - 1000) }),
+    );
+    await service.finishByExaminee('1', '9');
+
+    const su = sessionUpdate(updateCalls);
+    expect(su?.status).toBe(SessionStatus.EXPIRED);
+    expect(su?.score).toBe('0.00');
+    expect(su?.percent).toBe('0.00');
+    expect(su?.passed).toBe(false);
+    expect(su?.grade).toBeNull();
+    expect(su?.certificateUid).toBeNull();
+    // maxScore ko'rsatish uchun saqlanadi (0/maxScore).
+    expect(su?.maxScore).toBe('2.00');
+    // Javoblar BAHOLANMAYDI (timeout — natija bekor).
+    expect(answerUpdate(updateCalls)).toBeUndefined();
+  });
+});
+
+describe('SessionsService.expireOverdueSessions', () => {
+  it("deadline o'tgan in_progress sessiyalarni topib EXPIRED qiladi", async () => {
+    const { service, mocks } = build();
+    mocks.sessions.find.mockResolvedValue([{ id: '1' }, { id: '2' }]);
+    // finalize tranzaksiyasini soddalashtiramiz (chaqirilganini sanaymiz).
+    mocks.dataSource.transaction.mockResolvedValue(undefined);
+
+    const count = await service.expireOverdueSessions();
+
+    expect(count).toBe(2);
+    expect(mocks.dataSource.transaction).toHaveBeenCalledTimes(2);
+    // Faqat in_progress sessiyalar so'raladi.
+    const where = mocks.sessions.find.mock.calls[0][0].where;
+    expect(where.status).toBe(SessionStatus.IN_PROGRESS);
+    expect(where.deadlineAt).toBeDefined();
+  });
+});
+
 describe('SessionsService.startPreview', () => {
   it('examinee preview ocholmaydi → 400', async () => {
     const { service } = build();

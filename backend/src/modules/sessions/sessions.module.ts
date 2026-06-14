@@ -11,6 +11,7 @@ import { UsersModule } from '../users/users.module';
 import { SessionAnswer } from './entities/session-answer.entity';
 import { SessionQuestion } from './entities/session-question.entity';
 import { TestSession } from './entities/test-session.entity';
+import { SessionExpiryScheduler } from './session-expiry.scheduler';
 import { SessionsController } from './sessions.controller';
 import { SessionsService } from './sessions.service';
 import { VerifyController } from './verify.controller';
@@ -31,7 +32,7 @@ import { VerifyController } from './verify.controller';
     UsersModule,
   ],
   controllers: [SessionsController, VerifyController],
-  providers: [SessionsService, RateLimitGuard],
+  providers: [SessionsService, RateLimitGuard, SessionExpiryScheduler],
   exports: [SessionsService],
 })
 export class SessionsModule {}

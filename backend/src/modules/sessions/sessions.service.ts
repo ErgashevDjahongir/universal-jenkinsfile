@@ -7,7 +7,15 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'node:crypto';
-import { DataSource, EntityManager, In, QueryFailedError, Repository, UpdateResult } from 'typeorm';
+import {
+  DataSource,
+  EntityManager,
+  In,
+  LessThan,
+  QueryFailedError,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import { CandidateStatus } from '../../common/enums/candidate-status.enum';
 import { NavigationMode } from '../../common/enums/navigation-mode.enum';
 import { QuestionType } from '../../common/enums/question-type.enum';
@@ -39,6 +47,7 @@ import {
   GradeBand,
   GradeOption,
   gradeQuestion,
+  SessionScore,
 } from './scoring';
 import { generateAccessCode } from '../assignments/access-code.util';
 
@@ -697,55 +706,70 @@ export class SessionsService {
         relations: { question: { options: true }, answer: true },
       });
 
+      // Vaqt tugashi (timeout = EXPIRED) → natija BEKOR: 0 ball / 0 foiz / o'tmagan (TZ §b1).
+      // Bunda javoblar baholanmaydi va savol statistikasi yangilanmaydi. Faqat topshiruvchi
+      // O'ZI vaqtida yakunlasa (COMPLETED) yoki qoidabuzarlik (TERMINATED) bo'lsa normal baholanadi.
+      const isTimeout = finalStatus === SessionStatus.EXPIRED;
+
       const negativePoints = Number(template.negativePoints);
       const scored: { points: number; awardedPoints: number }[] = [];
       const usedIds: string[] = [];
       const correctIds: string[] = [];
 
-      for (const sq of sqs) {
-        const question = sq.question!;
-        const options: GradeOption[] = question.options.map((o) => ({
-          id: o.id,
-          isCorrect: o.isCorrect,
-          orderIndex: o.orderIndex,
-          matchPair: o.matchPair,
-        }));
-        const examineeAnswer = this.parseStoredAnswer(sq.answer) ?? {};
-        const result = gradeQuestion(
-          {
-            type: question.type,
-            points: Number(sq.points),
-            options,
-            answerKey: question.answerKey,
-            partialScoring: template.partialScoring,
-            negativeMarking: template.negativeMarking,
-            negativePoints,
-          },
-          examineeAnswer,
-        );
-
-        // Javob qatorini status hali in_progress ekanida yangilaymiz (immutability
-        // triggeri faqat yakunlangach bloklaydi).
-        if (sq.answer) {
-          await manager.update(
-            SessionAnswer,
-            { id: sq.answer.id },
-            { isCorrect: result.isCorrect, awardedPoints: result.awardedPoints.toFixed(2) },
+      if (!isTimeout) {
+        for (const sq of sqs) {
+          const question = sq.question!;
+          const options: GradeOption[] = question.options.map((o) => ({
+            id: o.id,
+            isCorrect: o.isCorrect,
+            orderIndex: o.orderIndex,
+            matchPair: o.matchPair,
+          }));
+          const examineeAnswer = this.parseStoredAnswer(sq.answer) ?? {};
+          const result = gradeQuestion(
+            {
+              type: question.type,
+              points: Number(sq.points),
+              options,
+              answerKey: question.answerKey,
+              partialScoring: template.partialScoring,
+              negativeMarking: template.negativeMarking,
+              negativePoints,
+            },
+            examineeAnswer,
           );
-        }
-        scored.push({ points: Number(sq.points), awardedPoints: result.awardedPoints });
-        usedIds.push(sq.questionId);
-        if (result.isCorrect) {
-          correctIds.push(sq.questionId);
+
+          // Javob qatorini status hali in_progress ekanida yangilaymiz (immutability
+          // triggeri faqat yakunlangach bloklaydi).
+          if (sq.answer) {
+            await manager.update(
+              SessionAnswer,
+              { id: sq.answer.id },
+              { isCorrect: result.isCorrect, awardedPoints: result.awardedPoints.toFixed(2) },
+            );
+          }
+          scored.push({ points: Number(sq.points), awardedPoints: result.awardedPoints });
+          usedIds.push(sq.questionId);
+          if (result.isCorrect) {
+            correctIds.push(sq.questionId);
+          }
         }
       }
 
-      const gradeScale: GradeBand[] = template.gradeScale.map((g) => ({
-        grade: g.grade,
-        minPercent: Number(g.minPercent),
-      }));
-      const totals = computeSessionScore(scored, Number(template.passingScorePercent), gradeScale);
-      const certificateUid = !session.isPreview && totals.passed ? randomUUID() : null;
+      let totals: SessionScore;
+      let certificateUid: string | null = null;
+      if (isTimeout) {
+        // maxScore ko'rsatish uchun savol ballari yig'indisidan olinadi (natija 0/maxScore).
+        const maxScore = sqs.reduce((sum, sq) => sum + Number(sq.points), 0);
+        totals = { score: 0, maxScore, percent: 0, passed: false, grade: null };
+      } else {
+        const gradeScale: GradeBand[] = template.gradeScale.map((g) => ({
+          grade: g.grade,
+          minPercent: Number(g.minPercent),
+        }));
+        totals = computeSessionScore(scored, Number(template.passingScorePercent), gradeScale);
+        certificateUid = !session.isPreview && totals.passed ? randomUUID() : null;
+      }
 
       await manager.update(
         TestSession,
@@ -762,8 +786,8 @@ export class SessionsService {
         },
       );
 
-      // Savol statistikasi — is_preview=true sessiyalar KIRMAYDI (qaror §3).
-      if (!session.isPreview) {
+      // Savol statistikasi — preview va timeout (bekor qilingan) sessiyalar KIRMAYDI.
+      if (!session.isPreview && !isTimeout) {
         await this.bumpQuestionStats(manager, usedIds, correctIds);
       }
 
@@ -836,6 +860,27 @@ export class SessionsService {
       return this.finalize(session.id, SessionStatus.EXPIRED);
     }
     return session;
+  }
+
+  /**
+   * Rejalashtirilgan tekshiruv (SessionExpiryScheduler): deadline o'tib ketgan, lekin
+   * hali in_progress holatdagi sessiyalarni timeout (EXPIRED) sifatida yakunlaydi —
+   * topshiruvchi brauzerni yopib ketgan va boshqa so'rov yubormagan bo'lsa ham. Bu
+   * server tomonidagi ishonchli kafolat (mijoz vaqtiga bog'liq emas). Yakunlangan
+   * sessiyalar soni qaytadi.
+   */
+  async expireOverdueSessions(): Promise<number> {
+    const overdue = await this.sessions.find({
+      where: { status: SessionStatus.IN_PROGRESS, deadlineAt: LessThan(new Date()) },
+      select: { id: true },
+    });
+    let expired = 0;
+    for (const s of overdue) {
+      // finalize ichida pessimistik lock + status tekshiruvi bor — parallel yakunlashga chidamli.
+      await this.finalize(s.id, SessionStatus.EXPIRED);
+      expired += 1;
+    }
+    return expired;
   }
 
   /** Saqlanadigan tanlov (jsonb) — faqat tanlov maydonlari; answerText alohida ustun. */

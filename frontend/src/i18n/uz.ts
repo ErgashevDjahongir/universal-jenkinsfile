@@ -194,7 +194,8 @@ export const uz = {
     resultCorrectCount: "To'g'ri javoblar",
     correctCountValue: '{correct} / {total} ta',
     resultHidden: 'Natija administrator tomonidan koʻrib chiqilgandan soʻng eʼlon qilinadi.',
-    resultTimeUp: 'Belgilangan vaqt tugadi va test avtomatik yakunlandi.',
+    resultTimeUp:
+      'Belgilangan vaqt tugadi, test avtomatik yakunlandi. Vaqtida yakunlanmagani sababli natija 0 ball deb baholandi.',
     resultTerminated: 'Test qoidalar buzilgani sababli avtomatik yakunlandi.',
     certificateUid: 'Bayonnoma raqami: {uid}',
     exit: 'Chiqish',
