@@ -6,6 +6,7 @@ import { Button, Input } from '@/components/ui';
 import { Logo } from '@/components/Logo';
 import { cn } from '@/lib/cn';
 import { uz } from '@/i18n/uz';
+import { UserRole } from '@/auth/roles';
 import { CandidateCodeForm } from './test/CandidateCodeForm';
 
 interface LocationState {
@@ -25,7 +26,7 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (status === 'authenticated' && user) {
+  if (status === 'authenticated' && user && user.role !== UserRole.EXAMINEE) {
     return <Navigate to="/" replace />;
   }
 

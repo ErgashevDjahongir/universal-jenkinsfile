@@ -1,17 +1,9 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/auth/useAuth';
 import { Card } from '@/components/ui';
 import { Logo } from '@/components/Logo';
 import { uz } from '@/i18n/uz';
 import { CandidateCodeForm } from './CandidateCodeForm';
 
 export function StartPage() {
-  const { status, user } = useAuth();
-
-  if (status === 'authenticated' && user) {
-    return <Navigate to="/" replace />;
-  }
-
   return (
     <div className="w-full max-w-md">
       <div className="mb-6 flex flex-col items-center text-center">
