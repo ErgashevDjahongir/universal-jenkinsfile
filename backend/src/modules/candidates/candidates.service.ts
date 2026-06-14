@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { mkdir, unlink, writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { join, resolve } from 'node:path';
-import { DataSource, EntityManager, ILike, QueryFailedError, Repository } from 'typeorm';
+import { DataSource, EntityManager, ILike, In, QueryFailedError, Repository } from 'typeorm';
 import { CandidateStatus } from '../../common/enums/candidate-status.enum';
 import { DocumentType } from '../../common/enums/document-type.enum';
 import { SessionStatus } from '../../common/enums/session-status.enum';
@@ -16,7 +16,7 @@ import { AuditService } from '../audit/audit.service';
 import { TestSession } from '../sessions/entities/test-session.entity';
 import { TemplatesService } from '../templates/templates.service';
 import { AssignCandidateDto } from './dto/assign-candidate.dto';
-import { CandidateFilterDto } from './dto/candidate-filter.dto';
+import { CandidateFilterDto, CandidateView } from './dto/candidate-filter.dto';
 import { CreateCandidateDto } from './dto/create-candidate.dto';
 import { UpdateCandidateAssignmentDto } from './dto/update-candidate-assignment.dto';
 import { UpdateCandidateDto } from './dto/update-candidate.dto';
@@ -152,9 +152,10 @@ export class CandidatesService {
   }
 
   async findAll(filter: CandidateFilterDto): Promise<CandidateListRow[]> {
+    const statusFilter = this.resolveStatusFilter(filter);
     const rows = await this.candidates.find({
       where: {
-        ...(filter.status ? { status: filter.status } : {}),
+        ...statusFilter,
         ...(filter.search ? { fullName: ILike(`%${filter.search}%`) } : {}),
       },
       order: { id: 'DESC' },
@@ -458,6 +459,22 @@ export class CandidatesService {
   }
 
   // ---- yordamchilar ----
+
+  /**
+   * `view` yoki `status` filtrini TypeORM WHERE shartiga aylantiradi.
+   * `view` berilsa `status` e'tiborga olinmaydi.
+   */
+  private resolveStatusFilter(filter: CandidateFilterDto): {
+    status?: CandidateStatus | ReturnType<typeof In>;
+  } {
+    if (filter.view === CandidateView.CURRENT) {
+      return { status: In([CandidateStatus.PENDING, CandidateStatus.IN_PROGRESS]) };
+    }
+    if (filter.view === CandidateView.ARCHIVED) {
+      return { status: In([CandidateStatus.COMPLETED, CandidateStatus.NO_SHOW]) };
+    }
+    return filter.status ? { status: filter.status } : {};
+  }
 
   private async getOrFail(id: string): Promise<Candidate> {
     const candidate = await this.candidates.findOne({ where: { id } });

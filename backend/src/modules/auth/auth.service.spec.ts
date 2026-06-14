@@ -36,7 +36,10 @@ function makeUser(overrides: Partial<User> = {}): User {
 
 describe('AuthService — blok logikasi', () => {
   let users: jest.Mocked<
-    Pick<UsersService, 'findByLogin' | 'findById' | 'save' | 'registerFailedAttempt' | 'updatePassword'>
+    Pick<
+      UsersService,
+      'findByLogin' | 'findById' | 'save' | 'registerFailedAttempt' | 'updatePassword'
+    >
   >;
   let passwords: jest.Mocked<Pick<PasswordService, 'compare' | 'compareDummy'>>;
   let jwt: jest.Mocked<Pick<JwtService, 'signAsync'>>;
@@ -119,7 +122,10 @@ describe('AuthService — blok logikasi', () => {
 
 describe('AuthService — changePassword', () => {
   let users: jest.Mocked<
-    Pick<UsersService, 'findByLogin' | 'findById' | 'save' | 'registerFailedAttempt' | 'updatePassword'>
+    Pick<
+      UsersService,
+      'findByLogin' | 'findById' | 'save' | 'registerFailedAttempt' | 'updatePassword'
+    >
   >;
   let passwords: jest.Mocked<Pick<PasswordService, 'compare' | 'compareDummy'>>;
   let service: AuthService;
@@ -147,18 +153,33 @@ describe('AuthService — changePassword', () => {
     );
   });
 
-  it('joriy parol noto\'g\'ri bo\'lsa BadRequestException tashlaydi', async () => {
+  it("joriy parol noto'g'ri bo'lsa BadRequestException tashlaydi", async () => {
     const { BadRequestException } = await import('@nestjs/common');
     const makeUser = (overrides = {}) => ({
-      id: '1', lastName: 'A', firstName: 'B', middleName: null, login: 'u',
-      passwordHash: 'hash', phone: null, email: null, role: 'admin' as any,
-      status: 'active' as any, departmentId: null, positionId: null,
-      isCandidate: false, failedAttempts: 0, lockedUntil: null,
-      lastLoginAt: null, mustChangePassword: false, createdBy: null,
-      createdAt: new Date(), updatedAt: new Date(), ...overrides,
+      id: '1',
+      lastName: 'A',
+      firstName: 'B',
+      middleName: null,
+      login: 'u',
+      passwordHash: 'hash',
+      phone: null,
+      email: null,
+      role: 'admin' as any,
+      status: 'active' as any,
+      departmentId: null,
+      positionId: null,
+      isCandidate: false,
+      failedAttempts: 0,
+      lockedUntil: null,
+      lastLoginAt: null,
+      mustChangePassword: false,
+      createdBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...overrides,
     });
 
-    users.findById.mockResolvedValue(makeUser() as any);
+    users.findById.mockResolvedValue(makeUser());
     passwords.compare.mockResolvedValue(false);
 
     await expect(
@@ -167,35 +188,65 @@ describe('AuthService — changePassword', () => {
     expect(users.updatePassword).not.toHaveBeenCalled();
   });
 
-  it('passwordHash yo\'q bo\'lsa (examinee) BadRequestException tashlaydi', async () => {
+  it("passwordHash yo'q bo'lsa (examinee) BadRequestException tashlaydi", async () => {
     const { BadRequestException } = await import('@nestjs/common');
     const makeUser = (overrides = {}) => ({
-      id: '1', lastName: 'A', firstName: 'B', middleName: null, login: null,
-      passwordHash: null, phone: null, email: null, role: 'examinee' as any,
-      status: 'active' as any, departmentId: null, positionId: null,
-      isCandidate: false, failedAttempts: 0, lockedUntil: null,
-      lastLoginAt: null, mustChangePassword: false, createdBy: null,
-      createdAt: new Date(), updatedAt: new Date(), ...overrides,
+      id: '1',
+      lastName: 'A',
+      firstName: 'B',
+      middleName: null,
+      login: null,
+      passwordHash: null,
+      phone: null,
+      email: null,
+      role: 'examinee' as any,
+      status: 'active' as any,
+      departmentId: null,
+      positionId: null,
+      isCandidate: false,
+      failedAttempts: 0,
+      lockedUntil: null,
+      lastLoginAt: null,
+      mustChangePassword: false,
+      createdBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...overrides,
     });
 
-    users.findById.mockResolvedValue(makeUser() as any);
+    users.findById.mockResolvedValue(makeUser());
 
     await expect(
       service.changePassword('1', { currentPassword: 'any', newPassword: 'New1pass' }),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
-  it('to\'g\'ri joriy parol bilan updatePassword chaqiriladi', async () => {
+  it("to'g'ri joriy parol bilan updatePassword chaqiriladi", async () => {
     const makeUser = (overrides = {}) => ({
-      id: '1', lastName: 'A', firstName: 'B', middleName: null, login: 'u',
-      passwordHash: 'hash', phone: null, email: null, role: 'admin' as any,
-      status: 'active' as any, departmentId: null, positionId: null,
-      isCandidate: false, failedAttempts: 0, lockedUntil: null,
-      lastLoginAt: null, mustChangePassword: true, createdBy: null,
-      createdAt: new Date(), updatedAt: new Date(), ...overrides,
+      id: '1',
+      lastName: 'A',
+      firstName: 'B',
+      middleName: null,
+      login: 'u',
+      passwordHash: 'hash',
+      phone: null,
+      email: null,
+      role: 'admin' as any,
+      status: 'active' as any,
+      departmentId: null,
+      positionId: null,
+      isCandidate: false,
+      failedAttempts: 0,
+      lockedUntil: null,
+      lastLoginAt: null,
+      mustChangePassword: true,
+      createdBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...overrides,
     });
 
-    users.findById.mockResolvedValue(makeUser() as any);
+    users.findById.mockResolvedValue(makeUser());
     passwords.compare.mockResolvedValue(true);
 
     await service.changePassword('1', { currentPassword: 'correct', newPassword: 'New1pass' });

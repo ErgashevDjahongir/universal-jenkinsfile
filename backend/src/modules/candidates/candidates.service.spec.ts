@@ -3,6 +3,7 @@ import { QueryFailedError } from 'typeorm';
 import { CandidateStatus } from '../../common/enums/candidate-status.enum';
 import { TemplateStatus } from '../../common/enums/template-status.enum';
 import { CandidatesService, UploadedDocument } from './candidates.service';
+import { CandidateView } from './dto/candidate-filter.dto';
 
 // Disk yozuvini chetlab o'tamiz — test fayl tizimiga tegmaydi.
 jest.mock('node:fs/promises', () => ({
@@ -290,6 +291,46 @@ describe('CandidatesService.updateAssignment', () => {
     expect(mocks.audit.log).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'candidate.assignment_update' }),
     );
+  });
+});
+
+describe('CandidatesService.findAll — view filtri', () => {
+  it('view=current faqat pending va in_progress ni qaytaradi', async () => {
+    const { service, mocks } = build();
+    const assignmentQb = {
+      createQueryBuilder: jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([]),
+      }),
+    };
+    Object.assign(mocks.assignments, assignmentQb);
+    mocks.candidates.find.mockResolvedValue([]);
+
+    await service.findAll({ view: CandidateView.CURRENT });
+
+    const whereArg = mocks.candidates.find.mock.calls[0][0].where;
+    // status maydoni In() operatori bo'lishi kerak
+    expect(whereArg.status).toBeDefined();
+    // TypeORM In() natijasi FindOperator obyekti; qiymatlarini tekshiramiz
+    const values: CandidateStatus[] = (whereArg.status as { value: CandidateStatus[] }).value;
+    expect(values).toContain(CandidateStatus.PENDING);
+    expect(values).toContain(CandidateStatus.IN_PROGRESS);
+    expect(values).not.toContain(CandidateStatus.COMPLETED);
+    expect(values).not.toContain(CandidateStatus.NO_SHOW);
+  });
+
+  it('view=archived faqat completed va no_show ni qaytaradi', async () => {
+    const { service, mocks } = build();
+    mocks.candidates.find.mockResolvedValue([]);
+
+    await service.findAll({ view: CandidateView.ARCHIVED });
+
+    const whereArg = mocks.candidates.find.mock.calls[0][0].where;
+    const values: CandidateStatus[] = (whereArg.status as { value: CandidateStatus[] }).value;
+    expect(values).toContain(CandidateStatus.COMPLETED);
+    expect(values).toContain(CandidateStatus.NO_SHOW);
+    expect(values).not.toContain(CandidateStatus.PENDING);
+    expect(values).not.toContain(CandidateStatus.IN_PROGRESS);
   });
 });
 

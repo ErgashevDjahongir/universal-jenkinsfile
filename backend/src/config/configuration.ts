@@ -34,7 +34,6 @@ export default (): AppConfig => {
     throw new Error('JWT_SECRET env o’zgaruvchisi o’rnatilmagan. .env faylini tekshiring.');
   }
   if (jwtSecret === 'change_me_in_production') {
-    // eslint-disable-next-line no-console
     console.warn(
       '[XAVFSIZLIK] JWT_SECRET hali ham standart qiymatda — production uchun kuchli kalit o’rnating.',
     );

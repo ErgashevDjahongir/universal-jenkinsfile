@@ -108,16 +108,20 @@ export class UsersService {
     maxAttempts: number,
     lockMinutes: number,
   ): Promise<void> {
+    // Parametrized bindings: maxAttempts va lockMinutes hech qachon SQL fragmentiga
+    // to'g'ridan-to'g'ri qo'shilmaydi — injection xavfi yo'q.
     await this.users
       .createQueryBuilder()
       .update(User)
       .set({
         failedAttempts: () =>
-          `CASE WHEN failed_attempts + 1 >= ${maxAttempts} THEN 0 ELSE failed_attempts + 1 END`,
+          'CASE WHEN failed_attempts + 1 >= :max THEN 0 ELSE failed_attempts + 1 END',
         lockedUntil: () =>
-          `CASE WHEN failed_attempts + 1 >= ${maxAttempts} ` +
-          `THEN now() + (interval '1 minute' * ${lockMinutes}) ELSE locked_until END`,
+          'CASE WHEN failed_attempts + 1 >= :max ' +
+          "THEN now() + (interval '1 minute' * :lock) ELSE locked_until END",
       })
+      .setParameter('max', maxAttempts)
+      .setParameter('lock', lockMinutes)
       .where('id = :userId', { userId })
       .execute();
   }

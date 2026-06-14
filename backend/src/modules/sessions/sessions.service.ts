@@ -1030,6 +1030,7 @@ export class SessionsService {
       phone: dto.phone ?? null,
       role: UserRole.EXAMINEE,
       status: UserStatus.ACTIVE,
+      isCandidate: true,
     });
     return manager.save(user);
   }

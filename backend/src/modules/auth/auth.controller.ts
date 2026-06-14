@@ -55,7 +55,10 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Parolni almashtirish (joriy + yangi)' })
   @ApiResponse({ status: 204, description: 'Parol muvaffaqiyatli almashtirildi' })
-  @ApiResponse({ status: 400, description: 'Joriy parol noto’g’ri yoki yangi parol talablarga javob bermaydi' })
+  @ApiResponse({
+    status: 400,
+    description: 'Joriy parol noto’g’ri yoki yangi parol talablarga javob bermaydi',
+  })
   async changePassword(
     @CurrentUser() user: AuthUser,
     @Body() dto: ChangePasswordDto,
