@@ -16,6 +16,7 @@ import {
 } from '@/api/sessions';
 
 const STATUS_BADGE: Record<SessionStatus, 'success' | 'danger' | 'warning' | 'neutral'> = {
+  ready: 'neutral',
   in_progress: 'warning',
   completed: 'success',
   expired: 'neutral',
@@ -25,6 +26,7 @@ const STATUS_BADGE: Record<SessionStatus, 'success' | 'danger' | 'warning' | 'ne
 };
 
 const STATUS_LABEL: Record<SessionStatus, string> = {
+  ready: uz.sessions.statusReady,
   in_progress: uz.sessions.statusInProgress,
   completed: uz.sessions.statusCompleted,
   expired: uz.sessions.statusExpired,

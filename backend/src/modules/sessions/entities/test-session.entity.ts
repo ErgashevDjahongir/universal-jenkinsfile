@@ -40,11 +40,12 @@ export class TestSession {
   })
   status!: SessionStatus;
 
-  @Column({ name: 'started_at', type: 'timestamptz' })
-  startedAt!: Date;
+  // NULL = sessiya hali `ready` holatda (taymer boshlanmagan). `begin`'da yoziladi.
+  @Column({ name: 'started_at', type: 'timestamptz', nullable: true })
+  startedAt!: Date | null;
 
-  @Column({ name: 'deadline_at', type: 'timestamptz' })
-  deadlineAt!: Date;
+  @Column({ name: 'deadline_at', type: 'timestamptz', nullable: true })
+  deadlineAt!: Date | null;
 
   @Column({ name: 'finished_at', type: 'timestamptz', nullable: true })
   finishedAt!: Date | null;

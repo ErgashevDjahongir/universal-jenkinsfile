@@ -3,6 +3,7 @@ import type { AuthUser } from './auth';
 import { api } from './client';
 
 export type SessionStatus =
+  | 'ready'
   | 'in_progress'
   | 'completed'
   | 'expired'
@@ -148,12 +149,15 @@ export interface ExamineeSession {
   status: SessionStatus;
   assignmentTitle: string;
   candidateName: string | null;
-  startedAt: string;
-  deadlineAt: string;
+  // `ready` holatda (taymer boshlanmagan) NULL bo'ladi; "Testni boshlash"da to'ladi.
+  startedAt: string | null;
+  deadlineAt: string | null;
   serverNow: string;
   remainingSeconds: number;
   tabSwitches: number;
   maxTabSwitches: number;
+  // Savollar soni — `ready` holatda savol matnlari kelmaydi, faqat soni ko'rsatiladi.
+  questionCount: number;
   timeLimitMinutes: number;
   passingScorePercent: string;
   navigation: NavigationMode;
@@ -215,6 +219,15 @@ export async function startSession(
 /** Sessiya holati va savollarni oladi (refresh'da to'liq tiklash). */
 export async function getExamineeSession(id: string): Promise<ExamineeSession> {
   const { data } = await api.get<ExamineeSession>(`/sessions/${id}`);
+  return data;
+}
+
+/**
+ * "Testni boshlash" — taymerni server tomonda ishga tushiradi (started_at/deadline yoziladi)
+ * va savollarni qaytaradi. Idempotent: allaqachon boshlangan bo'lsa mavjud holat qaytadi.
+ */
+export async function beginSession(id: string): Promise<ExamineeSession> {
+  const { data } = await api.post<ExamineeSession>(`/sessions/${id}/begin`);
   return data;
 }
 

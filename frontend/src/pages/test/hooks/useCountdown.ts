@@ -6,8 +6,13 @@ import { useEffect, useRef, useState } from 'react';
  * vaqt aniqlanadi — taymer faqat ko'rsatish uchun, haqiqiy nazorat serverda.
  * Vaqt tugaganda `onExpire` bir marta chaqiriladi.
  */
-export function useCountdown(deadlineAt: string, serverNow: string, onExpire: () => void): number {
-  const deadlineMs = new Date(deadlineAt).getTime();
+export function useCountdown(
+  deadlineAt: string | null,
+  serverNow: string,
+  onExpire: () => void,
+): number {
+  // `ready` holatda (taymer hali boshlanmagan) deadline NULL — sanoq yurmaydi.
+  const deadlineMs = deadlineAt ? new Date(deadlineAt).getTime() : null;
   // Server va mijoz soatlari farqi (musbat — server oldinda).
   const offsetRef = useRef(new Date(serverNow).getTime() - Date.now());
   const onExpireRef = useRef(onExpire);
@@ -15,11 +20,14 @@ export function useCountdown(deadlineAt: string, serverNow: string, onExpire: ()
   const firedRef = useRef(false);
 
   const remaining = (): number =>
-    Math.max(0, Math.floor((deadlineMs - (Date.now() + offsetRef.current)) / 1000));
+    deadlineMs === null
+      ? 0
+      : Math.max(0, Math.floor((deadlineMs - (Date.now() + offsetRef.current)) / 1000));
 
   const [seconds, setSeconds] = useState(remaining);
 
   useEffect(() => {
+    if (deadlineMs === null) return; // taymer yo'q — interval ishga tushmaydi.
     const id = setInterval(() => {
       const s = remaining();
       setSeconds(s);

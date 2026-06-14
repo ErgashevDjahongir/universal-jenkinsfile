@@ -17,6 +17,7 @@ import {
 type Tab = 'monitoring' | 'list';
 
 const STATUS_LABEL: Record<SessionStatus, string> = {
+  ready: uz.sessions.statusReady,
   in_progress: uz.sessions.statusInProgress,
   completed: uz.sessions.statusCompleted,
   expired: uz.sessions.statusExpired,
@@ -26,6 +27,7 @@ const STATUS_LABEL: Record<SessionStatus, string> = {
 };
 
 const STATUS_BADGE: Record<SessionStatus, 'success' | 'danger' | 'warning' | 'neutral'> = {
+  ready: 'neutral',
   in_progress: 'warning',
   completed: 'success',
   expired: 'neutral',

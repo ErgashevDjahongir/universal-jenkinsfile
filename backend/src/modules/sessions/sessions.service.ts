@@ -64,8 +64,9 @@ export interface SessionView {
   status: SessionStatus;
   attemptNumber: number;
   isPreview: boolean;
-  startedAt: Date;
-  deadlineAt: Date;
+  // NULL = `ready` (taymer boshlanmagan).
+  startedAt: Date | null;
+  deadlineAt: Date | null;
   questionCount: number;
   timeLimitMinutes: number;
 }
@@ -98,12 +99,15 @@ export interface ExamineeSessionView {
   assignmentTitle: string;
   /** Topshiruvchi F.I.Sh. (timer panelidagi ma'lumot uchun). */
   candidateName: string | null;
-  startedAt: Date;
-  deadlineAt: Date;
+  // `ready` holatda NULL — taymer hali boshlanmagan.
+  startedAt: Date | null;
+  deadlineAt: Date | null;
   serverNow: Date;
   remainingSeconds: number;
   tabSwitches: number;
   maxTabSwitches: number;
+  /** Savollar soni (qoidalar ekrani uchun; `ready` holatda savol matnlari yuborilmaydi). */
+  questionCount: number;
   /** Shablon sozlamalari — qoidalar ekrani va navigatsiya rejimi uchun. */
   timeLimitMinutes: number;
   passingScorePercent: string;
@@ -138,8 +142,8 @@ export interface MonitorRow {
   status: SessionStatus;
   attemptNumber: number;
   isPreview: boolean;
-  startedAt: Date;
-  deadlineAt: Date;
+  startedAt: Date | null;
+  deadlineAt: Date | null;
   tabSwitches: number;
 }
 
@@ -251,6 +255,7 @@ export class SessionsService {
         sealed,
         ctx,
         candidateId: candidate?.id ?? null,
+        startNow: false, // kod bilan kirish — taymer "Testni boshlash"da boshlanadi.
       });
 
       // Topshiruvchi testni boshladi (qaror §8): pending → in_progress.
@@ -265,7 +270,10 @@ export class SessionsService {
     });
 
     const tokens = await this.auth.issueForUser(user);
-    return { ...tokens, session: this.toView(session, assignment, sealed.length) };
+    return {
+      ...tokens,
+      session: this.toView(session, assignment, sealed.length, template.timeLimitMinutes),
+    };
   }
 
   /**
@@ -294,10 +302,11 @@ export class SessionsService {
         template,
         sealed,
         ctx,
+        startNow: true, // sinov (preview) — admin uchun darhol boshlanadi.
       });
     });
 
-    return this.toView(session, assignment, sealed.length);
+    return this.toView(session, assignment, sealed.length, template.timeLimitMinutes);
   }
 
   // ---- B qism: topshirish jarayoni ----
@@ -313,17 +322,34 @@ export class SessionsService {
 
     const assignment = await this.getAssignment(session.assignmentId);
     const template = await this.templates.findOne(assignment.templateId);
-    const sqs = await this.sessionQuestions.find({
-      where: { sessionId },
-      relations: { question: { options: true }, answer: true },
-      order: { orderIndex: 'ASC' },
-    });
 
     const candidate = session.candidateId
       ? await this.loadCandidate(session.candidateId).catch(() => null)
       : null;
 
+    // XAVFSIZLIK: `ready` holatda (taymer boshlanmagan) savol matnlari YUBORILMAYDI —
+    // aks holda topshiruvchi soat ketmayotganda barcha savollarni o'qib olishi mumkin edi.
+    const isStarted = session.status === SessionStatus.IN_PROGRESS;
+    const sqs = isStarted
+      ? await this.sessionQuestions.find({
+          where: { sessionId },
+          relations: { question: { options: true }, answer: true },
+          order: { orderIndex: 'ASC' },
+        })
+      : [];
+    const questionCount = isStarted
+      ? sqs.length
+      : await this.sessionQuestions.count({ where: { sessionId } });
+
     const now = new Date();
+    // Qolgan vaqt: `in_progress` — deadline bo'yicha; `ready` — to'liq limit (faqat ko'rsatish).
+    const remainingSeconds =
+      session.status === SessionStatus.READY
+        ? template.timeLimitMinutes * 60
+        : session.deadlineAt
+          ? Math.max(0, Math.floor((session.deadlineAt.getTime() - now.getTime()) / 1000))
+          : 0;
+
     return {
       id: session.id,
       status: session.status,
@@ -332,18 +358,54 @@ export class SessionsService {
       startedAt: session.startedAt,
       deadlineAt: session.deadlineAt,
       serverNow: now,
-      remainingSeconds: Math.max(
-        0,
-        Math.floor((session.deadlineAt.getTime() - now.getTime()) / 1000),
-      ),
+      remainingSeconds,
       tabSwitches: session.tabSwitches,
       maxTabSwitches: template.maxTabSwitches,
+      questionCount,
       timeLimitMinutes: template.timeLimitMinutes,
       passingScorePercent: template.passingScorePercent,
       navigation: template.navigation,
       resultVisibility: template.resultVisibility,
       questions: sqs.map((sq) => this.toExamineeQuestion(sq)),
     };
+  }
+
+  /**
+   * "Testni boshlash" — `ready` → `in_progress`. Server `started_at` ni AYNAN shu lahzada
+   * yozadi va `deadline_at = started_at + time_limit` ni hisoblaydi (vaqt nazorati faqat
+   * serverda). Atomik UPDATE `status = 'ready'` sharti bilan ikki marta boshlashni bloklaydi.
+   * Savollar kirishda muhrlangan — qayta muhrlanmaydi. Idempotent: allaqachon boshlangan
+   * bo'lsa mavjud holatni qaytaradi.
+   */
+  async beginSession(sessionId: string, userId: string): Promise<ExamineeSessionView> {
+    const session = await this.loadOwnedSession(sessionId, userId);
+
+    if (session.status === SessionStatus.IN_PROGRESS) {
+      return this.getExamineeSession(sessionId, userId); // allaqachon boshlangan (refresh/qayta bosish)
+    }
+    if (session.status !== SessionStatus.READY) {
+      throw new BadRequestException(messages.session.notInProgress);
+    }
+
+    const assignment = await this.getAssignment(session.assignmentId);
+    // Faollik oynasi boshlash lahzasida ham tekshiriladi (oyna yopilib qolgan bo'lishi mumkin).
+    this.assertWindowOpen(assignment);
+    const template = await this.templates.findOne(assignment.templateId);
+
+    const startedAt = new Date();
+    const deadlineAt = new Date(startedAt.getTime() + template.timeLimitMinutes * 60_000);
+    const updated = await this.sessions
+      .createQueryBuilder()
+      .update(TestSession)
+      .set({ status: SessionStatus.IN_PROGRESS, startedAt, deadlineAt })
+      .where('id = :id AND status = :st', { id: sessionId, st: SessionStatus.READY })
+      .execute();
+    if (updated.affected !== 1) {
+      // Parallel boshlash — qayta o'qib mavjud holatni qaytaramiz.
+      return this.getExamineeSession(sessionId, userId);
+    }
+
+    return this.getExamineeSession(sessionId, userId);
   }
 
   /**
@@ -360,7 +422,8 @@ export class SessionsService {
     if (session.status !== SessionStatus.IN_PROGRESS) {
       throw new BadRequestException(messages.session.notInProgress);
     }
-    if (Date.now() > session.deadlineAt.getTime()) {
+    // in_progress holatda deadline har doim mavjud (begin'da yozilgan).
+    if (session.deadlineAt && Date.now() > session.deadlineAt.getTime()) {
       // Muddat o'tgan — sessiyani yakunlaymiz va javobni rad etamiz.
       await this.finalize(session.id, SessionStatus.EXPIRED);
       throw new BadRequestException(messages.session.deadlinePassed);
@@ -403,7 +466,7 @@ export class SessionsService {
     if (session.status !== SessionStatus.IN_PROGRESS) {
       throw new BadRequestException(messages.session.notInProgress);
     }
-    if (Date.now() > session.deadlineAt.getTime()) {
+    if (session.deadlineAt && Date.now() > session.deadlineAt.getTime()) {
       await this.finalize(session.id, SessionStatus.EXPIRED);
       throw new BadRequestException(messages.session.deadlinePassed);
     }
@@ -436,8 +499,11 @@ export class SessionsService {
     if (session.status !== SessionStatus.IN_PROGRESS) {
       return this.toResultView(session, template.resultVisibility);
     }
+    // in_progress holatda deadline har doim mavjud (begin'da yozilgan); null bo'lsa muddat o'tmagan.
     const finalStatus =
-      Date.now() > session.deadlineAt.getTime() ? SessionStatus.EXPIRED : SessionStatus.COMPLETED;
+      session.deadlineAt && Date.now() > session.deadlineAt.getTime()
+        ? SessionStatus.EXPIRED
+        : SessionStatus.COMPLETED;
     const finished = await this.finalize(session.id, finalStatus);
     return this.toResultView(finished, template.resultVisibility);
   }
@@ -751,7 +817,12 @@ export class SessionsService {
   }
 
   private async autoExpireIfNeeded(session: TestSession): Promise<TestSession> {
-    if (session.status === SessionStatus.IN_PROGRESS && Date.now() > session.deadlineAt.getTime()) {
+    // Faqat boshlangan (deadlineAt mavjud) sessiya muddati o'ta oladi; ready holat hech qachon expired bo'lmaydi.
+    if (
+      session.status === SessionStatus.IN_PROGRESS &&
+      session.deadlineAt &&
+      Date.now() > session.deadlineAt.getTime()
+    ) {
       return this.finalize(session.id, SessionStatus.EXPIRED);
     }
     return session;
@@ -1054,16 +1125,22 @@ export class SessionsService {
       sealed: SealedQuestion[];
       ctx: SessionContext;
       candidateId?: string | null;
+      /** TRUE (preview) — taymer darhol boshlanadi; FALSE (kod) — `ready`, "begin"da boshlanadi. */
+      startNow: boolean;
     },
   ): Promise<TestSession> {
-    const startedAt = new Date();
-    const deadlineAt = new Date(startedAt.getTime() + params.template.timeLimitMinutes * 60_000);
+    // `ready` holatda taymer hali boshlanmaydi: started_at/deadline NULL bo'ladi.
+    const startedAt = params.startNow ? new Date() : null;
+    const deadlineAt =
+      startedAt !== null
+        ? new Date(startedAt.getTime() + params.template.timeLimitMinutes * 60_000)
+        : null;
 
     const session = manager.create(TestSession, {
       assignmentId: params.assignmentId,
       userId: params.userId,
       attemptNumber: params.attemptNumber,
-      status: SessionStatus.IN_PROGRESS,
+      status: params.startNow ? SessionStatus.IN_PROGRESS : SessionStatus.READY,
       startedAt,
       deadlineAt,
       isPreview: params.isPreview,
@@ -1100,6 +1177,7 @@ export class SessionsService {
     session: TestSession,
     assignment: TestAssignment,
     questionCount: number,
+    timeLimitMinutes: number,
   ): SessionView {
     return {
       id: session.id,
@@ -1111,9 +1189,7 @@ export class SessionsService {
       startedAt: session.startedAt,
       deadlineAt: session.deadlineAt,
       questionCount,
-      timeLimitMinutes: Math.round(
-        (session.deadlineAt.getTime() - session.startedAt.getTime()) / 60_000,
-      ),
+      timeLimitMinutes,
     };
   }
 

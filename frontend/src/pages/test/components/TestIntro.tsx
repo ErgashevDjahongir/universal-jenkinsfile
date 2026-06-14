@@ -6,9 +6,11 @@ import type { ExamineeSession } from '@/api/sessions';
 interface TestIntroProps {
   session: ExamineeSession;
   onStart: () => void;
+  /** "Testni boshlash" so'rovi serverga ketmoqda (taymer shu lahzada yoziladi). */
+  starting?: boolean;
 }
 
-export function TestIntro({ session, onStart }: TestIntroProps) {
+export function TestIntro({ session, onStart, starting = false }: TestIntroProps) {
   const { user } = useAuth();
   const fullName = user ? `${user.lastName} ${user.firstName}`.trim() : null;
 
@@ -35,7 +37,7 @@ export function TestIntro({ session, onStart }: TestIntroProps) {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Stat
           label={uz.test.questionCount}
-          value={uz.test.questionCountValue.replace('{count}', String(session.questions.length))}
+          value={uz.test.questionCountValue.replace('{count}', String(session.questionCount))}
         />
         <Stat
           label={uz.test.timeLimit}
@@ -61,7 +63,7 @@ export function TestIntro({ session, onStart }: TestIntroProps) {
         </ul>
       </div>
 
-      <Button className="w-full" onClick={onStart}>
+      <Button className="w-full" onClick={onStart} loading={starting} disabled={starting}>
         {uz.test.start}
       </Button>
     </div>

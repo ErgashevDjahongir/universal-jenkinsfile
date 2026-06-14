@@ -60,6 +60,19 @@ export class SessionsController {
     return this.sessions.getExamineeSession(id, user.id);
   }
 
+  @Post(':id/begin')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Testni boshlash — taymerni shu lahzada ishga tushiradi (server vaqti)',
+  })
+  @ApiResponse({ status: 200, description: 'Sessiya in_progress; savollar va qoldiq vaqt' })
+  @ApiResponse({ status: 400, description: 'Sessiya boshlash uchun tayyor emas yoki oyna yopiq' })
+  @ApiResponse({ status: 403, description: 'Begona sessiya' })
+  begin(@Param('id') id: string, @CurrentUser() user: AuthUser): Promise<ExamineeSessionView> {
+    return this.sessions.beginSession(id, user.id);
+  }
+
   @Post(':id/answers/:sessionQuestionId')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()

@@ -537,6 +537,7 @@ export const uz = {
     filterAssignment: 'Tayinlov',
     filterDate: 'Sana',
     allStatuses: 'Barcha holatlar',
+    statusReady: 'Boshlashga tayyor',
     statusInProgress: 'Jarayonda',
     statusCompleted: 'Yakunlangan',
     statusExpired: 'Vaqt tugagan',

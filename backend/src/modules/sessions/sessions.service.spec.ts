@@ -14,8 +14,13 @@ function uniqueViolation(): QueryFailedError {
 }
 
 interface Mocks {
-  sessions: { find: jest.Mock; count: jest.Mock; findOne: jest.Mock };
-  sessionQuestions: { find: jest.Mock; findOne: jest.Mock };
+  sessions: {
+    find: jest.Mock;
+    count: jest.Mock;
+    findOne: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
+  sessionQuestions: { find: jest.Mock; findOne: jest.Mock; count: jest.Mock };
   answers: { findOne: jest.Mock; save: jest.Mock; create: jest.Mock };
   codes: { findOne: jest.Mock };
   assignments: { findOne: jest.Mock };
@@ -74,8 +79,21 @@ function build(overrides: Partial<Mocks> = {}): { service: SessionsService; mock
       find: jest.fn().mockResolvedValue([]),
       count: jest.fn().mockResolvedValue(0),
       findOne: jest.fn(),
+      createQueryBuilder: jest.fn(() => {
+        const qb = {
+          update: () => qb,
+          set: () => qb,
+          where: () => qb,
+          execute: jest.fn().mockResolvedValue({ affected: 1 }),
+        };
+        return qb;
+      }),
     },
-    sessionQuestions: { find: jest.fn().mockResolvedValue([]), findOne: jest.fn() },
+    sessionQuestions: {
+      find: jest.fn().mockResolvedValue([]),
+      findOne: jest.fn(),
+      count: jest.fn().mockResolvedValue(0),
+    },
     answers: { findOne: jest.fn(), save: jest.fn(), create: jest.fn() },
     codes: { findOne: jest.fn() },
     assignments: { findOne: jest.fn() },
@@ -211,12 +229,15 @@ describe('SessionsService.startByCode', () => {
     const result = await service.startByCode(baseDto, CTX);
     expect(result.accessToken).toBe('a');
     expect(result.session.questionCount).toBe(2);
-    expect(result.session.status).toBe(SessionStatus.IN_PROGRESS);
+    // Taymer "Testni boshlash"da boshlanadi — kod bilan kirishda sessiya `ready`.
+    expect(result.session.status).toBe(SessionStatus.READY);
+    expect(result.session.startedAt).toBeNull();
+    expect(result.session.deadlineAt).toBeNull();
     expect(result.session.isPreview).toBe(false);
     expect(mocks.auth.issueForUser).toHaveBeenCalled();
   });
 
-  it('candidate kodi: topshiruvchi avtomatik aniqlanadi (F.I.Sh. so‘ralmaydi), status → in_progress', async () => {
+  it('candidate kodi: topshiruvchi avtomatik aniqlanadi (F.I.Sh. so‘ralmaydi), sessiya → ready, candidate → in_progress', async () => {
     const { service, mocks } = build();
     mocks.codes.findOne.mockResolvedValue({
       id: '7',
@@ -240,7 +261,7 @@ describe('SessionsService.startByCode', () => {
 
     // F.I.Sh. yuborilmaydi — kod orqali avtomatik aniqlanadi.
     const result = await service.startByCode({ code: 'CAND0001' }, CTX);
-    expect(result.session.status).toBe(SessionStatus.IN_PROGRESS);
+    expect(result.session.status).toBe(SessionStatus.READY);
     expect(mocks.auth.issueForUser).toHaveBeenCalled();
 
     // candidate.status pending → in_progress ga o'tkaziladi.
@@ -329,6 +350,21 @@ function inProgressSession(overrides: Record<string, unknown> = {}) {
   };
 }
 
+/** `ready` — kod bilan kirilgan, lekin "Testni boshlash" hali bosilmagan (taymer yo'q). */
+function readySession(overrides: Record<string, unknown> = {}) {
+  return {
+    id: '1',
+    userId: '9',
+    assignmentId: '3',
+    status: SessionStatus.READY,
+    startedAt: null,
+    deadlineAt: null,
+    tabSwitches: 0,
+    isPreview: false,
+    ...overrides,
+  };
+}
+
 describe('SessionsService.getExamineeSession', () => {
   const sessionQuestion = {
     id: '77',
@@ -373,6 +409,89 @@ describe('SessionsService.getExamineeSession', () => {
     expect(serialized).not.toContain('isCorrect');
     expect(serialized).not.toContain('MAXFIY_KALIT');
     expect(serialized).not.toContain('MAXFIY_IZOH');
+  });
+
+  it('ready holatda savol matnlari YUBORILMAYDI (faqat soni), taymer to‘liq limit', async () => {
+    const { service, mocks } = build();
+    mocks.sessions.findOne.mockResolvedValue(readySession());
+    mocks.assignments.findOne.mockResolvedValue(assignment());
+    mocks.templates.findOne.mockResolvedValue(makeTemplate({ maxTabSwitches: 3 }));
+    mocks.sessionQuestions.count.mockResolvedValue(2);
+
+    const view = await service.getExamineeSession('1', '9');
+
+    // Savol matnlari boshlanmaguncha berilmaydi — faqat soni ko‘rsatiladi.
+    expect(view.questions).toEqual([]);
+    expect(view.questionCount).toBe(2);
+    expect(view.startedAt).toBeNull();
+    expect(view.deadlineAt).toBeNull();
+    // ready: taymer hali yo‘q — to‘liq limit (60 daqiqa = 3600s) ko‘rsatiladi.
+    expect(view.remainingSeconds).toBe(3600);
+    // Savollarni o‘qib olishga urinish bo‘lmaydi.
+    expect(mocks.sessionQuestions.find).not.toHaveBeenCalled();
+  });
+});
+
+describe('SessionsService.beginSession', () => {
+  it('ready → in_progress: started_at va deadline server tomonda yoziladi', async () => {
+    const { service, mocks } = build();
+    const setSpy = jest.fn().mockReturnThis();
+    const execSpy = jest.fn().mockResolvedValue({ affected: 1 });
+    mocks.sessions.createQueryBuilder.mockImplementation(() => {
+      const qb = {
+        update: () => qb,
+        set: setSpy,
+        where: () => qb,
+        execute: execSpy,
+      };
+      return qb;
+    });
+    mocks.sessions.findOne
+      .mockResolvedValueOnce(readySession()) // beginSession ichidagi loadOwnedSession
+      .mockResolvedValue(inProgressSession()); // begin'dan keyin getExamineeSession
+    mocks.assignments.findOne.mockResolvedValue(assignment());
+    mocks.templates.findOne.mockResolvedValue(makeTemplate({ maxTabSwitches: 3 }));
+    mocks.sessionQuestions.find.mockResolvedValue([]);
+
+    const view = await service.beginSession('1', '9');
+
+    expect(view.status).toBe(SessionStatus.IN_PROGRESS);
+    expect(execSpy).toHaveBeenCalled();
+    // Server started_at/deadline yozadi (mijoz vaqtiga ishonilmaydi).
+    const setArg = setSpy.mock.calls[0][0] as {
+      status: SessionStatus;
+      startedAt: Date;
+      deadlineAt: Date;
+    };
+    expect(setArg.status).toBe(SessionStatus.IN_PROGRESS);
+    expect(setArg.startedAt).toBeInstanceOf(Date);
+    // deadline = started_at + 60 daqiqa.
+    expect(setArg.deadlineAt.getTime() - setArg.startedAt.getTime()).toBe(60 * 60_000);
+  });
+
+  it('allaqachon boshlangan (in_progress) sessiya idempotent — yangi UPDATE bo‘lmaydi', async () => {
+    const { service, mocks } = build();
+    mocks.sessions.findOne.mockResolvedValue(inProgressSession());
+    mocks.assignments.findOne.mockResolvedValue(assignment());
+    mocks.templates.findOne.mockResolvedValue(makeTemplate({ maxTabSwitches: 3 }));
+    mocks.sessionQuestions.find.mockResolvedValue([]);
+
+    const view = await service.beginSession('1', '9');
+    expect(view.status).toBe(SessionStatus.IN_PROGRESS);
+    // Boshlash UPDATE'i qayta chaqirilmaydi.
+    expect(mocks.sessions.createQueryBuilder).not.toHaveBeenCalled();
+  });
+
+  it('terminal (masalan completed) sessiyani boshlab bo‘lmaydi → 400', async () => {
+    const { service, mocks } = build();
+    mocks.sessions.findOne.mockResolvedValue(readySession({ status: SessionStatus.COMPLETED }));
+    await expect(service.beginSession('1', '9')).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('begona sessiyani boshlab bo‘lmaydi → 403', async () => {
+    const { service, mocks } = build();
+    mocks.sessions.findOne.mockResolvedValue(readySession({ userId: 'BOSHQA' }));
+    await expect(service.beginSession('1', '9')).rejects.toBeInstanceOf(ForbiddenException);
   });
 });
 

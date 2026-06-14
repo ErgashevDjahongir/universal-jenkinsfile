@@ -14,6 +14,7 @@ import { Button, Modal, Spinner } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { cn } from '@/lib/cn';
 import {
+  beginSession,
   finishSession,
   getExamineeSession,
   recordTabSwitch,
@@ -33,7 +34,14 @@ import { TestResult } from './components/TestResult';
 type Phase = 'loading' | 'error' | 'intro' | 'active' | 'result';
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
-const startedKey = (id: string) => `etest.test.started.${id}`;
+// Terminal (yakunlangan) holatlar — qayta kirishda to'g'ridan-to'g'ri natijaga o'tiladi.
+const TERMINAL_STATUSES: ReadonlyArray<ExamineeSession['status']> = [
+  'completed',
+  'expired',
+  'terminated',
+  'cancelled',
+  'void',
+];
 
 function formatClock(totalSeconds: number): string {
   const s = Math.max(0, totalSeconds);
@@ -63,6 +71,7 @@ export function TestRunnerPage() {
   const [tabWarning, setTabWarning] = useState(false);
   const [showFinish, setShowFinish] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  const [starting, setStarting] = useState(false);
 
   const timersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const finishingRef = useRef(false);
@@ -83,16 +92,15 @@ export function TestRunnerPage() {
         });
         setAnswers(init);
 
-        if (s.status !== 'in_progress') {
+        if (TERMINAL_STATUSES.includes(s.status)) {
           const r = await finishSession(sessionId);
           if (!active) return;
           setResult(r);
           setPhase('result');
-          localStorage.removeItem(startedKey(sessionId));
           return;
         }
-        // Faol sessiya: ilgari boshlangan bo'lsa to'g'ridan-to'g'ri testga.
-        setPhase(localStorage.getItem(startedKey(sessionId)) ? 'active' : 'intro');
+        // `ready` — taymer hali yo'q: boshlash ekrani. `in_progress` — testga (refresh'da tiklash).
+        setPhase(s.status === 'in_progress' ? 'active' : 'intro');
       } catch (err) {
         if (!active) return;
         setErrorMsg(
@@ -122,11 +130,9 @@ export function TestRunnerPage() {
     try {
       const r = await finishSession(sessionId);
       setResult(r);
-      localStorage.removeItem(startedKey(sessionId));
       setPhase('result');
     } catch {
-      // Tarmoq xatosi: natija ekraniga o'tamiz, lekin qayta urinish imkonini qoldiramiz
-      // (started bayrog'ini saqlab qolamiz — refresh'da ham tiklanadi).
+      // Tarmoq xatosi: natija ekraniga o'tamiz, lekin qayta urinish imkonini qoldiramiz.
       finishingRef.current = false;
       setPhase('result');
     }
@@ -176,9 +182,28 @@ export function TestRunnerPage() {
     }
   });
 
-  function handleStart(): void {
-    localStorage.setItem(startedKey(sessionId), '1');
-    setPhase('active');
+  // "Testni boshlash" — server started_at/deadline ni shu lahzada yozadi (taymer endi boshlanadi).
+  async function handleStart(): Promise<void> {
+    if (starting) return;
+    setStarting(true);
+    try {
+      const s = await beginSession(sessionId);
+      setSession(s);
+      setTabCount(s.tabSwitches);
+      const init: Record<string, AnswerPayload> = {};
+      s.questions.forEach((q) => {
+        init[q.sessionQuestionId] = answerFromStored(q);
+      });
+      setAnswers(init);
+      setPhase('active');
+    } catch (err) {
+      setErrorMsg(
+        isAxiosError(err) && err.response?.status === 403 ? uz.test.notOwner : uz.test.startError,
+      );
+      setPhase('error');
+    } finally {
+      setStarting(false);
+    }
   }
 
   async function handleConfirmFinish(): Promise<void> {
@@ -262,7 +287,7 @@ export function TestRunnerPage() {
   }
 
   if (phase === 'intro' && session) {
-    return <TestIntro session={session} onStart={handleStart} />;
+    return <TestIntro session={session} onStart={handleStart} starting={starting} />;
   }
 
   if (phase === 'active' && session) {
