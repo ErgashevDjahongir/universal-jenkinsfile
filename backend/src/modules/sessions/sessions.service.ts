@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'node:crypto';
-import { DataSource, EntityManager, In, QueryFailedError, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, QueryFailedError, Repository, UpdateResult } from 'typeorm';
 import { CandidateStatus } from '../../common/enums/candidate-status.enum';
 import { NavigationMode } from '../../common/enums/navigation-mode.enum';
 import { QuestionType } from '../../common/enums/question-type.enum';
@@ -394,12 +394,22 @@ export class SessionsService {
 
     const startedAt = new Date();
     const deadlineAt = new Date(startedAt.getTime() + template.timeLimitMinutes * 60_000);
-    const updated = await this.sessions
-      .createQueryBuilder()
-      .update(TestSession)
-      .set({ status: SessionStatus.IN_PROGRESS, startedAt, deadlineAt })
-      .where('id = :id AND status = :st', { id: sessionId, st: SessionStatus.READY })
-      .execute();
+    let updated: UpdateResult;
+    try {
+      updated = await this.sessions
+        .createQueryBuilder()
+        .update(TestSession)
+        .set({ status: SessionStatus.IN_PROGRESS, startedAt, deadlineAt })
+        .where('id = :id AND status = :st', { id: sessionId, st: SessionStatus.READY })
+        .execute();
+    } catch (error) {
+      // Foydalanuvchida boshqa faol (in_progress) sessiya bor — `in_progress` bo'yicha
+      // partial unique indeks buziladi. Toza 409 qaytaramiz (500 emas).
+      if (this.pgCode(error) === PG_UNIQUE_VIOLATION) {
+        throw new ConflictException(messages.session.alreadyInProgress);
+      }
+      throw error;
+    }
     if (updated.affected !== 1) {
       // Parallel boshlash — qayta o'qib mavjud holatni qaytaramiz.
       return this.getExamineeSession(sessionId, userId);

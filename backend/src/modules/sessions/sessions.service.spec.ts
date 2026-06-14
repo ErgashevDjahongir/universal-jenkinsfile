@@ -482,6 +482,24 @@ describe('SessionsService.beginSession', () => {
     expect(mocks.sessions.createQueryBuilder).not.toHaveBeenCalled();
   });
 
+  it('foydalanuvchida boshqa faol sessiya bor (unique buzilishi) → 409 Conflict', async () => {
+    const { service, mocks } = build();
+    mocks.sessions.createQueryBuilder.mockImplementation(() => {
+      const qb = {
+        update: () => qb,
+        set: () => qb,
+        where: () => qb,
+        execute: jest.fn().mockRejectedValue(uniqueViolation()),
+      };
+      return qb;
+    });
+    mocks.sessions.findOne.mockResolvedValue(readySession());
+    mocks.assignments.findOne.mockResolvedValue(assignment());
+    mocks.templates.findOne.mockResolvedValue(makeTemplate());
+
+    await expect(service.beginSession('1', '9')).rejects.toBeInstanceOf(ConflictException);
+  });
+
   it('terminal (masalan completed) sessiyani boshlab bo‘lmaydi → 400', async () => {
     const { service, mocks } = build();
     mocks.sessions.findOne.mockResolvedValue(readySession({ status: SessionStatus.COMPLETED }));
