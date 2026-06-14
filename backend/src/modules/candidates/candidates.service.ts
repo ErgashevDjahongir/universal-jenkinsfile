@@ -172,7 +172,7 @@ export class CandidatesService {
       return [];
     }
     const assignmentByCandidate = await this.loadAssignmentsByCandidate(rows.map((c) => c.id));
-    return rows.map((c) => ({
+    const result = rows.map((c) => ({
       id: c.id,
       fullName: c.fullName,
       phone: c.phone,
@@ -180,6 +180,7 @@ export class CandidatesService {
       createdAt: c.createdAt,
       assignment: assignmentByCandidate.get(c.id) ?? null,
     }));
+    return filter.hasAssignment ? result.filter((r) => r.assignment !== null) : result;
   }
 
   async findOne(id: string): Promise<CandidateDetail> {

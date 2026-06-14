@@ -15,7 +15,6 @@ import { SubjectsPage } from '@/pages/questions/SubjectsPage';
 import { QuestionFormPage } from '@/pages/questions/QuestionFormPage';
 import { TemplatesPage } from '@/pages/templates/TemplatesPage';
 import { TemplateFormPage } from '@/pages/templates/TemplateFormPage';
-import { AssignmentsPage } from '@/pages/assignments/AssignmentsPage';
 import { UsersPage } from '@/pages/users/UsersPage';
 import { DepartmentsPage } from '@/pages/users/DepartmentsPage';
 import { CandidatesPage } from '@/pages/candidates/CandidatesPage';
@@ -76,7 +75,6 @@ export function AppRouter() {
           <Route path="/templates" element={<TemplatesPage />} />
           <Route path="/templates/new" element={<TemplateFormPage />} />
           <Route path="/templates/:id/edit" element={<TemplateFormPage />} />
-          <Route path="/assignments" element={<AssignmentsPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/departments" element={<DepartmentsPage />} />
         </Route>

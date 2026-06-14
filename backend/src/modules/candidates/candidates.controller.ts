@@ -63,8 +63,13 @@ export class CandidatesController {
 
   @Get()
   @ApiOperation({ summary: 'Topshiruvchilar ro‘yxati (holat filtri, F.I.Sh. qidiruv)' })
-  findAll(@Query() filter: CandidateFilterDto): Promise<CandidateListRow[]> {
-    return this.candidates.findAll(filter);
+  findAll(
+    @Query() filter: CandidateFilterDto,
+    @CurrentUser() user: AuthUser,
+  ): Promise<CandidateListRow[]> {
+    const effectiveFilter =
+      user.role === UserRole.EXPERT ? { ...filter, hasAssignment: true } : filter;
+    return this.candidates.findAll(effectiveFilter);
   }
 
   @Get(':id')
