@@ -46,8 +46,8 @@ export const uz = {
     requiredLogin: 'Login kiritilishi shart',
     requiredPassword: 'Parol kiritilishi shart',
     welcome: 'Xush kelibsiz',
-    tabStaff: 'Tizim foydalanuvchilari',
-    tabCandidate: 'Test topshiruvchilar',
+    candidatePrompt: 'Test topshiruvchimisiz?',
+    candidateLink: 'Test topshirish',
   },
   nav: {
     dashboard: 'Bosh sahifa',
