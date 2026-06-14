@@ -237,7 +237,7 @@ export function UsersPage() {
               onChange={(e) => setRoleFilter(e.target.value as UserRole | '')}
             >
               <option value="">{uz.users.allRoles}</option>
-              {(Object.keys(ROLE_LABEL) as UserRole[]).map((r) => (
+              {(['super_admin', 'admin', 'expert'] as UserRole[]).map((r) => (
                 <option key={r} value={r}>
                   {ROLE_LABEL[r]}
                 </option>

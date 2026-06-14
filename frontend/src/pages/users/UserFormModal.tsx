@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react';
 import { Save, X } from 'lucide-react';
 import { Button, Input, Modal, Select } from '@/components/ui';
 import { uz } from '@/i18n/uz';
-import { type CreateUserDto, type UserListItem, type UserRole } from '@/api/users';
+import { type CreateUserDto, type StaffRole, type UserListItem } from '@/api/users';
 import { type Department, type Position } from '@/api/departments';
 
-const ROLES: { value: UserRole; label: string }[] = [
+const ROLES: { value: StaffRole; label: string }[] = [
   { value: 'super_admin', label: uz.roles.super_admin },
   { value: 'admin', label: uz.roles.admin },
   { value: 'expert', label: uz.roles.expert },
-  { value: 'examinee', label: uz.roles.examinee },
 ];
 
 interface Props {
@@ -29,10 +28,9 @@ export function UserFormModal({ open, onClose, onSave, initial, departments, pos
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState<UserRole>('examinee');
+  const [role, setRole] = useState<StaffRole>('admin');
   const [departmentId, setDepartmentId] = useState('');
   const [positionId, setPositionId] = useState('');
-  const [isCandidate, setIsCandidate] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,10 +44,9 @@ export function UserFormModal({ open, onClose, onSave, initial, departments, pos
       setPassword('');
       setPhone(initial.phone ?? '');
       setEmail(initial.email ?? '');
-      setRole(initial.role);
+      setRole(initial.role as StaffRole);
       setDepartmentId(initial.departmentId ?? '');
       setPositionId(initial.positionId ?? '');
-      setIsCandidate(initial.isCandidate);
     } else {
       setLastName('');
       setFirstName('');
@@ -58,10 +55,9 @@ export function UserFormModal({ open, onClose, onSave, initial, departments, pos
       setPassword('');
       setPhone('');
       setEmail('');
-      setRole('examinee');
+      setRole('admin');
       setDepartmentId('');
       setPositionId('');
-      setIsCandidate(false);
     }
     setError(null);
   }, [open, initial]);
@@ -90,7 +86,6 @@ export function UserFormModal({ open, onClose, onSave, initial, departments, pos
         role,
         departmentId: departmentId || undefined,
         positionId: positionId || undefined,
-        isCandidate,
       };
       await onSave(dto, initial?.id);
       onClose();
@@ -204,7 +199,7 @@ export function UserFormModal({ open, onClose, onSave, initial, departments, pos
         <Select
           label={uz.users.roleLabel}
           value={role}
-          onChange={(e) => setRole(e.target.value as UserRole)}
+          onChange={(e) => setRole(e.target.value as StaffRole)}
         >
           {ROLES.map((r) => (
             <option key={r.value} value={r.value}>
@@ -242,16 +237,6 @@ export function UserFormModal({ open, onClose, onSave, initial, departments, pos
             ))}
           </Select>
         </div>
-
-        <label className="flex items-center gap-2 text-sm text-gray-700">
-          <input
-            type="checkbox"
-            checked={isCandidate}
-            onChange={(e) => setIsCandidate(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600"
-          />
-          {uz.users.isCandidateLabel}
-        </label>
       </form>
     </Modal>
   );

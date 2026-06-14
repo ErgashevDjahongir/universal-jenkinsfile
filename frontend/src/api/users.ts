@@ -25,6 +25,8 @@ export interface UserFilter {
   departmentId?: string;
 }
 
+export type StaffRole = 'super_admin' | 'admin' | 'expert';
+
 export interface CreateUserDto {
   lastName: string;
   firstName: string;
@@ -33,10 +35,9 @@ export interface CreateUserDto {
   password?: string;
   phone?: string;
   email?: string;
-  role: UserRole;
+  role: StaffRole;
   departmentId?: string;
   positionId?: string;
-  isCandidate?: boolean;
 }
 
 export type UpdateUserDto = Partial<CreateUserDto>;

@@ -58,7 +58,7 @@ export class UsersService {
       role: dto.role,
       departmentId: dto.departmentId ?? null,
       positionId: dto.positionId ?? null,
-      isCandidate: dto.isCandidate ?? false,
+      isCandidate: false,
       createdBy: createdBy ?? null,
     });
     return this.users.save(user);
@@ -77,7 +77,6 @@ export class UsersService {
     if (dto.role !== undefined) user.role = dto.role;
     if (dto.departmentId !== undefined) user.departmentId = dto.departmentId ?? null;
     if (dto.positionId !== undefined) user.positionId = dto.positionId ?? null;
-    if (dto.isCandidate !== undefined) user.isCandidate = dto.isCandidate;
     return this.users.save(user);
   }
 
