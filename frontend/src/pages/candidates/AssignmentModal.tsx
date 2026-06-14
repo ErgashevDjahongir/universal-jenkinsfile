@@ -78,7 +78,8 @@ export function AssignmentModal({ open, onClose, candidateId, existing, onSaved 
       } else {
         const res = await assignCandidate(candidateId, dto);
         setResult(res);
-        onSaved(res.assignment);
+        // onSaved kod ekrani yopilganda chaqiriladi — shu paytgacha existing
+        // o'zgarmaydi va useEffect result ni tozalamaydi.
       }
     } catch (err: unknown) {
       const msg =
@@ -111,7 +112,10 @@ export function AssignmentModal({ open, onClose, candidateId, existing, onSaved 
             size="icon"
             title={uz.common.close}
             aria-label={uz.common.close}
-            onClick={onClose}
+            onClick={() => {
+              onSaved(result.assignment);
+              onClose();
+            }}
           >
             <Check size={16} />
           </Button>
