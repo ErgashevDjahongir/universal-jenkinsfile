@@ -600,6 +600,7 @@ export const uz = {
     deleteDoc: "Hujjatni o'chirish",
     deleteDocConfirm: "Bu hujjatni o'chirishni tasdiqlaysizmi?",
     downloadDoc: 'Yuklab olish',
+    viewDoc: "Ko'rish",
     noDoc: 'Hujjat yuklanmagan',
     docHint: 'Faqat PDF, maks. 10 MB',
     assignmentTitle: 'Tayinlov',
@@ -625,5 +626,6 @@ export const uz = {
     deleteConfirm: "Bu topshiruvchini o'chirishni tasdiqlaysizmi? Barcha hujjatlar ham o'chadi.",
     saving: 'Saqlanmoqda…',
     assignmentStarted: "Test boshlangan — tayinlovni tahrirlab bo'lmaydi",
+    registeredAt: "Ro'yxatga olingan",
   },
 } as const;

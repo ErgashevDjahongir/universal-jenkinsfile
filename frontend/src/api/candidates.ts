@@ -154,6 +154,16 @@ export async function downloadCandidateDocument(
   URL.revokeObjectURL(url);
 }
 
+export async function fetchCandidateDocumentUrl(
+  candidateId: string,
+  docType: DocumentType,
+): Promise<string> {
+  const { data } = await api.get(`/candidates/${candidateId}/documents/${docType}/download`, {
+    responseType: 'blob',
+  });
+  return URL.createObjectURL(data as Blob);
+}
+
 export async function assignCandidate(
   candidateId: string,
   dto: AssignCandidateDto,

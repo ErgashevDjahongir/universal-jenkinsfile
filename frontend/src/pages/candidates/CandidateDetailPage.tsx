@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Download, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
+import { ArrowLeft, Download, Eye, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
 import { Badge, Button, Modal } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { useAuth } from '@/auth/useAuth';
@@ -8,6 +8,7 @@ import { UserRole } from '@/auth/roles';
 import {
   deleteCandidateDocument,
   downloadCandidateDocument,
+  fetchCandidateDocumentUrl,
   getCandidate,
   uploadCandidateDocument,
   type CandidateAssignmentView,
@@ -68,6 +69,8 @@ export function CandidateDetailPage() {
   const [docDeleting, setDocDeleting] = useState(false);
   const [docUploading, setDocUploading] = useState<DocumentType | null>(null);
   const [docDownloading, setDocDownloading] = useState<DocumentType | null>(null);
+  const [pdfPreview, setPdfPreview] = useState<{ url: string; name: string } | null>(null);
+  const [pdfLoading, setPdfLoading] = useState<DocumentType | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingDocType = useRef<DocumentType | null>(null);
@@ -161,6 +164,25 @@ export function CandidateDetailPage() {
     }
   }
 
+  async function handlePreview(docType: DocumentType, originalName: string) {
+    if (!id) return;
+    setPdfLoading(docType);
+    setActionError(null);
+    try {
+      const url = await fetchCandidateDocumentUrl(id, docType);
+      setPdfPreview({ url, name: originalName });
+    } catch {
+      setActionError(uz.common.error);
+    } finally {
+      setPdfLoading(null);
+    }
+  }
+
+  function closePdfPreview() {
+    if (pdfPreview) URL.revokeObjectURL(pdfPreview.url);
+    setPdfPreview(null);
+  }
+
   function handleAssignmentSaved(assignment: CandidateAssignmentView) {
     setCandidate((prev) => (prev ? { ...prev, assignment } : prev));
   }
@@ -195,7 +217,7 @@ export function CandidateDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
@@ -249,7 +271,7 @@ export function CandidateDetailPage() {
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500">{uz.sessions.startedAt}</dt>
+            <dt className="text-xs text-gray-500">{uz.candidates.registeredAt}</dt>
             <dd className="mt-0.5 text-sm text-gray-900">{formatDate(candidate.createdAt)}</dd>
           </div>
         </dl>
@@ -287,6 +309,16 @@ export function CandidateDetailPage() {
                 <div className="flex items-center gap-1 shrink-0">
                   {doc ? (
                     <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={uz.candidates.viewDoc}
+                        aria-label={uz.candidates.viewDoc}
+                        loading={pdfLoading === type}
+                        onClick={() => handlePreview(type, doc.originalName)}
+                      >
+                        <Eye size={15} />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -453,6 +485,27 @@ export function CandidateDetailPage() {
         existing={candidate.assignment}
         onSaved={handleAssignmentSaved}
       />
+
+      <Modal
+        open={pdfPreview !== null}
+        onClose={closePdfPreview}
+        title={pdfPreview?.name ?? ''}
+        className="max-w-4xl"
+        footer={
+          <Button variant="secondary" size="sm" onClick={closePdfPreview}>
+            {uz.common.close}
+          </Button>
+        }
+      >
+        {pdfPreview && (
+          <iframe
+            src={pdfPreview.url}
+            className="w-full rounded border border-gray-200"
+            style={{ height: '70vh' }}
+            title={pdfPreview.name}
+          />
+        )}
+      </Modal>
 
       <Modal
         open={docDeleteTarget !== null}
