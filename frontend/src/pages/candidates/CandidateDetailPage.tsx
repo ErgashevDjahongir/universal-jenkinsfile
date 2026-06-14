@@ -1,6 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Download, Eye, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
+import {
+  ArrowLeft,
+  Check,
+  Copy,
+  Download,
+  Eye,
+  Pencil,
+  Plus,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react';
 import { Badge, Button, Modal } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { useAuth } from '@/auth/useAuth';
@@ -71,6 +82,7 @@ export function CandidateDetailPage() {
   const [docDownloading, setDocDownloading] = useState<DocumentType | null>(null);
   const [pdfPreview, setPdfPreview] = useState<{ url: string; name: string } | null>(null);
   const [pdfLoading, setPdfLoading] = useState<DocumentType | null>(null);
+  const [codeCopied, setCodeCopied] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingDocType = useRef<DocumentType | null>(null);
@@ -431,10 +443,30 @@ export function CandidateDetailPage() {
             {candidate.assignment.accessCode && (
               <div className="sm:col-span-2">
                 <dt className="text-xs text-gray-500">{uz.candidates.accessCodeLabel}</dt>
-                <dd className="mt-1">
-                  <span className="inline-block rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 font-mono text-base font-bold tracking-widest text-blue-700">
+                <dd className="mt-1 flex items-center gap-2">
+                  <span className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 font-mono text-base font-bold tracking-widest text-blue-700">
                     {candidate.assignment.accessCode}
                   </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title={codeCopied ? uz.candidates.codeCopied : uz.candidates.codeCopy}
+                    aria-label={uz.candidates.codeCopy}
+                    onClick={() => {
+                      void navigator.clipboard
+                        .writeText(candidate.assignment!.accessCode!)
+                        .then(() => {
+                          setCodeCopied(true);
+                          setTimeout(() => setCodeCopied(false), 2000);
+                        });
+                    }}
+                  >
+                    {codeCopied ? (
+                      <Check size={15} className="text-green-600" />
+                    ) : (
+                      <Copy size={15} />
+                    )}
+                  </Button>
                 </dd>
               </div>
             )}
