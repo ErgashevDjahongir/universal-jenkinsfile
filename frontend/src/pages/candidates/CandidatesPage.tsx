@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Avatar,
   Badge,
   Button,
   Modal,
@@ -121,7 +122,12 @@ export function CandidatesPage() {
     {
       key: 'fullName',
       header: uz.candidates.fullNameLabel,
-      render: (c) => <div className="font-medium text-gray-900">{c.fullName}</div>,
+      render: (c) => (
+        <div className="flex items-center gap-3">
+          <Avatar name={c.fullName} />
+          <div className="font-medium text-gray-900">{c.fullName}</div>
+        </div>
+      ),
     },
     {
       key: 'assignment',

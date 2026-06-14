@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Ban, Pencil, Plus, Power, X } from 'lucide-react';
-import { Badge, Button, Modal, PageHeader, Select, Table, type Column } from '@/components/ui';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Modal,
+  PageHeader,
+  Select,
+  Table,
+  type Column,
+} from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   activateUser,
@@ -129,12 +138,15 @@ export function UsersPage() {
       key: 'name',
       header: 'F.I.Sh.',
       render: (u) => (
-        <div>
-          <div className="font-medium text-gray-900">
-            {u.lastName} {u.firstName}
-            {u.middleName ? ` ${u.middleName}` : ''}
+        <div className="flex items-center gap-3">
+          <Avatar name={`${u.lastName} ${u.firstName}`} />
+          <div>
+            <div className="font-medium text-gray-900">
+              {u.lastName} {u.firstName}
+              {u.middleName ? ` ${u.middleName}` : ''}
+            </div>
+            {u.login && <div className="text-xs text-gray-500">{u.login}</div>}
           </div>
-          {u.login && <div className="text-xs text-gray-500">{u.login}</div>}
         </div>
       ),
     },
