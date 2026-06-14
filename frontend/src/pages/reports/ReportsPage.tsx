@@ -13,7 +13,7 @@ import {
   type ReportFilter,
 } from '@/api/reports';
 import { getTemplates, type TestTemplate } from '@/api/templates';
-import { Badge, Button, PageHeader, Select } from '@/components/ui';
+import { Avatar, Badge, Button, PageHeader, Select } from '@/components/ui';
 import { DataState } from '@/components/ui/DataState';
 import { uz } from '@/i18n/uz';
 
@@ -261,7 +261,12 @@ export function ReportsPage() {
                     className="border-b border-gray-100 last:border-0 hover:bg-gray-50"
                   >
                     <td className="px-3 py-3 text-center font-medium text-gray-500">{row.rank}</td>
-                    <td className="px-4 py-3 font-medium text-gray-900">{row.fullName}</td>
+                    <td className="px-4 py-3 font-medium text-gray-900">
+                      <div className="flex items-center gap-3">
+                        <Avatar name={row.fullName} />
+                        <span>{row.fullName}</span>
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-gray-600">{row.departmentName ?? '—'}</td>
                     <td className="px-4 py-3 text-gray-700">{row.assignmentTitle}</td>
                     <td className="px-4 py-3 text-gray-700">

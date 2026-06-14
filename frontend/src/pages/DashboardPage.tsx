@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/useAuth';
 import { UserRole } from '@/auth/roles';
-import { Badge, Button, PageHeader } from '@/components/ui';
+import { Avatar, Badge, Button, PageHeader } from '@/components/ui';
 import { DataState } from '@/components/ui/DataState';
 import { uz } from '@/i18n/uz';
 import { getDashboard, type DashboardStats } from '@/api/reports';
@@ -152,7 +152,10 @@ export function DashboardPage() {
                         return (
                           <tr key={row.sessionId} className="border-b border-gray-50 last:border-0">
                             <td className="px-4 py-2 text-gray-900">
-                              {row.fullName || `ID: ${row.userId}`}
+                              <div className="flex items-center gap-3">
+                                <Avatar name={row.fullName || `ID: ${row.userId}`} />
+                                <span>{row.fullName || `ID: ${row.userId}`}</span>
+                              </div>
                             </td>
                             <td className="px-4 py-2 text-gray-700">{row.assignmentTitle}</td>
                             <td
@@ -222,7 +225,10 @@ export function DashboardPage() {
                       {stats.recentResults.map((row) => (
                         <tr key={row.sessionId} className="border-b border-gray-50 last:border-0">
                           <td className="px-4 py-2 text-gray-900">
-                            {row.fullName || `ID: ${row.userId}`}
+                            <div className="flex items-center gap-3">
+                              <Avatar name={row.fullName || `ID: ${row.userId}`} />
+                              <span>{row.fullName || `ID: ${row.userId}`}</span>
+                            </div>
                           </td>
                           <td className="px-4 py-2 text-gray-700">{row.assignmentTitle}</td>
                           <td className="px-4 py-2 text-gray-700">

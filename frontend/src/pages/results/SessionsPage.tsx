@@ -3,7 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, RefreshCw, RotateCcw, StopCircle, X, XCircle } from 'lucide-react';
 import { UserRole } from '@/auth/roles';
 import { useAuth } from '@/auth/useAuth';
-import { Badge, Button, Modal, PageHeader, Select, Table, type Column } from '@/components/ui';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Modal,
+  PageHeader,
+  Select,
+  Table,
+  type Column,
+} from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   allowRetry,
@@ -145,12 +154,15 @@ export function SessionsPage() {
       key: 'user',
       header: uz.sessions.examinee,
       render: (r) => (
-        <div>
-          <div className="font-medium text-gray-900">{r.fullName || r.userId}</div>
-          <div className="text-xs text-gray-500">
-            {r.isPreview
-              ? uz.sessions.preview
-              : `${r.attemptNumber}-${uz.sessions.attempt.replace('{n}', '')}`}
+        <div className="flex items-center gap-3">
+          <Avatar name={r.fullName || String(r.userId)} />
+          <div>
+            <div className="font-medium text-gray-900">{r.fullName || r.userId}</div>
+            <div className="text-xs text-gray-500">
+              {r.isPreview
+                ? uz.sessions.preview
+                : `${r.attemptNumber}-${uz.sessions.attempt.replace('{n}', '')}`}
+            </div>
           </div>
         </div>
       ),
@@ -251,7 +263,12 @@ export function SessionsPage() {
     {
       key: 'user',
       header: uz.sessions.examinee,
-      render: (r) => <span className="text-sm text-gray-900">{r.fullName || r.userId}</span>,
+      render: (r) => (
+        <div className="flex items-center gap-3">
+          <Avatar name={r.fullName || String(r.userId)} />
+          <span className="text-sm text-gray-900">{r.fullName || r.userId}</span>
+        </div>
+      ),
     },
     {
       key: 'status',
