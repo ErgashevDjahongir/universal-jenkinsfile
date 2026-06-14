@@ -93,12 +93,7 @@ export function CandidatesPage() {
     {
       key: 'fullName',
       header: uz.candidates.fullNameLabel,
-      render: (c) => (
-        <div>
-          <div className="font-medium text-gray-900">{c.fullName}</div>
-          <div className="text-xs text-gray-500">{c.phone}</div>
-        </div>
-      ),
+      render: (c) => <div className="font-medium text-gray-900">{c.fullName}</div>,
     },
     {
       key: 'assignment',
@@ -168,7 +163,7 @@ export function CandidatesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">{uz.candidates.title}</h1>
         {!isReadOnly && (
           <Button
