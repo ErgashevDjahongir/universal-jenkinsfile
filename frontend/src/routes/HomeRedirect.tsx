@@ -19,12 +19,12 @@ export function HomeRedirect() {
     return <Navigate to="/login" replace />;
   }
 
-  // Examinee — kod orqali test; ekspert — monitoring (dashboard admin-only); qolgan — dashboard.
+  // Examinee — kod orqali test; ekspert — test topshiruvchilar ro'yxati; qolgan — dashboard.
   const target =
     user.role === UserRole.EXAMINEE
       ? '/start'
       : user.role === UserRole.EXPERT
-        ? '/sessions'
+        ? '/candidates'
         : '/dashboard';
   return <Navigate to={target} replace />;
 }

@@ -603,6 +603,8 @@ export const uz = {
     viewDoc: "Ko'rish",
     noDoc: 'Hujjat yuklanmagan',
     docHint: 'Faqat PDF, maks. 10 MB',
+    todaySection: 'Bugungi test topshiruvchilar',
+    todayNone: "Bugun test topshiradigan kimsa yo'q",
     assignmentTitle: 'Tayinlov',
     assign: 'Tayinlov berish',
     assignEdit: 'Tayinlovni tahrirlash',

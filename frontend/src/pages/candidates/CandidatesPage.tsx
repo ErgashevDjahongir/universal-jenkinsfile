@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge, Button, Modal, Pagination, Select, Table, type Column } from '@/components/ui';
@@ -55,10 +55,7 @@ export function CandidatesPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getCandidates({
-        status: statusFilter || undefined,
-        search: debouncedSearch || undefined,
-      });
+      const data = await getCandidates();
       setCandidates(data);
       setPage(1);
     } catch {
@@ -66,13 +63,35 @@ export function CandidatesPage() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, debouncedSearch]);
+  }, []);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const paged = candidates.slice((page - 1) * PAGE_LIMIT, page * PAGE_LIMIT);
+  const filtered = useMemo(() => {
+    return candidates.filter((c) => {
+      if (statusFilter && c.status !== statusFilter) return false;
+      if (debouncedSearch && !c.fullName.toLowerCase().includes(debouncedSearch.toLowerCase()))
+        return false;
+      return true;
+    });
+  }, [candidates, statusFilter, debouncedSearch]);
+
+  const todayCandidates = useMemo(() => {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+    return candidates.filter((c) => {
+      if (!c.assignment) return false;
+      const s = new Date(c.assignment.startsAt);
+      const e = new Date(c.assignment.endsAt);
+      return s <= todayEnd && e >= todayStart;
+    });
+  }, [candidates]);
+
+  const paged = filtered.slice((page - 1) * PAGE_LIMIT, page * PAGE_LIMIT);
 
   async function handleDelete() {
     if (!deleteTarget) return;
@@ -186,6 +205,59 @@ export function CandidatesPage() {
         </div>
       )}
 
+      {/* Bugungi ko'rinish — ekspert uchun bosh sahifa vazifasini bajaradi */}
+      {isReadOnly && (
+        <div className="rounded-lg border border-gray-200 bg-white p-5">
+          <h2 className="mb-4 text-base font-semibold text-gray-800">
+            {uz.candidates.todaySection}
+          </h2>
+          {todayCandidates.length === 0 ? (
+            <p className="text-sm text-gray-400">{uz.candidates.todayNone}</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {(
+                [
+                  {
+                    label: uz.candidates.allStatuses,
+                    count: todayCandidates.length,
+                    color: 'bg-gray-50 border-gray-200 text-gray-700',
+                    value: '' as CandidateStatus | '',
+                  },
+                  {
+                    label: uz.candidates.statusPending,
+                    count: todayCandidates.filter((c) => c.status === 'pending').length,
+                    color: 'bg-yellow-50 border-yellow-200 text-yellow-700',
+                    value: 'pending' as CandidateStatus,
+                  },
+                  {
+                    label: uz.candidates.statusInProgress,
+                    count: todayCandidates.filter((c) => c.status === 'in_progress').length,
+                    color: 'bg-blue-50 border-blue-200 text-blue-700',
+                    value: 'in_progress' as CandidateStatus,
+                  },
+                  {
+                    label: uz.candidates.statusCompleted,
+                    count: todayCandidates.filter((c) => c.status === 'completed').length,
+                    color: 'bg-green-50 border-green-200 text-green-700',
+                    value: 'completed' as CandidateStatus,
+                  },
+                ] as const
+              ).map(({ label, count, color, value }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setStatusFilter(value)}
+                  className={`rounded-lg border p-4 text-left transition-all hover:opacity-80 ${color} ${statusFilter === value ? 'ring-2 ring-offset-1 ring-blue-400' : ''}`}
+                >
+                  <div className="text-2xl font-bold">{count}</div>
+                  <div className="mt-1 text-xs font-medium">{label}</div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="rounded-lg border border-gray-200 bg-white p-4">
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 min-w-48">
@@ -226,8 +298,8 @@ export function CandidatesPage() {
         onRetry={load}
       />
 
-      {candidates.length > PAGE_LIMIT && (
-        <Pagination page={page} total={candidates.length} limit={PAGE_LIMIT} onChange={setPage} />
+      {filtered.length > PAGE_LIMIT && (
+        <Pagination page={page} total={filtered.length} limit={PAGE_LIMIT} onChange={setPage} />
       )}
 
       <CandidateFormModal
