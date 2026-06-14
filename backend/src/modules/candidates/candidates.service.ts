@@ -105,7 +105,7 @@ export interface CandidateDetail {
 
 /** Tayinlash natijasi: tayinlov + bir martalik kod. */
 export interface CandidateAssignmentResult {
-  assignment: TestAssignment;
+  assignment: CandidateAssignmentView;
   code: AccessCode;
 }
 
@@ -408,7 +408,7 @@ export class CandidatesService {
       throw error;
     }
 
-    const assignment = await this.assignments.findOneOrFail({ where: { id: assignmentId } });
+    const assignment = await this.buildAssignmentView(assignmentId);
     const code = await this.codes.findOneOrFail({
       where: { assignmentId, candidateId },
     });
@@ -428,7 +428,7 @@ export class CandidatesService {
     candidateId: string,
     dto: UpdateCandidateAssignmentDto,
     ctx: RequestContext,
-  ): Promise<TestAssignment> {
+  ): Promise<CandidateAssignmentView> {
     await this.getOrFail(candidateId);
     const assignment = await this.assignments.findOne({ where: { candidateId } });
     if (!assignment) {
@@ -464,7 +464,7 @@ export class CandidatesService {
       details: { candidateId },
       ip: ctx.ip,
     });
-    return assignment;
+    return this.buildAssignmentView(assignment.id);
   }
 
   // ---- yordamchilar ----
@@ -569,6 +569,28 @@ export class CandidatesService {
       }
     }
     return map;
+  }
+
+  /**
+   * Bitta tayinlov uchun to'liq kartochka ko'rinishi (template nomi va kirish kodi bilan).
+   * assign/updateAssignment javoblari shu orqali quriladi — UI reload'siz darhol yangilanadi.
+   */
+  private async buildAssignmentView(assignmentId: string): Promise<CandidateAssignmentView> {
+    const a = await this.assignments
+      .createQueryBuilder('a')
+      .leftJoinAndSelect('a.template', 't')
+      .leftJoinAndSelect('a.codes', 'c', 'c.candidate_id = a.candidate_id')
+      .where('a.id = :id', { id: assignmentId })
+      .getOneOrFail();
+    return {
+      id: a.id,
+      templateId: a.templateId,
+      templateName: a.template?.title ?? null,
+      title: a.title,
+      startsAt: a.startsAt,
+      endsAt: a.endsAt,
+      accessCode: a.codes?.[0]?.code ?? null,
+    };
   }
 
   private async loadResult(candidateId: string): Promise<CandidateResultView | null> {

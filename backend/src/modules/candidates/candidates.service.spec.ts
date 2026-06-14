@@ -63,7 +63,23 @@ function build(): { service: CandidatesService; mocks: Mocks } {
     assignments: {
       findOne: jest.fn(),
       findOneOrFail: jest.fn().mockResolvedValue({ id: '10', title: 'T' }),
-      createQueryBuilder: jest.fn(),
+      createQueryBuilder: jest.fn(() => {
+        const qb = {
+          leftJoinAndSelect: () => qb,
+          where: () => qb,
+          getMany: jest.fn().mockResolvedValue([]),
+          getOneOrFail: jest.fn().mockResolvedValue({
+            id: '10',
+            templateId: '5',
+            title: 'T',
+            startsAt: new Date(),
+            endsAt: new Date(),
+            template: { title: 'Shablon nomi' },
+            codes: [{ code: 'CAND0001' }],
+          }),
+        };
+        return qb;
+      }),
       save: jest.fn().mockImplementation((x: unknown) => Promise.resolve(x)),
     },
     codes: { findOneOrFail: jest.fn().mockResolvedValue({ id: '99', code: 'CAND0001' }) },
@@ -204,6 +220,9 @@ describe('CandidatesService.assign', () => {
       CTX,
     );
     expect(result.code.code).toBe('CAND0001');
+    // Javob to'liq kartochka ko'rinishini qaytaradi (UI reload'siz darhol chiqishi uchun).
+    expect(result.assignment.templateName).toBe('Shablon nomi');
+    expect(result.assignment.accessCode).toBe('CAND0001');
     expect(mocks.audit.log).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'candidate.assign' }),
     );
@@ -287,7 +306,10 @@ describe('CandidatesService.updateAssignment', () => {
       endsAt: new Date(start.getTime() + 3600_000),
     });
     mocks.sessions.count.mockResolvedValue(0);
-    await service.updateAssignment('1', { title: 'Yangi nom' }, CTX);
+    const updated = await service.updateAssignment('1', { title: 'Yangi nom' }, CTX);
+    // Tahrirdan keyin ham to'liq ko'rinish (template nomi va kod) qaytadi.
+    expect(updated.templateName).toBe('Shablon nomi');
+    expect(updated.accessCode).toBe('CAND0001');
     expect(mocks.audit.log).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'candidate.assignment_update' }),
     );

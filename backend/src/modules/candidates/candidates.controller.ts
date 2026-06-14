@@ -21,10 +21,10 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/user-role.enum';
 import { AuthUser } from '../auth/types/auth-user.interface';
-import { TestAssignment } from '../assignments/entities/test-assignment.entity';
 import { Candidate } from './entities/candidate.entity';
 import {
   CandidateAssignmentResult,
+  CandidateAssignmentView,
   CandidateDetail,
   CandidateDocumentView,
   CandidateListRow,
@@ -180,7 +180,7 @@ export class CandidatesController {
     @Body() dto: UpdateCandidateAssignmentDto,
     @CurrentUser() user: AuthUser,
     @Ip() ip: string,
-  ): Promise<TestAssignment> {
+  ): Promise<CandidateAssignmentView> {
     return this.candidates.updateAssignment(id, dto, { userId: user.id, ip });
   }
 }
