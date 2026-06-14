@@ -133,10 +133,14 @@ export const uz = {
     minutesValue: '{count} daqiqa',
     passingScore: 'Oʻtish bali',
     percentValue: '{percent}%',
+    ruleStart: 'Vaqt hisobi "Boshlash" tugmasini bosganingizdan eʼtiboran boshlanadi.',
     ruleTimer: 'Vaqt server tomonida hisoblanadi va toʻxtatib boʻlmaydi.',
+    ruleTimeout:
+      'Vaqt tugaganda test avtomatik yakunlanadi; vaqtida yakunlanmagani uchun natija 0 ball deb baholanadi.',
     ruleAutosave: 'Har bir javobingiz avtomatik saqlanadi.',
     ruleTabSwitch:
       'Boshqa oyna yoki ilovaga oʻtish qayd etiladi; {count} martadan oshsa test avtomatik yakunlanadi.',
+    ruleCopy: 'Test davomida matnni nusxalash va kontekst menyu bloklangan.',
     ruleNavigationFree: 'Savollar orasida erkin harakatlanishingiz mumkin.',
     ruleNavigationForward: 'Savoldan keyingisiga oʻtgach, orqaga qaytib boʻlmaydi.',
     start: 'Boshlash',

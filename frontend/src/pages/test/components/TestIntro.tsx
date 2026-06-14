@@ -15,9 +15,12 @@ export function TestIntro({ session, onStart, starting = false }: TestIntroProps
   const fullName = user ? `${user.lastName} ${user.firstName}`.trim() : null;
 
   const rules: string[] = [
+    uz.test.ruleStart,
     uz.test.ruleTimer,
+    uz.test.ruleTimeout,
     uz.test.ruleAutosave,
     uz.test.ruleTabSwitch.replace('{count}', String(session.maxTabSwitches)),
+    uz.test.ruleCopy,
     session.navigation === 'forward_only'
       ? uz.test.ruleNavigationForward
       : uz.test.ruleNavigationFree,
