@@ -57,7 +57,7 @@ describe('UsersService', () => {
 
   beforeEach(() => {
     repo = makeRepo();
-    service = new UsersService(repo as unknown as Repository<User>);
+    service = new UsersService(repo);
   });
 
   describe('findByIds', () => {
@@ -67,7 +67,7 @@ describe('UsersService', () => {
       expect(repo.find).not.toHaveBeenCalled();
     });
 
-    it('idlar bo\'yicha find chaqiriladi', async () => {
+    it("idlar bo'yicha find chaqiriladi", async () => {
       repo.find.mockResolvedValue([makeUser()]);
       const result = await service.findByIds(['42']);
       expect(repo.find).toHaveBeenCalledTimes(1);
@@ -84,7 +84,7 @@ describe('UsersService', () => {
       );
     });
 
-    it('role filtri uzatilganda where ga qo\'shiladi', async () => {
+    it("role filtri uzatilganda where ga qo'shiladi", async () => {
       repo.find.mockResolvedValue([]);
       await service.findAll({ role: UserRole.EXPERT });
       expect(repo.find).toHaveBeenCalledWith(
@@ -111,7 +111,9 @@ describe('UsersService', () => {
       repo.findOne.mockResolvedValue(user);
       repo.save.mockResolvedValue({ ...user, status: UserStatus.BLOCKED });
       const result = await service.block('42');
-      expect(repo.save).toHaveBeenCalledWith(expect.objectContaining({ status: UserStatus.BLOCKED }));
+      expect(repo.save).toHaveBeenCalledWith(
+        expect.objectContaining({ status: UserStatus.BLOCKED }),
+      );
       expect(result.status).toBe(UserStatus.BLOCKED);
     });
   });
@@ -140,7 +142,7 @@ describe('UsersService', () => {
       expect(qb.execute).toHaveBeenCalled();
     });
 
-    it('maxAttempts va lockMinutes hech qachon SQL satriga qo\'shilmaydi (injection xavfsizligi)', async () => {
+    it("maxAttempts va lockMinutes hech qachon SQL satriga qo'shilmaydi (injection xavfsizligi)", async () => {
       const qb = (repo as unknown as { _qb: { set: jest.Mock; setParameter: jest.Mock } })._qb;
       await service.registerFailedAttempt('42', 999, 999);
       // .set() ga uzatilgan callback matn ichida raqam bo'lmasligi kerak

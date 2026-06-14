@@ -58,22 +58,22 @@ export function QuestionNav({
         })}
       </div>
 
-      <ul className="space-y-1.5 pt-1 text-xs text-gray-600">
-        <li className="flex items-center gap-2">
+      <div className="flex flex-wrap gap-4 pt-1 text-xs text-gray-600">
+        <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded bg-green-100 ring-1 ring-green-300" />
           {uz.test.legendAnswered}
-        </li>
-        <li className="flex items-center gap-2">
+        </span>
+        <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded bg-gray-100 ring-1 ring-gray-300" />
           {uz.test.legendUnanswered}
-        </li>
-        <li className="flex items-center gap-2">
+        </span>
+        <span className="flex items-center gap-1.5">
           <span className="relative h-3 w-3 rounded bg-gray-100 ring-1 ring-gray-300">
             <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-yellow-400" />
           </span>
           {uz.test.legendFlagged}
-        </li>
-      </ul>
+        </span>
+      </div>
     </div>
   );
 }

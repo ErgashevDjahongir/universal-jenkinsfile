@@ -96,6 +96,8 @@ export interface ExamineeSessionView {
   status: SessionStatus;
   /** Test nomi (kirish/qoidalar ekrani uchun). */
   assignmentTitle: string;
+  /** Topshiruvchi F.I.Sh. (timer panelidagi ma'lumot uchun). */
+  candidateName: string | null;
   startedAt: Date;
   deadlineAt: Date;
   serverNow: Date;
@@ -317,11 +319,16 @@ export class SessionsService {
       order: { orderIndex: 'ASC' },
     });
 
+    const candidate = session.candidateId
+      ? await this.loadCandidate(session.candidateId).catch(() => null)
+      : null;
+
     const now = new Date();
     return {
       id: session.id,
       status: session.status,
       assignmentTitle: assignment.title,
+      candidateName: candidate?.fullName ?? null,
       startedAt: session.startedAt,
       deadlineAt: session.deadlineAt,
       serverNow: now,

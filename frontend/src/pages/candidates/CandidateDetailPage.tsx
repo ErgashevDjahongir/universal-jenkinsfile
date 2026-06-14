@@ -387,99 +387,101 @@ export function CandidateDetailPage() {
         <p className="mt-2 text-xs text-gray-400">{uz.candidates.docHint}</p>
       </div>
 
-      {/* Tayinlov */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium text-gray-900">{uz.candidates.assignmentTitle}</h2>
-          {!isReadOnly &&
-            (candidate.assignment === null ? (
-              <Button
-                size="icon"
-                title={uz.candidates.assign}
-                aria-label={uz.candidates.assign}
-                onClick={() => setAssignOpen(true)}
-              >
-                <Plus size={16} />
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                title={uz.candidates.assignEdit}
-                aria-label={uz.candidates.assignEdit}
-                disabled={!canEditAssignment}
-                onClick={() => setAssignOpen(true)}
-              >
-                <Pencil size={15} />
-              </Button>
-            ))}
-        </div>
-        {candidate.assignment ? (
-          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <dt className="text-xs text-gray-500">{uz.candidates.assignTitleLabel}</dt>
-              <dd className="mt-0.5 text-sm font-medium text-gray-900">
-                {candidate.assignment.title}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-gray-500">{uz.candidates.templateNameLabel}</dt>
-              <dd className="mt-0.5 text-sm text-gray-900">
-                {candidate.assignment.templateName ?? '—'}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-gray-500">{uz.candidates.startsAtLabel}</dt>
-              <dd className="mt-0.5 text-sm text-gray-900">
-                {formatDate(candidate.assignment.startsAt)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-gray-500">{uz.candidates.endsAtLabel}</dt>
-              <dd className="mt-0.5 text-sm text-gray-900">
-                {formatDate(candidate.assignment.endsAt)}
-              </dd>
-            </div>
-            {candidate.assignment.accessCode && (
-              <div className="sm:col-span-2">
-                <dt className="text-xs text-gray-500">{uz.candidates.accessCodeLabel}</dt>
-                <dd className="mt-1 flex items-center gap-2">
-                  <span className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 font-mono text-base font-bold tracking-widest text-blue-700">
-                    {candidate.assignment.accessCode}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    title={codeCopied ? uz.candidates.codeCopied : uz.candidates.codeCopy}
-                    aria-label={uz.candidates.codeCopy}
-                    onClick={() => {
-                      void navigator.clipboard
-                        .writeText(candidate.assignment!.accessCode!)
-                        .then(() => {
-                          setCodeCopied(true);
-                          setTimeout(() => setCodeCopied(false), 2000);
-                        });
-                    }}
-                  >
-                    {codeCopied ? (
-                      <Check size={15} className="text-green-600" />
-                    ) : (
-                      <Copy size={15} />
-                    )}
-                  </Button>
+      {/* Tayinlov — faqat admin ko'radi */}
+      {!isReadOnly && (
+        <div className="rounded-lg border border-gray-200 bg-white p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-gray-900">{uz.candidates.assignmentTitle}</h2>
+            {!isReadOnly &&
+              (candidate.assignment === null ? (
+                <Button
+                  size="icon"
+                  title={uz.candidates.assign}
+                  aria-label={uz.candidates.assign}
+                  onClick={() => setAssignOpen(true)}
+                >
+                  <Plus size={16} />
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  title={uz.candidates.assignEdit}
+                  aria-label={uz.candidates.assignEdit}
+                  disabled={!canEditAssignment}
+                  onClick={() => setAssignOpen(true)}
+                >
+                  <Pencil size={15} />
+                </Button>
+              ))}
+          </div>
+          {candidate.assignment ? (
+            <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <dt className="text-xs text-gray-500">{uz.candidates.assignTitleLabel}</dt>
+                <dd className="mt-0.5 text-sm font-medium text-gray-900">
+                  {candidate.assignment.title}
                 </dd>
               </div>
-            )}
-            {!canEditAssignment && candidate.result !== null && (
-              <div className="sm:col-span-2">
-                <p className="text-xs text-yellow-600">{uz.candidates.assignmentStarted}</p>
+              <div>
+                <dt className="text-xs text-gray-500">{uz.candidates.templateNameLabel}</dt>
+                <dd className="mt-0.5 text-sm text-gray-900">
+                  {candidate.assignment.templateName ?? '—'}
+                </dd>
               </div>
-            )}
-          </dl>
-        ) : (
-          <p className="text-sm text-gray-400">{uz.candidates.noAssignment}</p>
-        )}
-      </div>
+              <div>
+                <dt className="text-xs text-gray-500">{uz.candidates.startsAtLabel}</dt>
+                <dd className="mt-0.5 text-sm text-gray-900">
+                  {formatDate(candidate.assignment.startsAt)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">{uz.candidates.endsAtLabel}</dt>
+                <dd className="mt-0.5 text-sm text-gray-900">
+                  {formatDate(candidate.assignment.endsAt)}
+                </dd>
+              </div>
+              {candidate.assignment.accessCode && (
+                <div className="sm:col-span-2">
+                  <dt className="text-xs text-gray-500">{uz.candidates.accessCodeLabel}</dt>
+                  <dd className="mt-1 flex items-center gap-2">
+                    <span className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 font-mono text-base font-bold tracking-widest text-blue-700">
+                      {candidate.assignment.accessCode}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title={codeCopied ? uz.candidates.codeCopied : uz.candidates.codeCopy}
+                      aria-label={uz.candidates.codeCopy}
+                      onClick={() => {
+                        void navigator.clipboard
+                          .writeText(candidate.assignment!.accessCode!)
+                          .then(() => {
+                            setCodeCopied(true);
+                            setTimeout(() => setCodeCopied(false), 2000);
+                          });
+                      }}
+                    >
+                      {codeCopied ? (
+                        <Check size={15} className="text-green-600" />
+                      ) : (
+                        <Copy size={15} />
+                      )}
+                    </Button>
+                  </dd>
+                </div>
+              )}
+              {!canEditAssignment && candidate.result !== null && (
+                <div className="sm:col-span-2">
+                  <p className="text-xs text-yellow-600">{uz.candidates.assignmentStarted}</p>
+                </div>
+              )}
+            </dl>
+          ) : (
+            <p className="text-sm text-gray-400">{uz.candidates.noAssignment}</p>
+          )}
+        </div>
+      )}
 
       {/* Natija */}
       {candidate.result && (
@@ -487,7 +489,7 @@ export function CandidateDetailPage() {
           <h2 className="mb-4 text-lg font-medium text-gray-900">{uz.candidates.resultTitle}</h2>
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <dt className="text-xs text-gray-500">{uz.sessions.score}</dt>
+              <dt className="text-xs text-gray-500">{uz.candidates.earnedScore}</dt>
               <dd className="mt-0.5 text-sm font-medium text-gray-900">
                 {candidate.result.score} / {candidate.result.maxScore}
               </dd>
@@ -504,6 +506,14 @@ export function CandidateDetailPage() {
                 </Badge>
               </dd>
             </div>
+            {candidate.result.correctCount !== null && candidate.result.totalCount !== null && (
+              <div>
+                <dt className="text-xs text-gray-500">{uz.candidates.correctAnswers}</dt>
+                <dd className="mt-0.5 text-sm text-gray-900">
+                  {candidate.result.correctCount} / {candidate.result.totalCount} ta
+                </dd>
+              </div>
+            )}
             {candidate.result.finishedAt && (
               <div>
                 <dt className="text-xs text-gray-500">{uz.sessions.finishedAt}</dt>

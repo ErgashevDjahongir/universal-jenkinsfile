@@ -388,19 +388,31 @@ function ActiveTest({
   return (
     <div className="select-none space-y-4" onCopy={block} onCut={block} onContextMenu={block}>
       {/* Taymer va saqlash holati */}
-      <div className="sticky top-0 z-10 -mx-6 flex items-center justify-between border-b border-gray-200 bg-gray-50/95 px-6 py-3 backdrop-blur">
-        <div>
-          <p className="text-xs text-gray-500">{uz.test.remainingTime}</p>
-          <p
-            className={cn(
-              'font-mono text-xl font-semibold tabular-nums',
-              lowTime ? 'text-red-600' : 'text-gray-900',
-            )}
-          >
-            {formatClock(seconds)}
-          </p>
+      <div className="sticky top-0 z-10 -mx-6 flex items-stretch border-b border-gray-200 bg-gray-50/95 backdrop-blur">
+        {/* Chap: F.I.Sh. */}
+        {session.candidateName && (
+          <div className="flex flex-1 items-center border-r border-gray-200 px-6 py-3">
+            <p className="text-lg font-semibold text-gray-900">{session.candidateName}</p>
+          </div>
+        )}
+        {/* O'ng: vaqt + saqlash holati */}
+        <div
+          className="flex items-center justify-between gap-4 px-6 py-3"
+          style={{ minWidth: 220 }}
+        >
+          <div>
+            <p className="text-xs text-gray-500">{uz.test.remainingTime}</p>
+            <p
+              className={cn(
+                'font-mono text-xl font-semibold tabular-nums',
+                lowTime ? 'text-red-600' : 'text-gray-900',
+              )}
+            >
+              {formatClock(seconds)}
+            </p>
+          </div>
+          <SaveIndicator state={saveState} />
         </div>
-        <SaveIndicator state={saveState} />
       </div>
 
       {tabWarning && (

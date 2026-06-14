@@ -39,6 +39,8 @@ export interface CandidateResultView {
   percent: string | null;
   passed: boolean | null;
   grade: string | null;
+  correctCount: number | null;
+  totalCount: number | null;
 }
 
 export interface CandidateDetail {

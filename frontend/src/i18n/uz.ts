@@ -631,5 +631,7 @@ export const uz = {
     saving: 'Saqlanmoqda…',
     assignmentStarted: "Test boshlangan — tayinlovni tahrirlab bo'lmaydi",
     registeredAt: "Ro'yxatga olingan",
+    earnedScore: "To'plagan bal",
+    correctAnswers: "To'g'ri javoblar",
   },
 } as const;

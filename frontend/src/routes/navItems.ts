@@ -30,9 +30,9 @@ export const navItems: NavItem[] = [
   { to: '/questions', label: uz.nav.questions, roles: ADMIN, icon: BookOpen },
   { to: '/templates', label: uz.nav.templates, roles: ADMIN, icon: ClipboardList },
   { to: '/assignments', label: uz.nav.assignments, roles: ADMIN, icon: ClipboardCheck },
+  { to: '/candidates', label: uz.nav.candidates, roles: STAFF_WITH_EXPERT, icon: UserCheck },
   { to: '/sessions', label: uz.nav.sessions, roles: STAFF_WITH_EXPERT, icon: Activity },
   { to: '/reports', label: uz.nav.reports, roles: STAFF_WITH_EXPERT, icon: BarChart2 },
-  { to: '/candidates', label: uz.nav.candidates, roles: STAFF_WITH_EXPERT, icon: UserCheck },
   { to: '/users', label: uz.nav.users, roles: ADMIN, icon: Users },
   { to: '/departments', label: uz.nav.departments, roles: ADMIN, icon: Building2 },
 ];

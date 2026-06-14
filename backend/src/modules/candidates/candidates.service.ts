@@ -86,6 +86,8 @@ export interface CandidateResultView {
   percent: string | null;
   passed: boolean | null;
   grade: string | null;
+  correctCount: number | null;
+  totalCount: number | null;
 }
 
 /** Topshiruvchi kartochkasi: ma'lumot + hujjatlar + tayinlov + natija. */
@@ -576,6 +578,21 @@ export class CandidatesService {
     if (!session || session.status === SessionStatus.IN_PROGRESS) {
       return null;
     }
+    const sqIds = await this.dataSource
+      .query<
+        { id: string }[]
+      >('SELECT id FROM session_questions WHERE session_id = $1', [session.id])
+      .then((rows) => rows.map((r) => r.id));
+    const totalCount = sqIds.length;
+    const correctCount =
+      sqIds.length > 0
+        ? await this.dataSource
+            .query<
+              { cnt: string }[]
+            >('SELECT COUNT(*)::int AS cnt FROM session_answers WHERE session_question_id = ANY($1) AND is_correct = true', [sqIds])
+            .then((rows) => Number(rows[0]?.cnt ?? 0))
+        : 0;
+
     return {
       sessionId: session.id,
       status: session.status,
@@ -585,6 +602,8 @@ export class CandidatesService {
       percent: session.percent,
       passed: session.passed,
       grade: session.grade,
+      correctCount,
+      totalCount,
     };
   }
 

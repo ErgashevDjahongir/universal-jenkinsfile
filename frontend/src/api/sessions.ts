@@ -147,6 +147,7 @@ export interface ExamineeSession {
   id: string;
   status: SessionStatus;
   assignmentTitle: string;
+  candidateName: string | null;
   startedAt: string;
   deadlineAt: string;
   serverNow: string;
