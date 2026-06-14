@@ -6,9 +6,11 @@ export type DocumentType = 'recommendation' | 'reference' | 'application';
 export interface CandidateAssignmentView {
   id: string;
   templateId: string;
+  templateName: string | null;
   title: string;
   startsAt: string;
   endsAt: string;
+  accessCode: string | null;
 }
 
 export interface CandidateListRow {

@@ -607,6 +607,8 @@ export const uz = {
     assign: 'Tayinlov berish',
     assignEdit: 'Tayinlovni tahrirlash',
     templateLabel: 'Test shabloni',
+    templateNameLabel: 'Shablon nomi',
+    accessCodeLabel: 'Maxsus kod',
     selectTemplate: 'Shablon tanlang',
     assignTitleLabel: 'Tayinlov nomi',
     assignTitlePlaceholder: 'Nomzod attestatsiyasi',

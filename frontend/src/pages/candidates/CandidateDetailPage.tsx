@@ -411,6 +411,12 @@ export function CandidateDetailPage() {
               </dd>
             </div>
             <div>
+              <dt className="text-xs text-gray-500">{uz.candidates.templateNameLabel}</dt>
+              <dd className="mt-0.5 text-sm text-gray-900">
+                {candidate.assignment.templateName ?? '—'}
+              </dd>
+            </div>
+            <div>
               <dt className="text-xs text-gray-500">{uz.candidates.startsAtLabel}</dt>
               <dd className="mt-0.5 text-sm text-gray-900">
                 {formatDate(candidate.assignment.startsAt)}
@@ -422,11 +428,19 @@ export function CandidateDetailPage() {
                 {formatDate(candidate.assignment.endsAt)}
               </dd>
             </div>
+            {candidate.assignment.accessCode && (
+              <div className="sm:col-span-2">
+                <dt className="text-xs text-gray-500">{uz.candidates.accessCodeLabel}</dt>
+                <dd className="mt-1">
+                  <span className="inline-block rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 font-mono text-base font-bold tracking-widest text-blue-700">
+                    {candidate.assignment.accessCode}
+                  </span>
+                </dd>
+              </div>
+            )}
             {!canEditAssignment && candidate.result !== null && (
               <div className="sm:col-span-2">
-                <p className="text-xs text-warning-600 text-yellow-600">
-                  {uz.candidates.assignmentStarted}
-                </p>
+                <p className="text-xs text-yellow-600">{uz.candidates.assignmentStarted}</p>
               </div>
             )}
           </dl>

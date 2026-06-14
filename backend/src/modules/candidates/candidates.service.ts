@@ -50,9 +50,11 @@ function hasPdfMagic(buffer: Buffer): boolean {
 export interface CandidateAssignmentView {
   id: string;
   templateId: string;
+  templateName: string | null;
   title: string;
   startsAt: Date;
   endsAt: Date;
+  accessCode: string | null;
 }
 
 /** Ro'yxat qatori — topshiruvchi + biriktirilgan tayinlov va holat. */
@@ -544,18 +546,22 @@ export class CandidatesService {
     if (candidateIds.length === 0) {
       return map;
     }
-    const assignments = await this.assignments
+    const rows = await this.assignments
       .createQueryBuilder('a')
+      .leftJoinAndSelect('a.template', 't')
+      .leftJoinAndSelect('a.codes', 'c', 'c.candidate_id = a.candidate_id')
       .where('a.candidate_id IN (:...ids)', { ids: candidateIds })
       .getMany();
-    for (const a of assignments) {
+    for (const a of rows) {
       if (a.candidateId) {
         map.set(a.candidateId, {
           id: a.id,
           templateId: a.templateId,
+          templateName: a.template?.title ?? null,
           title: a.title,
           startsAt: a.startsAt,
           endsAt: a.endsAt,
+          accessCode: a.codes?.[0]?.code ?? null,
         });
       }
     }
