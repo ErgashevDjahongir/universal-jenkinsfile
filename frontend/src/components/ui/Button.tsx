@@ -8,8 +8,9 @@ type Size = 'icon' | 'sm' | 'md';
 const variants: Record<Variant, string> = {
   primary: 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:outline-blue-600',
   secondary:
-    'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus-visible:outline-gray-400',
-  ghost: 'text-gray-600 hover:bg-gray-100 focus-visible:outline-gray-400',
+    'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus-visible:outline-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600',
+  ghost:
+    'text-gray-600 hover:bg-gray-100 focus-visible:outline-gray-400 dark:text-gray-300 dark:hover:bg-gray-700',
   danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600',
 };
 

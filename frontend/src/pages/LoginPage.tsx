@@ -60,9 +60,13 @@ export function LoginPage() {
         <Logo className="h-16 w-auto" />
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="text-center text-2xl font-bold text-gray-900">{uz.auth.loginTitle}</h2>
-        <p className="mt-1 text-center text-sm text-gray-500">{uz.auth.loginSubtitle}</p>
+      <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <h2 className="text-center text-2xl font-bold text-gray-900 dark:text-gray-100">
+          {uz.auth.loginTitle}
+        </h2>
+        <p className="mt-1 text-center text-sm text-gray-500 dark:text-gray-400">
+          {uz.auth.loginSubtitle}
+        </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <Input
@@ -83,7 +87,7 @@ export function LoginPage() {
             disabled={submitting}
           />
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
           <Button type="submit" className="w-full" loading={submitting} disabled={submitting}>
             {submitting ? uz.auth.submitting : uz.auth.submit}
@@ -92,7 +96,7 @@ export function LoginPage() {
       </div>
 
       {/* Test topshiruvchilar bir martalik kod orqali alohida sahifada kiradi. */}
-      <p className="mt-6 text-center text-sm text-gray-500">
+      <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
         {uz.auth.candidatePrompt}{' '}
         <Link to="/start" className="font-medium text-blue-600 hover:text-blue-700">
           {uz.auth.candidateLink}

@@ -17,7 +17,7 @@ export function Pagination({ page, total, limit, onChange }: PaginationProps) {
 
   return (
     <div className="flex items-center justify-between gap-4">
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-gray-500 dark:text-gray-400">
         {uz.common.paginationInfo
           .replace('{from}', String(from))
           .replace('{to}', String(to))
@@ -32,7 +32,7 @@ export function Pagination({ page, total, limit, onChange }: PaginationProps) {
         >
           {uz.common.prev}
         </Button>
-        <span className="text-sm text-gray-700">
+        <span className="text-sm text-gray-700 dark:text-gray-300">
           {page} / {pageCount}
         </span>
         <Button

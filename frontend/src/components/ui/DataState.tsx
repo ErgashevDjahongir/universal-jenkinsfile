@@ -33,9 +33,9 @@ export function DataState({
   if (loading) {
     return (
       <div className="space-y-3 p-6" aria-busy="true" aria-live="polite">
-        <div className="h-4 w-1/3 animate-pulse rounded bg-gray-200" />
-        <div className="h-4 animate-pulse rounded bg-gray-200" />
-        <div className="h-4 w-5/6 animate-pulse rounded bg-gray-200" />
+        <div className="h-4 w-1/3 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-4 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-4 w-5/6 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
       </div>
     );
   }
@@ -43,7 +43,7 @@ export function DataState({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
         {onRetry && (
           <Button variant="secondary" size="sm" onClick={onRetry}>
             {uz.common.retry}
@@ -56,7 +56,7 @@ export function DataState({
   if (isEmpty) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-        <p className="text-sm text-gray-500">{emptyText ?? uz.common.noData}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{emptyText ?? uz.common.noData}</p>
         {emptyAction}
       </div>
     );

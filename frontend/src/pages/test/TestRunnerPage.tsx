@@ -239,7 +239,7 @@ export function TestRunnerPage() {
   if (phase === 'error') {
     return (
       <div className="mx-auto max-w-md py-12 text-center">
-        <p className="text-sm text-red-600">{errorMsg}</p>
+        <p className="text-sm text-red-600 dark:text-red-400">{errorMsg}</p>
         <Button
           variant="secondary"
           size="icon"
@@ -261,7 +261,7 @@ export function TestRunnerPage() {
     // Natija olinmadi (tarmoq xatosi) — qayta urinish yoki chiqish.
     return (
       <div className="mx-auto max-w-md space-y-4 py-12 text-center">
-        <p className="text-sm text-red-600">{uz.test.resultError}</p>
+        <p className="text-sm text-red-600 dark:text-red-400">{uz.test.resultError}</p>
         <div className="flex justify-center gap-2">
           <Button
             variant="secondary"
@@ -336,7 +336,7 @@ export function TestRunnerPage() {
               </>
             }
           >
-            <p className="text-sm text-gray-700">{uz.test.finishConfirmText}</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">{uz.test.finishConfirmText}</p>
             <UnansweredNote session={session} answers={answers} />
           </Modal>
         }
@@ -359,7 +359,7 @@ function UnansweredNote({
   ).length;
   if (count === 0) return null;
   return (
-    <p className="mt-2 text-sm text-yellow-700">
+    <p className="mt-2 text-sm text-yellow-700 dark:text-yellow-400">
       {uz.test.finishConfirmUnanswered.replace('{count}', String(count))}
     </p>
   );
@@ -413,11 +413,13 @@ function ActiveTest({
   return (
     <div className="select-none space-y-4" onCopy={block} onCut={block} onContextMenu={block}>
       {/* Taymer va saqlash holati */}
-      <div className="sticky top-0 z-10 -mx-6 flex items-stretch border-b border-gray-200 bg-gray-50/95 backdrop-blur">
+      <div className="sticky top-0 z-10 -mx-6 flex items-stretch border-b border-gray-200 bg-gray-50/95 backdrop-blur dark:border-gray-700 dark:bg-gray-900/95">
         {/* Chap: F.I.Sh. */}
         {session.candidateName && (
-          <div className="flex flex-1 items-center border-r border-gray-200 px-6 py-3">
-            <p className="text-lg font-semibold text-gray-900">{session.candidateName}</p>
+          <div className="flex flex-1 items-center border-r border-gray-200 px-6 py-3 dark:border-gray-700">
+            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {session.candidateName}
+            </p>
           </div>
         )}
         {/* O'ng: vaqt + saqlash holati */}
@@ -426,11 +428,11 @@ function ActiveTest({
           style={{ minWidth: 220 }}
         >
           <div>
-            <p className="text-xs text-gray-500">{uz.test.remainingTime}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{uz.test.remainingTime}</p>
             <p
               className={cn(
                 'font-mono text-xl font-semibold tabular-nums',
-                lowTime ? 'text-red-600' : 'text-gray-900',
+                lowTime ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100',
               )}
             >
               {formatClock(seconds)}
@@ -441,8 +443,8 @@ function ActiveTest({
       </div>
 
       {tabWarning && (
-        <div className="flex items-start justify-between gap-3 rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3">
-          <div className="text-sm text-yellow-800">
+        <div className="flex items-start justify-between gap-3 rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 dark:border-yellow-700 dark:bg-yellow-900/20">
+          <div className="text-sm text-yellow-800 dark:text-yellow-300">
             <p className="font-medium">{uz.test.tabWarningTitle}</p>
             <p>
               {uz.test.tabWarning
@@ -458,7 +460,7 @@ function ActiveTest({
             onClick={onDismissWarning}
             title={uz.common.close}
             aria-label={uz.common.close}
-            className="shrink-0 text-yellow-700 hover:text-yellow-900"
+            className="shrink-0 text-yellow-700 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-200"
           >
             <X size={16} />
           </button>
@@ -466,7 +468,7 @@ function ActiveTest({
       )}
 
       {/* Savollar paneli */}
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
         <QuestionNav
           questions={questions}
           answers={answers}
@@ -478,7 +480,7 @@ function ActiveTest({
       </div>
 
       {/* Joriy savol */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
         <QuestionView
           question={q}
           index={currentIndex}
@@ -538,9 +540,9 @@ function ActiveTest({
 function SaveIndicator({ state }: { state: SaveState }) {
   if (state === 'idle') return null;
   const map: Record<Exclude<SaveState, 'idle'>, { text: string; cls: string }> = {
-    saving: { text: uz.test.saving, cls: 'text-gray-500' },
-    saved: { text: uz.test.saved, cls: 'text-green-600' },
-    error: { text: uz.test.saveError, cls: 'text-red-600' },
+    saving: { text: uz.test.saving, cls: 'text-gray-500 dark:text-gray-400' },
+    saved: { text: uz.test.saved, cls: 'text-green-600 dark:text-green-400' },
+    error: { text: uz.test.saveError, cls: 'text-red-600 dark:text-red-400' },
   };
   const { text, cls } = map[state];
   return <span className={cn('text-xs', cls)}>{text}</span>;

@@ -22,13 +22,16 @@ export function PageHeader({ title, aside, actions, leading, className }: PageHe
     <div
       className={cn(
         'flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white px-6 py-4',
+        'dark:border-gray-700 dark:bg-gray-800',
         className,
       )}
     >
       <div className="flex min-w-0 items-center gap-3">
         {leading}
         <div className="flex min-w-0 items-baseline gap-3">
-          <h1 className="truncate text-2xl font-semibold text-gray-900">{title}</h1>
+          <h1 className="truncate text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            {title}
+          </h1>
           {aside}
         </div>
       </div>
