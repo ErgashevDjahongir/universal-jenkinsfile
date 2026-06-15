@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Save, X } from 'lucide-react';
 import {
   createInterviewQuestion,
@@ -26,14 +26,20 @@ export function InterviewQuestionFormModal({ open, onClose, onSaved, initial, su
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    setSubjectId(initial?.subjectId ?? '');
-    setQuestionText(initial?.questionText ?? '');
-    setExpectedAnswer(initial?.expectedAnswer ?? '');
-    setRationale(initial?.rationale ?? '');
-    setError(null);
-  }, [open, initial]);
+  // Render vaqtida state yangilash (useEffect o'rniga) — shunda RichTextEditor
+  // to'g'ri initial value bilan mount bo'ladi, keyinroq setContent kerak bo'lmaydi.
+  const [seenKey, setSeenKey] = useState('');
+  const currentKey = open ? (initial?.id ?? 'new') : '';
+  if (currentKey !== seenKey) {
+    setSeenKey(currentKey);
+    if (open) {
+      setSubjectId(initial?.subjectId ?? '');
+      setQuestionText(initial?.questionText ?? '');
+      setExpectedAnswer(initial?.expectedAnswer ?? '');
+      setRationale(initial?.rationale ?? '');
+      setError(null);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
