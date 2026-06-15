@@ -198,23 +198,30 @@ export function InterviewQuestionsPage() {
 
               {/* Jadval */}
               <div className="overflow-x-auto rounded-lg border border-gray-200">
-                <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
+                <table className="w-full table-fixed divide-y divide-gray-200 bg-white text-sm">
+                  <colgroup>
+                    <col className="w-10" />
+                    <col className={isReadOnly ? 'w-1/3' : 'w-[30%]'} />
+                    <col className={isReadOnly ? 'w-1/3' : 'w-[30%]'} />
+                    <col className={isReadOnly ? 'w-1/3' : 'w-[25%]'} />
+                    {!isReadOnly && <col className="w-20" />}
+                  </colgroup>
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="w-8 px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
                         №
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
                         {uz.interviewQuestions.colQuestion}
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                        {uz.interviewQuestions.colAnswer}
+                        Javob
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
                         {uz.interviewQuestions.colRationale}
                       </th>
                       {!isReadOnly && (
-                        <th className="w-24 px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-gray-500">
+                        <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-gray-500">
                           {uz.interviewQuestions.colActions}
                         </th>
                       )}
