@@ -6,6 +6,7 @@ import {
   Building2,
   ClipboardList,
   Home,
+  MessageSquare,
   UserCheck,
   Users,
 } from 'lucide-react';
@@ -29,6 +30,12 @@ export const navItems: NavItem[] = [
   { to: '/questions', label: uz.nav.questions, roles: ADMIN, icon: BookOpen },
   { to: '/templates', label: uz.nav.templates, roles: ADMIN, icon: ClipboardList },
   { to: '/candidates', label: uz.nav.candidates, roles: STAFF_WITH_EXPERT, icon: UserCheck },
+  {
+    to: '/interview-questions',
+    label: uz.nav.interviewQuestions,
+    roles: STAFF_WITH_EXPERT,
+    icon: MessageSquare,
+  },
   { to: '/sessions', label: uz.nav.sessions, roles: STAFF_WITH_EXPERT, icon: Activity },
   { to: '/reports', label: uz.nav.reports, roles: STAFF_WITH_EXPERT, icon: BarChart2 },
   { to: '/users', label: uz.nav.users, roles: ADMIN, icon: Users },

@@ -19,6 +19,7 @@ import { UsersPage } from '@/pages/users/UsersPage';
 import { DepartmentsPage } from '@/pages/users/DepartmentsPage';
 import { CandidatesPage } from '@/pages/candidates/CandidatesPage';
 import { CandidateDetailPage } from '@/pages/candidates/CandidateDetailPage';
+import { InterviewQuestionsPage } from '@/pages/interview-questions/InterviewQuestionsPage';
 import { SessionsPage } from '@/pages/results/SessionsPage';
 import { SessionDetailPage } from '@/pages/results/SessionDetailPage';
 import { ProfilePage } from '@/pages/ProfilePage';
@@ -60,6 +61,7 @@ export function AppRouter() {
         <Route element={<AppLayout />}>
           <Route path="/candidates" element={<CandidatesPage />} />
           <Route path="/candidates/:id" element={<CandidateDetailPage />} />
+          <Route path="/interview-questions" element={<InterviewQuestionsPage />} />
         </Route>
       </Route>
 

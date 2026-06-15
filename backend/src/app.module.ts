@@ -11,6 +11,7 @@ import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CandidatesModule } from './modules/candidates/candidates.module';
 import { HealthModule } from './modules/health/health.module';
+import { InterviewQuestionsModule } from './modules/interview-questions/interview-questions.module';
 import { QuestionsModule } from './modules/questions/questions.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { ReportsModule } from './modules/reports/reports.module';
@@ -41,6 +42,7 @@ import { UsersModule } from './modules/users/users.module';
     TemplatesModule,
     AssignmentsModule,
     CandidatesModule,
+    InterviewQuestionsModule,
     SessionsModule,
     ReportsModule,
     AuditModule,
