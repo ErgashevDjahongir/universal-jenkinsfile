@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import {
   deleteInterviewQuestion,
   getInterviewQuestions,
@@ -11,6 +11,12 @@ import { UserRole } from '@/auth/roles';
 import { Button, DataState, Modal, PageHeader, Select } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { InterviewQuestionFormModal } from './InterviewQuestionFormModal';
+
+/** Bir yo'nalish uchun savollar guruhi. */
+interface SubjectGroup {
+  subject: Subject;
+  questions: InterviewQuestion[];
+}
 
 export function InterviewQuestionsPage() {
   const { user } = useAuth();
@@ -30,8 +36,6 @@ export function InterviewQuestionsPage() {
   const [deleteTarget, setDeleteTarget] = useState<InterviewQuestion | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300);
@@ -56,18 +60,33 @@ export function InterviewQuestionsPage() {
     void load();
   }, [load]);
 
-  const filtered = useMemo(() => {
-    return questions.filter((q) => {
+  /** Filtrlanib, yo'nalish bo'yicha guruhlangan savollar. */
+  const groups = useMemo<SubjectGroup[]>(() => {
+    const filtered = questions.filter((q) => {
       if (subjectFilter && q.subjectId !== subjectFilter) return false;
       if (debouncedSearch && !q.questionText.toLowerCase().includes(debouncedSearch.toLowerCase()))
         return false;
       return true;
     });
-  }, [questions, subjectFilter, debouncedSearch]);
 
-  function subjectName(id: string) {
-    return subjects.find((s) => s.id === id)?.name ?? id;
-  }
+    // Yo'nalish tartibini subjects ro'yxati tartibiga moslashtiramiz.
+    const subjectMap = new Map(subjects.map((s) => [s.id, s]));
+    const groupMap = new Map<string, InterviewQuestion[]>();
+    for (const q of filtered) {
+      const arr = groupMap.get(q.subjectId) ?? [];
+      arr.push(q);
+      groupMap.set(q.subjectId, arr);
+    }
+
+    return [...groupMap.entries()]
+      .map(([subjectId, qs]) => ({
+        subject: subjectMap.get(subjectId) ?? ({ id: subjectId, name: subjectId } as Subject),
+        questions: qs,
+      }))
+      .sort((a, b) => a.subject.name.localeCompare(b.subject.name));
+  }, [questions, subjects, subjectFilter, debouncedSearch]);
+
+  const totalFiltered = groups.reduce((acc, g) => acc + g.questions.length, 0);
 
   function openCreate() {
     setEditTarget(null);
@@ -104,10 +123,6 @@ export function InterviewQuestionsPage() {
     } finally {
       setDeleting(false);
     }
-  }
-
-  function toggleExpand(id: string) {
-    setExpandedId((prev) => (prev === id ? null : id));
   }
 
   return (
@@ -150,12 +165,12 @@ export function InterviewQuestionsPage() {
         />
       </div>
 
-      {/* Ro'yxat */}
+      {/* Asosiy kontent */}
       <DataState
         loading={loading}
         error={error}
         onRetry={load}
-        isEmpty={filtered.length === 0}
+        isEmpty={totalFiltered === 0}
         emptyText={
           subjectFilter || debouncedSearch
             ? uz.interviewQuestions.emptyFiltered
@@ -170,69 +185,81 @@ export function InterviewQuestionsPage() {
           ) : undefined
         }
       >
-        <div className="space-y-3">
-          {filtered.map((q) => {
-            const expanded = expandedId === q.id;
-            return (
-              <div key={q.id} className="rounded-lg border border-gray-200 bg-white">
-                {/* Sarlavha qatori */}
-                <button
-                  type="button"
-                  className="flex w-full items-start gap-3 p-4 text-left"
-                  onClick={() => toggleExpand(q.id)}
-                  aria-expanded={expanded}
-                >
-                  <span className="mt-0.5 flex-1 text-sm font-medium text-gray-900">
-                    {q.questionText}
-                  </span>
-                  <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
-                    {subjectName(q.subjectId)}
-                  </span>
-                  {expanded ? (
-                    <ChevronUp size={16} className="mt-0.5 shrink-0 text-gray-400" />
-                  ) : (
-                    <ChevronDown size={16} className="mt-0.5 shrink-0 text-gray-400" />
-                  )}
-                </button>
-
-                {/* Kengaytirilgan tafsilot */}
-                {expanded && (
-                  <div className="border-t border-gray-100 px-4 pb-4 pt-3 space-y-3">
-                    <div>
-                      <p className="text-xs font-medium text-gray-500">
-                        {uz.interviewQuestions.expectedAnswerLabel}
-                      </p>
-                      <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">
-                        {q.expectedAnswer}
-                      </p>
-                    </div>
-                    {q.rationale && (
-                      <div>
-                        <p className="text-xs font-medium text-gray-500">
-                          {uz.interviewQuestions.rationaleLabel}
-                        </p>
-                        <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">
-                          {q.rationale}
-                        </p>
-                      </div>
-                    )}
-                    {!isReadOnly && (
-                      <div className="flex gap-2 pt-1">
-                        <Button variant="secondary" size="sm" onClick={() => openEdit(q)}>
-                          <Pencil size={14} className="mr-1" />
-                          {uz.common.edit}
-                        </Button>
-                        <Button variant="danger" size="sm" onClick={() => setDeleteTarget(q)}>
-                          <Trash2 size={14} className="mr-1" />
-                          {uz.interviewQuestions.delete}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
+        <div className="space-y-8">
+          {groups.map(({ subject, questions: qs }) => (
+            <section key={subject.id}>
+              {/* Yo'nalish sarlavhasi */}
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">{subject.name}</h2>
+                <span className="text-xs text-gray-500">
+                  {uz.interviewQuestions.questionCount.replace('{count}', String(qs.length))}
+                </span>
               </div>
-            );
-          })}
+
+              {/* Jadval */}
+              <div className="overflow-x-auto rounded-lg border border-gray-200">
+                <table className="min-w-full divide-y divide-gray-200 bg-white text-sm">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="w-8 px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                        №
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                        {uz.interviewQuestions.colQuestion}
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                        {uz.interviewQuestions.colAnswer}
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                        {uz.interviewQuestions.colRationale}
+                      </th>
+                      {!isReadOnly && (
+                        <th className="w-24 px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-gray-500">
+                          {uz.interviewQuestions.colActions}
+                        </th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {qs.map((q, idx) => (
+                      <tr key={q.id} className="align-top hover:bg-gray-50">
+                        <td className="px-4 py-3 text-gray-400">{idx + 1}</td>
+                        <td className="px-4 py-3 text-gray-900">{q.questionText}</td>
+                        <td className="px-4 py-3 text-gray-700">{q.expectedAnswer}</td>
+                        <td className="px-4 py-3 text-gray-500">
+                          {q.rationale ?? <span className="text-gray-300">—</span>}
+                        </td>
+                        {!isReadOnly && (
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex justify-end gap-1">
+                              <button
+                                type="button"
+                                onClick={() => openEdit(q)}
+                                className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                                aria-label={uz.common.edit}
+                                title={uz.common.edit}
+                              >
+                                <Pencil size={14} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteTarget(q)}
+                                className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                                aria-label={uz.interviewQuestions.delete}
+                                title={uz.interviewQuestions.delete}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ))}
         </div>
       </DataState>
 
