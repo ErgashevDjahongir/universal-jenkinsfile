@@ -45,19 +45,19 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         className={cn(
-          'relative z-10 w-full rounded-lg bg-white shadow-xl dark:bg-gray-800',
+          'relative z-10 flex w-full max-h-[96vh] flex-col rounded-lg bg-white shadow-xl dark:bg-gray-800',
           SIZE_CLASS[size],
           className,
         )}
       >
         {title && (
-          <div className="border-b border-gray-100 px-5 py-4 dark:border-gray-700">
+          <div className="shrink-0 border-b border-gray-100 px-5 py-4 dark:border-gray-700">
             <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
           </div>
         )}
-        <div className="px-5 py-4">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
         {footer && (
-          <div className="flex justify-end gap-2 border-t border-gray-100 px-5 py-4 dark:border-gray-700">
+          <div className="shrink-0 flex justify-end gap-2 border-t border-gray-100 px-5 py-4 dark:border-gray-700">
             {footer}
           </div>
         )}

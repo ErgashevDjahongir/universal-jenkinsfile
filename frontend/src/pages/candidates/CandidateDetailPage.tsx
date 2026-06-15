@@ -595,7 +595,7 @@ export function CandidateDetailPage() {
         open={pdfPreview !== null}
         onClose={closePdfPreview}
         title={pdfPreview?.name ?? ''}
-        className="max-w-4xl"
+        className="max-w-[1100px]"
         footer={
           <Button variant="secondary" size="sm" onClick={closePdfPreview}>
             {uz.common.close}
@@ -606,7 +606,7 @@ export function CandidateDetailPage() {
           <iframe
             src={pdfPreview.url}
             className="w-full rounded border border-gray-200"
-            style={{ height: '70vh' }}
+            style={{ height: 'calc(90vh - 8rem)' }}
             title={pdfPreview.name}
           />
         )}
