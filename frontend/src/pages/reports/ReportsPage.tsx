@@ -221,7 +221,7 @@ export function ReportsPage() {
       >
         {tab === 'rankings' ? (
           <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[860px] text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
                   <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">

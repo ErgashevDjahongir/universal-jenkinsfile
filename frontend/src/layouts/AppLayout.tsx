@@ -87,7 +87,7 @@ export function AppLayout() {
         </header>
 
         <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 2xl:max-w-[1536px]">
             {/* Sahifa qulasa, layout (sidebar/header) saqlanib qoladi va
                 boshqa bo'limga o'tish mumkin; marshrut o'zgarsa chegara tiklanadi. */}
             <ErrorBoundary key={location.pathname}>

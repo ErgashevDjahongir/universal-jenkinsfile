@@ -413,7 +413,7 @@ function ActiveTest({
   return (
     <div className="select-none space-y-4" onCopy={block} onCut={block} onContextMenu={block}>
       {/* Taymer va saqlash holati */}
-      <div className="sticky top-0 z-10 -mx-6 flex items-stretch border-b border-gray-200 bg-gray-50/95 backdrop-blur dark:border-gray-700 dark:bg-gray-900/95">
+      <div className="sticky top-0 z-10 -mx-4 flex items-stretch border-b border-gray-200 bg-gray-50/95 backdrop-blur sm:-mx-6 dark:border-gray-700 dark:bg-gray-900/95">
         {/* Chap: F.I.Sh. */}
         {session.candidateName && (
           <div className="flex flex-1 items-center border-r border-gray-200 px-6 py-3 dark:border-gray-700">
@@ -423,10 +423,7 @@ function ActiveTest({
           </div>
         )}
         {/* O'ng: vaqt + saqlash holati */}
-        <div
-          className="flex items-center justify-between gap-4 px-6 py-3"
-          style={{ minWidth: 220 }}
-        >
+        <div className="flex min-w-[220px] items-center justify-between gap-4 px-6 py-3">
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">{uz.test.remainingTime}</p>
             <p

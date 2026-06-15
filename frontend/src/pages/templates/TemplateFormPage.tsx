@@ -513,7 +513,7 @@ export function TemplateFormPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6">
       {/* Sarlavha */}
       <PageHeader
         title={isEdit ? uz.templates.edit : uz.templates.add}
