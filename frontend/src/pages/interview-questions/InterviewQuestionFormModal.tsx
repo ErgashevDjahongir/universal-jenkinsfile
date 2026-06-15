@@ -74,6 +74,7 @@ export function InterviewQuestionFormModal({ open, onClose, onSaved, initial, su
       open={open}
       onClose={onClose}
       title={initial ? uz.interviewQuestions.edit : uz.interviewQuestions.add}
+      size="xl"
       footer={
         <>
           <Button

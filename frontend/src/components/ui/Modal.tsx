@@ -8,10 +8,21 @@ interface ModalProps {
   title?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
+  size?: 'md' | 'lg' | 'xl';
   className?: string;
 }
 
-export function Modal({ open, onClose, title, children, footer, className }: ModalProps) {
+const SIZE_CLASS = { md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-3xl' };
+
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  footer,
+  size = 'md',
+  className,
+}: ModalProps) {
   // Escape bilan yopish.
   useEffect(() => {
     if (!open) return;
@@ -30,7 +41,11 @@ export function Modal({ open, onClose, title, children, footer, className }: Mod
       <div
         role="dialog"
         aria-modal="true"
-        className={cn('relative z-10 w-full max-w-lg rounded-lg bg-white shadow-xl', className)}
+        className={cn(
+          'relative z-10 w-full rounded-lg bg-white shadow-xl',
+          SIZE_CLASS[size],
+          className,
+        )}
       >
         {title && (
           <div className="border-b border-gray-100 px-5 py-4">
