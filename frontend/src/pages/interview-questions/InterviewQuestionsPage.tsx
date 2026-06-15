@@ -221,10 +221,12 @@ export function InterviewQuestionsPage() {
                     <span className="text-xs text-gray-500">
                       {uz.interviewQuestions.questionCount.replace('{count}', String(qs.length))}
                     </span>
-                    <ChevronDown
-                      size={16}
-                      className={`shrink-0 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                    />
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-gray-50 text-gray-400">
+                      <ChevronDown
+                        size={14}
+                        className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                      />
+                    </span>
                   </div>
                 </button>
 
