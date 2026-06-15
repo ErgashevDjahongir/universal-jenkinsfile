@@ -9,6 +9,10 @@ export const uz = {
     tagline: 'Xodimlar va nomzodlarni baholash platformasi',
     backendStatus: 'Backend holati',
   },
+  theme: {
+    light: 'Kunduzgi rejim',
+    dark: 'Tungi rejim',
+  },
   common: {
     loading: 'Yuklanmoqda…',
     connectionError: 'Serverga ulanib bo‘lmadi',
