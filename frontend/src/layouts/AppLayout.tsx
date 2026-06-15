@@ -25,9 +25,9 @@ export function AppLayout() {
   }
 
   return (
-    <div className="flex min-h-full bg-gray-50 dark:bg-gray-900">
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-gray-200 bg-white md:flex dark:border-gray-700 dark:bg-gray-800">
-        <div className="flex h-16 items-center px-4">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-gray-200 bg-white md:flex overflow-y-auto dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex h-16 shrink-0 items-center px-4">
           <Logo className="h-10 w-auto" />
         </div>
         <nav className="flex-1 space-y-1 px-3 py-4">
@@ -51,8 +51,8 @@ export function AppLayout() {
         </nav>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 items-center border-b border-gray-200 bg-white px-6 dark:border-gray-700 dark:bg-gray-800">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex h-16 shrink-0 items-center border-b border-gray-200 bg-white px-6 dark:border-gray-700 dark:bg-gray-800">
           <Logo className="h-6 w-auto md:hidden" />
           <div className="ml-auto flex items-center gap-4">
             {user && (
@@ -86,7 +86,7 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-y-auto">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             {/* Sahifa qulasa, layout (sidebar/header) saqlanib qoladi va
                 boshqa bo'limga o'tish mumkin; marshrut o'zgarsa chegara tiklanadi. */}

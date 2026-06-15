@@ -1,7 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Archive, Pencil, Plus, Power, X } from 'lucide-react';
-import { Button, Badge, Modal, PageHeader, Select, Table, type Column } from '@/components/ui';
+import {
+  Button,
+  Badge,
+  Modal,
+  PageHeader,
+  Pagination,
+  Select,
+  Table,
+  type Column,
+} from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   getTemplates,
@@ -23,12 +32,15 @@ const STATUS_BADGE: Record<TemplateStatus, 'neutral' | 'success' | 'danger'> = {
   archived: 'danger',
 };
 
+const PAGE_LIMIT = 20;
+
 export function TemplatesPage() {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<TemplateStatus | ''>('');
   const [templates, setTemplates] = useState<TestTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<TestTemplate | null>(null);
@@ -39,6 +51,7 @@ export function TemplatesPage() {
     try {
       const filter = statusFilter ? { status: statusFilter } : undefined;
       setTemplates(await getTemplates(filter));
+      setPage(1);
     } catch {
       setError(uz.common.error);
     } finally {
@@ -204,13 +217,17 @@ export function TemplatesPage() {
 
       <Table
         columns={columns}
-        data={templates}
+        data={templates.slice((page - 1) * PAGE_LIMIT, page * PAGE_LIMIT)}
         rowKey={(t) => t.id}
         loading={loading}
         error={error}
         emptyText={uz.templates.emptyText}
         onRetry={load}
       />
+
+      {templates.length > PAGE_LIMIT && (
+        <Pagination page={page} total={templates.length} limit={PAGE_LIMIT} onChange={setPage} />
+      )}
 
       <Modal
         open={archiveConfirm !== null}

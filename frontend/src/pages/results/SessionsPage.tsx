@@ -9,6 +9,7 @@ import {
   Button,
   Modal,
   PageHeader,
+  Pagination,
   Select,
   Table,
   type Column,
@@ -24,6 +25,8 @@ import {
 } from '@/api/sessions';
 
 type Tab = 'monitoring' | 'list';
+
+const PAGE_LIMIT = 20;
 
 const STATUS_LABEL: Record<SessionStatus, string> = {
   ready: uz.sessions.statusReady,
@@ -66,6 +69,7 @@ export function SessionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<SessionStatus | ''>('');
+  const [page, setPage] = useState(1);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [retryCode, setRetryCode] = useState<{ sessionId: string; code: string } | null>(null);
@@ -81,6 +85,7 @@ export function SessionsPage() {
       const status =
         tab === 'monitoring' ? 'in_progress' : (statusFilter as SessionStatus) || undefined;
       setRows(await getSessions(status ? { status } : {}));
+      setPage(1);
     } catch {
       setError(uz.common.error);
     } finally {
@@ -431,13 +436,17 @@ export function SessionsPage() {
 
       <Table
         columns={tab === 'monitoring' ? monitorCols : listCols}
-        data={rows}
+        data={tab === 'list' ? rows.slice((page - 1) * PAGE_LIMIT, page * PAGE_LIMIT) : rows}
         rowKey={(r) => r.id}
         loading={loading}
         error={error}
         emptyText={tab === 'monitoring' ? uz.sessions.monitoringEmpty : uz.sessions.listEmpty}
         onRetry={load}
       />
+
+      {tab === 'list' && rows.length > PAGE_LIMIT && (
+        <Pagination page={page} total={rows.length} limit={PAGE_LIMIT} onChange={setPage} />
+      )}
 
       <Modal
         open={terminateConfirm !== null}

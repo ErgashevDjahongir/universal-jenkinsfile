@@ -8,9 +8,19 @@ import {
 import { getSubjects, type Subject } from '@/api/subjects';
 import { useAuth } from '@/auth/useAuth';
 import { UserRole } from '@/auth/roles';
-import { Button, DataState, Modal, PageHeader, Select, SafeHtml } from '@/components/ui';
+import {
+  Button,
+  DataState,
+  Modal,
+  PageHeader,
+  Pagination,
+  Select,
+  SafeHtml,
+} from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { InterviewQuestionFormModal } from './InterviewQuestionFormModal';
+
+const PAGE_LIMIT = 20;
 
 /** Bir yo'nalish uchun savollar guruhi. */
 interface SubjectGroup {
@@ -40,6 +50,8 @@ export function InterviewQuestionsPage() {
   // Ochiq accordion'lar to'plami (subject ID'lar); boshlang'ichda hammasi ochiq.
   const initializedRef = useRef(false);
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+  // Har bir section uchun sahifa raqami (subjectId → page)
+  const [groupPages, setGroupPages] = useState<Record<string, number>>({});
 
   function toggleGroup(id: string) {
     setOpenGroups((prev) => {
@@ -54,6 +66,10 @@ export function InterviewQuestionsPage() {
     const t = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(t);
   }, [search]);
+
+  useEffect(() => {
+    setGroupPages({});
+  }, [subjectFilter, debouncedSearch]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -207,6 +223,9 @@ export function InterviewQuestionsPage() {
         <div className="space-y-4">
           {groups.map(({ subject, questions: qs }) => {
             const isOpen = openGroups.has(subject.id);
+            const gPage = groupPages[subject.id] ?? 1;
+            const pagedQs = qs.slice((gPage - 1) * PAGE_LIMIT, gPage * PAGE_LIMIT);
+            const gOffset = (gPage - 1) * PAGE_LIMIT;
             return (
               <section
                 key={subject.id}
@@ -268,13 +287,13 @@ export function InterviewQuestionsPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                        {qs.map((q, idx) => (
+                        {pagedQs.map((q, idx) => (
                           <tr
                             key={q.id}
                             className="align-top hover:bg-gray-50 dark:hover:bg-gray-700/50"
                           >
                             <td className="px-4 py-3 text-gray-400 dark:text-gray-500">
-                              {idx + 1}
+                              {gOffset + idx + 1}
                             </td>
                             <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
                               <SafeHtml html={q.questionText} className="rte-display" />
@@ -317,6 +336,16 @@ export function InterviewQuestionsPage() {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                )}
+                {isOpen && qs.length > PAGE_LIMIT && (
+                  <div className="border-t border-gray-100 px-4 py-3 dark:border-gray-700">
+                    <Pagination
+                      page={gPage}
+                      total={qs.length}
+                      limit={PAGE_LIMIT}
+                      onChange={(p) => setGroupPages((prev) => ({ ...prev, [subject.id]: p }))}
+                    />
                   </div>
                 )}
               </section>

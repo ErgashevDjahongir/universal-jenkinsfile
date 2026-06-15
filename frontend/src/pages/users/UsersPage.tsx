@@ -6,6 +6,7 @@ import {
   Button,
   Modal,
   PageHeader,
+  Pagination,
   Select,
   Table,
   type Column,
@@ -44,6 +45,8 @@ const STATUS_LABEL: Record<UserStatus, string> = {
   archived: uz.users.statusArchived,
 };
 
+const PAGE_LIMIT = 20;
+
 export function UsersPage() {
   const [users, setUsers] = useState<UserListItem[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -53,6 +56,7 @@ export function UsersPage() {
   const [roleFilter, setRoleFilter] = useState<UserRole | ''>('');
   const [statusFilter, setStatusFilter] = useState<UserStatus | ''>('');
   const [deptFilter, setDeptFilter] = useState('');
+  const [page, setPage] = useState(1);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -75,6 +79,7 @@ export function UsersPage() {
       setUsers(usersData);
       setDepartments(deptsData);
       setPositions(posData);
+      setPage(1);
     } catch {
       setError(uz.common.error);
     } finally {
@@ -221,6 +226,8 @@ export function UsersPage() {
     },
   ];
 
+  const paged = users.slice((page - 1) * PAGE_LIMIT, page * PAGE_LIMIT);
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -293,13 +300,17 @@ export function UsersPage() {
 
       <Table
         columns={columns}
-        data={users}
+        data={paged}
         rowKey={(u) => u.id}
         loading={loading}
         error={error}
         emptyText={uz.users.emptyText}
         onRetry={load}
       />
+
+      {users.length > PAGE_LIMIT && (
+        <Pagination page={page} total={users.length} limit={PAGE_LIMIT} onChange={setPage} />
+      )}
 
       <UserFormModal
         open={formOpen}

@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Pencil, Plus, Save, Trash2, X } from 'lucide-react';
-import { Button, Input, Modal, PageHeader, Select, Table, type Column } from '@/components/ui';
+import {
+  Button,
+  Input,
+  Modal,
+  PageHeader,
+  Pagination,
+  Select,
+  Table,
+  type Column,
+} from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   createDepartment,
@@ -17,8 +26,12 @@ import {
 
 type Tab = 'departments' | 'positions';
 
+const PAGE_LIMIT = 20;
+
 export function DepartmentsPage() {
   const [tab, setTab] = useState<Tab>('departments');
+  const [deptPage, setDeptPage] = useState(1);
+  const [posPage, setPosPage] = useState(1);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
@@ -297,26 +310,46 @@ export function DepartmentsPage() {
       </div>
 
       {tab === 'departments' && (
-        <Table
-          columns={deptCols}
-          data={departments}
-          rowKey={(d) => d.id}
-          loading={loading}
-          error={null}
-          emptyText={uz.departments.emptyText}
-          onRetry={load}
-        />
+        <>
+          <Table
+            columns={deptCols}
+            data={departments.slice((deptPage - 1) * PAGE_LIMIT, deptPage * PAGE_LIMIT)}
+            rowKey={(d) => d.id}
+            loading={loading}
+            error={null}
+            emptyText={uz.departments.emptyText}
+            onRetry={load}
+          />
+          {departments.length > PAGE_LIMIT && (
+            <Pagination
+              page={deptPage}
+              total={departments.length}
+              limit={PAGE_LIMIT}
+              onChange={setDeptPage}
+            />
+          )}
+        </>
       )}
       {tab === 'positions' && (
-        <Table
-          columns={posCols}
-          data={positions}
-          rowKey={(p) => p.id}
-          loading={loading}
-          error={null}
-          emptyText={uz.positions.emptyText}
-          onRetry={load}
-        />
+        <>
+          <Table
+            columns={posCols}
+            data={positions.slice((posPage - 1) * PAGE_LIMIT, posPage * PAGE_LIMIT)}
+            rowKey={(p) => p.id}
+            loading={loading}
+            error={null}
+            emptyText={uz.positions.emptyText}
+            onRetry={load}
+          />
+          {positions.length > PAGE_LIMIT && (
+            <Pagination
+              page={posPage}
+              total={positions.length}
+              limit={PAGE_LIMIT}
+              onChange={setPosPage}
+            />
+          )}
+        </>
       )}
 
       {/* Department form modal */}
