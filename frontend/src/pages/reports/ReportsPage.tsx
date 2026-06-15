@@ -107,7 +107,7 @@ export function ReportsPage() {
       <PageHeader title={uz.reports.title} />
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
         {[
           { key: 'rankings' as Tab, label: uz.reports.tabRankings },
           { key: 'analysis' as Tab, label: uz.reports.tabAnalysis },
@@ -119,7 +119,7 @@ export function ReportsPage() {
               'px-4 py-2 text-sm font-medium transition-colors',
               tab === t.key
                 ? 'border-b-2 border-blue-600 text-blue-700'
-                : 'text-gray-600 hover:text-gray-900',
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
             ].join(' ')}
           >
             {t.label}
@@ -129,7 +129,7 @@ export function ReportsPage() {
 
       {/* Rankings filters */}
       {tab === 'rankings' && (
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <div className="rounded-lg border border-gray-200 bg-white p-4 dark:bg-gray-800 dark:border-gray-700">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Select
               label={uz.reports.filterDepartment}
@@ -186,25 +186,25 @@ export function ReportsPage() {
 
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
                 {uz.reports.filterDateFrom}
               </label>
               <input
                 type="date"
                 value={filter.dateFrom ?? ''}
                 onChange={(e) => setFilterField('dateFrom', e.target.value)}
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
                 {uz.reports.filterDateTo}
               </label>
               <input
                 type="date"
                 value={filter.dateTo ?? ''}
                 onChange={(e) => setFilterField('dateTo', e.target.value)}
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
               />
             </div>
           </div>
@@ -220,35 +220,35 @@ export function ReportsPage() {
         onRetry={loadData}
       >
         {tab === 'rankings' ? (
-          <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+          <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-3 py-3 text-left font-medium text-gray-600">
+                <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+                  <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.rankColumn}
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">
+                  <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.nameColumn}
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">
+                  <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.departmentColumn}
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">
+                  <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.assignmentColumn}
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">
+                  <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.scoreColumn}
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">
+                  <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.percentColumn}
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">
+                  <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.passedColumn}
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">
+                  <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.gradeColumn}
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">
+                  <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.dateColumn}
                   </th>
                   <th className="px-4 py-3" />
@@ -258,23 +258,29 @@ export function ReportsPage() {
                 {rankings.map((row) => (
                   <tr
                     key={row.sessionId}
-                    className="border-b border-gray-100 last:border-0 hover:bg-gray-50"
+                    className="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
                   >
-                    <td className="px-3 py-3 text-center font-medium text-gray-500">{row.rank}</td>
-                    <td className="px-4 py-3 font-medium text-gray-900">
+                    <td className="px-3 py-3 text-center font-medium text-gray-500 dark:text-gray-400">
+                      {row.rank}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
                       <div className="flex items-center gap-3">
                         <Avatar name={row.fullName} />
                         <span>{row.fullName}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{row.departmentName ?? '—'}</td>
-                    <td className="px-4 py-3 text-gray-700">{row.assignmentTitle}</td>
-                    <td className="px-4 py-3 text-gray-700">
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                      {row.departmentName ?? '—'}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                      {row.assignmentTitle}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
                       {row.score && row.maxScore
                         ? `${parseFloat(row.score).toFixed(1)} / ${parseFloat(row.maxScore).toFixed(1)}`
                         : '—'}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">
+                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
                       {row.percent ? `${parseFloat(row.percent).toFixed(1)}%` : '—'}
                     </td>
                     <td className="px-4 py-3">
@@ -283,11 +289,15 @@ export function ReportsPage() {
                           {row.passed ? uz.reports.passed : uz.reports.failed}
                         </Badge>
                       ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-gray-400 dark:text-gray-500">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{row.grade ?? '—'}</td>
-                    <td className="px-4 py-3 text-gray-500">{formatDate(row.finishedAt)}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                      {row.grade ?? '—'}
+                    </td>
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                      {formatDate(row.finishedAt)}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
                         <Button
@@ -319,23 +329,23 @@ export function ReportsPage() {
             </table>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+          <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-3 py-3 text-left font-medium text-gray-600">
+                <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+                  <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.rankColumn}
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">
+                  <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.analysisColumn}
                   </th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">
+                  <th className="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.timesUsed}
                   </th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">
+                  <th className="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.errorCount}
                   </th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">
+                  <th className="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-400">
                     {uz.reports.errorRate}
                   </th>
                 </tr>
@@ -344,14 +354,18 @@ export function ReportsPage() {
                 {analysis.map((row, i) => (
                   <tr
                     key={row.questionId}
-                    className="border-b border-gray-100 last:border-0 hover:bg-gray-50"
+                    className="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
                   >
-                    <td className="px-3 py-3 text-center text-gray-500">{i + 1}</td>
-                    <td className="px-4 py-3 text-gray-900 max-w-lg">
+                    <td className="px-3 py-3 text-center text-gray-500 dark:text-gray-400">
+                      {i + 1}
+                    </td>
+                    <td className="px-4 py-3 text-gray-900 max-w-lg dark:text-gray-100">
                       <p className="line-clamp-2">{row.text}</p>
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-700">{row.timesUsed}</td>
-                    <td className="px-4 py-3 text-right text-red-700 font-medium">
+                    <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300">
+                      {row.timesUsed}
+                    </td>
+                    <td className="px-4 py-3 text-right text-red-700 font-medium dark:text-red-400">
                       {row.errorCount}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -359,10 +373,10 @@ export function ReportsPage() {
                         className={[
                           'inline-block rounded px-2 py-0.5 text-xs font-medium',
                           row.errorRate >= 70
-                            ? 'bg-red-100 text-red-700'
+                            ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
                             : row.errorRate >= 40
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : 'bg-green-100 text-green-700',
+                              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400'
+                              : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400',
                         ].join(' ')}
                       >
                         {row.errorRate}%

@@ -164,12 +164,14 @@ export function DepartmentsPage() {
     {
       key: 'name',
       header: uz.departments.nameLabel,
-      render: (d) => <span className="font-medium text-gray-900">{d.name}</span>,
+      render: (d) => <span className="font-medium text-gray-900 dark:text-gray-100">{d.name}</span>,
     },
     {
       key: 'parent',
       header: uz.departments.parentLabel,
-      render: (d) => <span className="text-sm text-gray-700">{parentName(d.parentId)}</span>,
+      render: (d) => (
+        <span className="text-sm text-gray-700 dark:text-gray-300">{parentName(d.parentId)}</span>
+      ),
     },
     {
       key: 'actions',
@@ -204,12 +206,16 @@ export function DepartmentsPage() {
     {
       key: 'name',
       header: uz.positions.nameLabel,
-      render: (p) => <span className="font-medium text-gray-900">{p.name}</span>,
+      render: (p) => <span className="font-medium text-gray-900 dark:text-gray-100">{p.name}</span>,
     },
     {
       key: 'department',
       header: uz.positions.departmentLabel,
-      render: (p) => <span className="text-sm text-gray-700">{deptLabel(p.departmentId)}</span>,
+      render: (p) => (
+        <span className="text-sm text-gray-700 dark:text-gray-300">
+          {deptLabel(p.departmentId)}
+        </span>
+      ),
     },
     {
       key: 'actions',
@@ -268,12 +274,12 @@ export function DepartmentsPage() {
       />
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700/50 dark:bg-red-900/30 dark:text-red-400">
           {error}
         </div>
       )}
 
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
         {(['departments', 'positions'] as Tab[]).map((t) => (
           <button
             key={t}
@@ -282,7 +288,7 @@ export function DepartmentsPage() {
               'px-4 py-2 text-sm font-medium transition-colors',
               tab === t
                 ? 'border-b-2 border-blue-600 text-blue-700'
-                : 'text-gray-600 hover:text-gray-900',
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
             ].join(' ')}
           >
             {t === 'departments' ? uz.departments.title : uz.positions.title}
@@ -345,7 +351,7 @@ export function DepartmentsPage() {
       >
         <form id="dept-form" onSubmit={saveDept} className="space-y-4">
           {deptFormErr && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-700/50 dark:bg-red-900/30 dark:text-red-400">
               {deptFormErr}
             </div>
           )}
@@ -401,7 +407,7 @@ export function DepartmentsPage() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">{uz.departments.deleteConfirm}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">{uz.departments.deleteConfirm}</p>
       </Modal>
 
       {/* Position form modal */}
@@ -436,7 +442,7 @@ export function DepartmentsPage() {
       >
         <form id="pos-form" onSubmit={savePos} className="space-y-4">
           {posFormErr && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-700/50 dark:bg-red-900/30 dark:text-red-400">
               {posFormErr}
             </div>
           )}
@@ -490,7 +496,7 @@ export function DepartmentsPage() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">{uz.positions.deleteConfirm}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">{uz.positions.deleteConfirm}</p>
       </Modal>
     </div>
   );

@@ -85,7 +85,11 @@ export function TemplatesPage() {
     {
       key: 'title',
       header: uz.templates.titleLabel,
-      render: (t) => <span className="max-w-xs text-sm font-medium text-gray-900">{t.title}</span>,
+      render: (t) => (
+        <span className="max-w-xs text-sm font-medium text-gray-900 dark:text-gray-100">
+          {t.title}
+        </span>
+      ),
     },
     {
       key: 'status',
@@ -95,18 +99,22 @@ export function TemplatesPage() {
     {
       key: 'timeLimitMinutes',
       header: uz.templates.timeLimitLabel,
-      render: (t) => <span className="text-sm text-gray-700">{t.timeLimitMinutes} daq</span>,
+      render: (t) => (
+        <span className="text-sm text-gray-700 dark:text-gray-300">{t.timeLimitMinutes} daq</span>
+      ),
     },
     {
       key: 'passingScorePercent',
       header: uz.templates.passingScoreLabel,
-      render: (t) => <span className="text-sm text-gray-700">{t.passingScorePercent}%</span>,
+      render: (t) => (
+        <span className="text-sm text-gray-700 dark:text-gray-300">{t.passingScorePercent}%</span>
+      ),
     },
     {
       key: 'questions',
       header: 'Savollar',
       render: (t) => (
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-gray-500 dark:text-gray-400">
           {(t.fixedQuestions ?? []).length} ta qo'lda + {(t.selectionRules ?? []).length} ta qoida
         </span>
       ),
@@ -174,12 +182,12 @@ export function TemplatesPage() {
       />
 
       {actionError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700/50 dark:bg-red-900/30 dark:text-red-400">
           {actionError}
         </div>
       )}
 
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 dark:bg-gray-800 dark:border-gray-700">
         <div className="w-48">
           <Select
             label={uz.questions.statusLabel}
@@ -229,7 +237,7 @@ export function TemplatesPage() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">{uz.templates.archiving}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">{uz.templates.archiving}</p>
       </Modal>
     </div>
   );

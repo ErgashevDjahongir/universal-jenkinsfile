@@ -176,7 +176,7 @@ export function InterviewQuestionsPage() {
         </div>
         <input
           type="search"
-          className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+          className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400"
           placeholder={uz.interviewQuestions.searchPlaceholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -208,7 +208,10 @@ export function InterviewQuestionsPage() {
           {groups.map(({ subject, questions: qs }) => {
             const isOpen = openGroups.has(subject.id);
             return (
-              <section key={subject.id} className="rounded-lg border border-gray-200 bg-white">
+              <section
+                key={subject.id}
+                className="rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700"
+              >
                 {/* Accordion sarlavha */}
                 <button
                   type="button"
@@ -216,12 +219,14 @@ export function InterviewQuestionsPage() {
                   aria-expanded={isOpen}
                   className="flex w-full items-center justify-between px-5 py-4 text-left"
                 >
-                  <h2 className="text-base font-semibold text-gray-900">{subject.name}</h2>
+                  <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                    {subject.name}
+                  </h2>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {uz.interviewQuestions.questionCount.replace('{count}', String(qs.length))}
                     </span>
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-gray-50 text-gray-400">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-gray-50 text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400">
                       <ChevronDown
                         size={14}
                         className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -232,8 +237,8 @@ export function InterviewQuestionsPage() {
 
                 {/* Jadval */}
                 {isOpen && (
-                  <div className="border-t border-gray-100 overflow-x-auto">
-                    <table className="w-full table-fixed divide-y divide-gray-200 bg-white text-sm">
+                  <div className="border-t border-gray-100 overflow-x-auto dark:border-gray-700">
+                    <table className="w-full table-fixed divide-y divide-gray-200 bg-white text-sm dark:bg-gray-800 dark:divide-gray-700">
                       <colgroup>
                         <col className="w-10" />
                         <col className={isReadOnly ? 'w-1/3' : 'w-[30%]'} />
@@ -242,17 +247,17 @@ export function InterviewQuestionsPage() {
                         {!isReadOnly && <col className="w-20" />}
                       </colgroup>
                       <thead>
-                        <tr className="bg-gray-50">
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                        <tr className="bg-gray-50 dark:bg-gray-900">
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                             №
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                             {uz.interviewQuestions.colQuestion}
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                             Javob
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                             {uz.interviewQuestions.colRationale}
                           </th>
                           {!isReadOnly && (
@@ -262,21 +267,26 @@ export function InterviewQuestionsPage() {
                           )}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                         {qs.map((q, idx) => (
-                          <tr key={q.id} className="align-top hover:bg-gray-50">
-                            <td className="px-4 py-3 text-gray-400">{idx + 1}</td>
-                            <td className="px-4 py-3 text-gray-900">
+                          <tr
+                            key={q.id}
+                            className="align-top hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                          >
+                            <td className="px-4 py-3 text-gray-400 dark:text-gray-500">
+                              {idx + 1}
+                            </td>
+                            <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
                               <SafeHtml html={q.questionText} className="rte-display" />
                             </td>
-                            <td className="px-4 py-3 text-gray-700">
+                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
                               <SafeHtml html={q.expectedAnswer} className="rte-display" />
                             </td>
-                            <td className="px-4 py-3 text-gray-500">
+                            <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
                               {q.rationale ? (
                                 <SafeHtml html={q.rationale} className="rte-display" />
                               ) : (
-                                <span className="text-gray-300">—</span>
+                                <span className="text-gray-300 dark:text-gray-600">—</span>
                               )}
                             </td>
                             {!isReadOnly && (
@@ -285,7 +295,7 @@ export function InterviewQuestionsPage() {
                                   <button
                                     type="button"
                                     onClick={() => openEdit(q)}
-                                    className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                                    className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                                     aria-label={uz.common.edit}
                                     title={uz.common.edit}
                                   >
@@ -294,7 +304,7 @@ export function InterviewQuestionsPage() {
                                   <button
                                     type="button"
                                     onClick={() => setDeleteTarget(q)}
-                                    className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                                    className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
                                     aria-label={uz.interviewQuestions.delete}
                                     title={uz.interviewQuestions.delete}
                                   >
@@ -342,11 +352,17 @@ export function InterviewQuestionsPage() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">{uz.interviewQuestions.deleteConfirm}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">
+          {uz.interviewQuestions.deleteConfirm}
+        </p>
         {deleteTarget && (
-          <p className="mt-2 text-sm font-medium text-gray-900">{deleteTarget.questionText}</p>
+          <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+            {deleteTarget.questionText}
+          </p>
         )}
-        {actionError && <p className="mt-2 text-sm text-red-600">{actionError}</p>}
+        {actionError && (
+          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{actionError}</p>
+        )}
       </Modal>
     </div>
   );

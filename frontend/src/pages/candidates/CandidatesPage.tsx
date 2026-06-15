@@ -134,7 +134,7 @@ export function CandidatesPage() {
       render: (c) => (
         <div className="flex items-center gap-3">
           <Avatar name={c.fullName} />
-          <div className="font-medium text-gray-900">{c.fullName}</div>
+          <div className="font-medium text-gray-900 dark:text-gray-100">{c.fullName}</div>
         </div>
       ),
     },
@@ -144,14 +144,16 @@ export function CandidatesPage() {
       render: (c) =>
         c.assignment ? (
           <div>
-            <div className="text-sm text-gray-700">{c.assignment.title}</div>
-            <div className="text-xs text-gray-500">
+            <div className="text-sm text-gray-700 dark:text-gray-300">{c.assignment.title}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
               {new Date(c.assignment.startsAt).toLocaleDateString('uz-Cyrl-UZ')} —{' '}
               {new Date(c.assignment.endsAt).toLocaleDateString('uz-Cyrl-UZ')}
             </div>
           </div>
         ) : (
-          <span className="text-xs text-gray-400">{uz.candidates.noAssignment}</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">
+            {uz.candidates.noAssignment}
+          </span>
         ),
     },
     {
@@ -226,14 +228,14 @@ export function CandidatesPage() {
       />
 
       {actionError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700/50 dark:bg-red-900/30 dark:text-red-400">
           {actionError}
         </div>
       )}
 
       {/* Joriy / O'tganlar bo'limi — tugash sanasi bo'yicha ajratiladi */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1">
+        <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1 dark:bg-gray-800 dark:border-gray-700">
           {(
             [
               ['current', uz.candidates.viewCurrent],
@@ -245,26 +247,28 @@ export function CandidatesPage() {
               type="button"
               onClick={() => changeView(v)}
               className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-                view === v ? 'bg-white text-blue-700' : 'text-gray-500 hover:text-gray-700'
+                view === v
+                  ? 'bg-white text-blue-700 dark:bg-gray-700 dark:text-blue-400'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
               {label}
             </button>
           ))}
         </div>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           {view === 'current' ? uz.candidates.viewCurrentHint : uz.candidates.viewArchivedHint}
         </p>
       </div>
 
       {/* Bugungi ko'rinish — ekspert uchun bosh sahifa vazifasini bajaradi */}
       {isReadOnly && view === 'current' && (
-        <div className="rounded-lg border border-gray-200 bg-white p-5">
-          <h2 className="mb-4 text-base font-semibold text-gray-800">
+        <div className="rounded-lg border border-gray-200 bg-white p-5 dark:bg-gray-800 dark:border-gray-700">
+          <h2 className="mb-4 text-base font-semibold text-gray-800 dark:text-gray-100">
             {uz.candidates.todaySection}
           </h2>
           {todayCandidates.length === 0 ? (
-            <p className="text-sm text-gray-400">{uz.candidates.todayNone}</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">{uz.candidates.todayNone}</p>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {(
@@ -272,19 +276,22 @@ export function CandidatesPage() {
                   {
                     label: uz.candidates.allStatuses,
                     count: todayCandidates.length,
-                    color: 'bg-gray-50 border-gray-200 text-gray-700',
+                    color:
+                      'bg-gray-50 border-gray-200 text-gray-700 dark:bg-gray-700/50 dark:border-gray-600 dark:text-gray-300',
                     value: '' as CandidateStatus | '',
                   },
                   {
                     label: uz.candidates.statusPending,
                     count: todayCandidates.filter((c) => c.status === 'pending').length,
-                    color: 'bg-yellow-50 border-yellow-200 text-yellow-700',
+                    color:
+                      'bg-yellow-50 border-yellow-200 text-yellow-700 dark:bg-yellow-900/30 dark:border-yellow-700/50 dark:text-yellow-400',
                     value: 'pending' as CandidateStatus,
                   },
                   {
                     label: uz.candidates.statusInProgress,
                     count: todayCandidates.filter((c) => c.status === 'in_progress').length,
-                    color: 'bg-blue-50 border-blue-200 text-blue-700',
+                    color:
+                      'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700/50 dark:text-blue-400',
                     value: 'in_progress' as CandidateStatus,
                   },
                 ] as const
@@ -304,10 +311,10 @@ export function CandidatesPage() {
         </div>
       )}
 
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 dark:bg-gray-800 dark:border-gray-700">
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 min-w-48">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-300">
               {uz.common.search}
             </label>
             <input
@@ -315,7 +322,7 @@ export function CandidatesPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={uz.candidates.searchPlaceholder}
-              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400"
             />
           </div>
           <div className="w-44">
@@ -409,7 +416,7 @@ export function CandidatesPage() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">{uz.candidates.deleteConfirm}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">{uz.candidates.deleteConfirm}</p>
       </Modal>
     </div>
   );

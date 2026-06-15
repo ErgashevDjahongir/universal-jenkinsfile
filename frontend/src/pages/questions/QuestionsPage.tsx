@@ -126,12 +126,18 @@ export function QuestionsPage() {
     {
       key: 'text',
       header: 'Savol matni',
-      render: (q) => <span className="line-clamp-2 max-w-xs text-sm text-gray-900">{q.text}</span>,
+      render: (q) => (
+        <span className="line-clamp-2 max-w-xs text-sm text-gray-900 dark:text-gray-100">
+          {q.text}
+        </span>
+      ),
     },
     {
       key: 'type',
       header: uz.questions.typeLabel,
-      render: (q) => <span className="text-xs text-gray-600">{TYPE_LABELS[q.type]}</span>,
+      render: (q) => (
+        <span className="text-xs text-gray-600 dark:text-gray-400">{TYPE_LABELS[q.type]}</span>
+      ),
     },
     {
       key: 'difficulty',
@@ -154,7 +160,7 @@ export function QuestionsPage() {
     {
       key: 'points',
       header: uz.questions.pointsLabel,
-      render: (q) => <span className="text-sm text-gray-700">{q.points}</span>,
+      render: (q) => <span className="text-sm text-gray-700 dark:text-gray-300">{q.points}</span>,
     },
     {
       key: 'actions',
@@ -180,9 +186,9 @@ export function QuestionsPage() {
         title={uz.questions.title}
         aside={
           counts && (
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               {uz.questions.activeTotal}:{' '}
-              <span className="font-medium text-gray-900">{counts.total}</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">{counts.total}</span>
             </span>
           )
         }
@@ -212,8 +218,8 @@ export function QuestionsPage() {
       />
 
       {/* Filtrlar */}
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <p className="mb-3 text-xs font-medium uppercase tracking-wide text-gray-500">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 dark:bg-gray-800 dark:border-gray-700">
+        <p className="mb-3 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
           {uz.questions.filtersLabel}
         </p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">

@@ -166,9 +166,11 @@ export function SubjectsPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Fanlar paneli */}
-        <div className="rounded-lg border border-gray-200 bg-white">
-          <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-            <span className="text-sm font-medium text-gray-700">{uz.subjects.title}</span>
+        <div className="rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700">
+          <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {uz.subjects.title}
+            </span>
             <Button
               size="icon"
               title={uz.subjects.add}
@@ -195,17 +197,21 @@ export function SubjectsPage() {
               </Button>
             }
           >
-            <ul className="divide-y divide-gray-100">
+            <ul className="divide-y divide-gray-100 dark:divide-gray-700">
               {subjects.map((s) => (
                 <li
                   key={s.id}
                   onClick={() => selectSubject(s)}
-                  className={`flex cursor-pointer items-center justify-between px-4 py-3 transition-colors hover:bg-gray-50 ${selectedSubject?.id === s.id ? 'bg-blue-50' : ''}`}
+                  className={`flex cursor-pointer items-center justify-between px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${selectedSubject?.id === s.id ? 'bg-blue-50 dark:bg-blue-900/30' : ''}`}
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-gray-900">{s.name}</p>
+                    <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {s.name}
+                    </p>
                     {s.description && (
-                      <p className="truncate text-xs text-gray-500">{s.description}</p>
+                      <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                        {s.description}
+                      </p>
                     )}
                   </div>
                   <div className="ml-2 flex shrink-0 items-center gap-2">
@@ -232,9 +238,9 @@ export function SubjectsPage() {
         </div>
 
         {/* Kategoriyalar paneli */}
-        <div className="rounded-lg border border-gray-200 bg-white">
-          <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-            <span className="text-sm font-medium text-gray-700">
+        <div className="rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700">
+          <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {selectedSubject ? selectedSubject.name + ' — ' : ''}
               {uz.subjects.categories}
             </span>
@@ -252,7 +258,9 @@ export function SubjectsPage() {
 
           {!selectedSubject ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-sm text-gray-400">{uz.categories.selectSubject}</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500">
+                {uz.categories.selectSubject}
+              </p>
             </div>
           ) : (
             <DataState
@@ -272,7 +280,7 @@ export function SubjectsPage() {
                 </Button>
               }
             >
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-gray-100 dark:divide-gray-700">
                 {topCategories.map((cat) => (
                   <CategoryRow
                     key={cat.id}
@@ -331,12 +339,12 @@ export function SubjectsPage() {
             onChange={(e) => setSubjectForm((f) => ({ ...f, description: e.target.value }))}
           />
           {subjectModal.editing && (
-            <label className="flex items-center gap-2 text-sm text-gray-700">
+            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
               <input
                 type="checkbox"
                 checked={subjectForm.isActive}
                 onChange={(e) => setSubjectForm((f) => ({ ...f, isActive: e.target.checked }))}
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 dark:border-gray-600"
               />
               {uz.subjects.activeLabel}
             </label>
@@ -382,13 +390,13 @@ export function SubjectsPage() {
           />
           {!categoryModal.editing && (
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {uz.categories.parentLabel}
               </label>
               <select
                 value={categoryForm.parentId}
                 onChange={(e) => setCategoryForm((f) => ({ ...f, parentId: e.target.value }))}
-                className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
               >
                 <option value="">{uz.categories.parentNone}</option>
                 {categories.map((c) => (
@@ -420,14 +428,17 @@ function CategoryRow({
 }) {
   return (
     <>
-      <li className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50">
+      <li className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700">
         <div className="flex items-center gap-2 min-w-0">
           {depth > 0 && (
-            <span className="text-gray-300" style={{ paddingLeft: `${depth * 12}px` }}>
+            <span
+              className="text-gray-300 dark:text-gray-600"
+              style={{ paddingLeft: `${depth * 12}px` }}
+            >
               └
             </span>
           )}
-          <span className="truncate text-sm text-gray-800">{category.name}</span>
+          <span className="truncate text-sm text-gray-800 dark:text-gray-200">{category.name}</span>
           {!category.isActive && (
             <Badge variant="neutral" className="shrink-0">
               Nofaol

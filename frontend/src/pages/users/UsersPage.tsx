@@ -141,11 +141,11 @@ export function UsersPage() {
         <div className="flex items-center gap-3">
           <Avatar name={`${u.lastName} ${u.firstName}`} />
           <div>
-            <div className="font-medium text-gray-900">
+            <div className="font-medium text-gray-900 dark:text-gray-100">
               {u.lastName} {u.firstName}
               {u.middleName ? ` ${u.middleName}` : ''}
             </div>
-            {u.login && <div className="text-xs text-gray-500">{u.login}</div>}
+            {u.login && <div className="text-xs text-gray-500 dark:text-gray-400">{u.login}</div>}
           </div>
         </div>
       ),
@@ -153,15 +153,19 @@ export function UsersPage() {
     {
       key: 'role',
       header: uz.users.roleLabel,
-      render: (u) => <span className="text-sm text-gray-700">{ROLE_LABEL[u.role]}</span>,
+      render: (u) => (
+        <span className="text-sm text-gray-700 dark:text-gray-300">{ROLE_LABEL[u.role]}</span>
+      ),
     },
     {
       key: 'department',
       header: uz.users.departmentLabel,
       render: (u) => (
         <div>
-          <div className="text-sm text-gray-700">{deptName(u.departmentId)}</div>
-          {u.positionId && <div className="text-xs text-gray-500">{posName(u.positionId)}</div>}
+          <div className="text-sm text-gray-700 dark:text-gray-300">{deptName(u.departmentId)}</div>
+          {u.positionId && (
+            <div className="text-xs text-gray-500 dark:text-gray-400">{posName(u.positionId)}</div>
+          )}
         </div>
       ),
     },
@@ -237,12 +241,12 @@ export function UsersPage() {
       />
 
       {actionError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700/50 dark:bg-red-900/30 dark:text-red-400">
           {actionError}
         </div>
       )}
 
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 dark:bg-gray-800 dark:border-gray-700">
         <div className="flex flex-wrap gap-4">
           <div className="w-44">
             <Select
@@ -333,7 +337,7 @@ export function UsersPage() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">{uz.users.blockConfirm}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">{uz.users.blockConfirm}</p>
       </Modal>
     </div>
   );

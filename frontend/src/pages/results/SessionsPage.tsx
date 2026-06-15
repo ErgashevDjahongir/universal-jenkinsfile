@@ -176,7 +176,9 @@ export function SessionsPage() {
         return (
           <span
             className={
-              secs < 300 ? 'font-mono text-sm text-red-600' : 'font-mono text-sm text-gray-900'
+              secs < 300
+                ? 'font-mono text-sm text-red-600 dark:text-red-400'
+                : 'font-mono text-sm text-gray-900 dark:text-gray-100'
             }
           >
             {formatTime(secs)}
@@ -188,7 +190,13 @@ export function SessionsPage() {
       key: 'tabSwitches',
       header: 'Tab',
       render: (r) => (
-        <span className={r.tabSwitches > 0 ? 'text-sm text-yellow-700' : 'text-sm text-gray-500'}>
+        <span
+          className={
+            r.tabSwitches > 0
+              ? 'text-sm text-yellow-700 dark:text-yellow-500'
+              : 'text-sm text-gray-500 dark:text-gray-400'
+          }
+        >
           {r.tabSwitches}
         </span>
       ),
@@ -197,7 +205,7 @@ export function SessionsPage() {
       key: 'started',
       header: uz.sessions.startedAt,
       render: (r) => (
-        <span className="text-sm text-gray-700">
+        <span className="text-sm text-gray-700 dark:text-gray-300">
           {new Date(r.startedAt).toLocaleTimeString('uz-UZ', {
             hour: '2-digit',
             minute: '2-digit',
@@ -266,7 +274,7 @@ export function SessionsPage() {
       render: (r) => (
         <div className="flex items-center gap-3">
           <Avatar name={r.fullName || String(r.userId)} />
-          <span className="text-sm text-gray-900">{r.fullName || r.userId}</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">{r.fullName || r.userId}</span>
         </div>
       ),
     },
@@ -278,13 +286,15 @@ export function SessionsPage() {
     {
       key: 'attempt',
       header: uz.sessions.attempt.replace('{n}', '#'),
-      render: (r) => <span className="text-sm text-gray-700">{r.attemptNumber}</span>,
+      render: (r) => (
+        <span className="text-sm text-gray-700 dark:text-gray-300">{r.attemptNumber}</span>
+      ),
     },
     {
       key: 'started',
       header: uz.sessions.startedAt,
       render: (r) => (
-        <span className="text-sm text-gray-700">
+        <span className="text-sm text-gray-700 dark:text-gray-300">
           {new Date(r.startedAt).toLocaleString('uz-UZ')}
         </span>
       ),
@@ -326,14 +336,14 @@ export function SessionsPage() {
       <PageHeader title={uz.sessions.title} />
 
       {actionError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700/50 dark:bg-red-900/30 dark:text-red-400">
           {actionError}
         </div>
       )}
 
       {retryCode && (
-        <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 px-4 py-3">
-          <p className="text-sm text-green-800">
+        <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 px-4 py-3 dark:border-green-700/50 dark:bg-green-900/30">
+          <p className="text-sm text-green-800 dark:text-green-300">
             {uz.sessions.retryCodeIssued.replace('{code}', retryCode.code)}
           </p>
           <Button
@@ -348,7 +358,7 @@ export function SessionsPage() {
         </div>
       )}
 
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
         {(
           [
             { key: 'monitoring', label: uz.sessions.monitoringTitle },
@@ -362,7 +372,7 @@ export function SessionsPage() {
               'px-4 py-2 text-sm font-medium transition-colors',
               tab === t.key
                 ? 'border-b-2 border-blue-600 text-blue-700'
-                : 'text-gray-600 hover:text-gray-900',
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
             ].join(' ')}
           >
             {t.label}
@@ -371,7 +381,7 @@ export function SessionsPage() {
       </div>
 
       {tab === 'list' && (
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <div className="rounded-lg border border-gray-200 bg-white p-4 dark:bg-gray-800 dark:border-gray-700">
           <div className="flex items-center gap-4">
             <div className="w-48">
               <Select
@@ -404,7 +414,7 @@ export function SessionsPage() {
 
       {tab === 'monitoring' && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {rows.length > 0 ? `${rows.length} ta faol sessiya` : uz.sessions.monitoringEmpty}
           </p>
           <Button
@@ -454,7 +464,7 @@ export function SessionsPage() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">{uz.sessions.terminating}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">{uz.sessions.terminating}</p>
       </Modal>
 
       <Modal
@@ -482,7 +492,7 @@ export function SessionsPage() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">{uz.sessions.cancelling}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">{uz.sessions.cancelling}</p>
       </Modal>
     </div>
   );
