@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react';
 import {
   deleteInterviewQuestion,
   getInterviewQuestions,
@@ -37,6 +37,19 @@ export function InterviewQuestionsPage() {
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  // Ochiq accordion'lar to'plami (subject ID'lar); boshlang'ichda hammasi ochiq.
+  const initializedRef = useRef(false);
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+
+  function toggleGroup(id: string) {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(t);
@@ -49,6 +62,12 @@ export function InterviewQuestionsPage() {
       const [qs, subs] = await Promise.all([getInterviewQuestions(), getSubjects()]);
       setQuestions(qs);
       setSubjects(subs);
+      // Birinchi yuklanishda barcha guruhlarni ochiq qilamiz.
+      if (!initializedRef.current) {
+        initializedRef.current = true;
+        const ids = new Set(qs.map((q) => q.subjectId));
+        setOpenGroups(ids);
+      }
     } catch {
       setError(uz.common.error);
     } finally {
@@ -185,88 +204,104 @@ export function InterviewQuestionsPage() {
           ) : undefined
         }
       >
-        <div className="space-y-8">
-          {groups.map(({ subject, questions: qs }) => (
-            <section key={subject.id}>
-              {/* Yo'nalish sarlavhasi */}
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">{subject.name}</h2>
-                <span className="text-xs text-gray-500">
-                  {uz.interviewQuestions.questionCount.replace('{count}', String(qs.length))}
-                </span>
-              </div>
+        <div className="space-y-4">
+          {groups.map(({ subject, questions: qs }) => {
+            const isOpen = openGroups.has(subject.id);
+            return (
+              <section key={subject.id} className="rounded-lg border border-gray-200 bg-white">
+                {/* Accordion sarlavha */}
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(subject.id)}
+                  aria-expanded={isOpen}
+                  className="flex w-full items-center justify-between px-5 py-4 text-left"
+                >
+                  <h2 className="text-base font-semibold text-gray-900">{subject.name}</h2>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-gray-500">
+                      {uz.interviewQuestions.questionCount.replace('{count}', String(qs.length))}
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`shrink-0 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    />
+                  </div>
+                </button>
 
-              {/* Jadval */}
-              <div className="overflow-x-auto rounded-lg border border-gray-200">
-                <table className="w-full table-fixed divide-y divide-gray-200 bg-white text-sm">
-                  <colgroup>
-                    <col className="w-10" />
-                    <col className={isReadOnly ? 'w-1/3' : 'w-[30%]'} />
-                    <col className={isReadOnly ? 'w-1/3' : 'w-[30%]'} />
-                    <col className={isReadOnly ? 'w-1/3' : 'w-[25%]'} />
-                    {!isReadOnly && <col className="w-20" />}
-                  </colgroup>
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                        №
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                        {uz.interviewQuestions.colQuestion}
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                        Javob
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                        {uz.interviewQuestions.colRationale}
-                      </th>
-                      {!isReadOnly && (
-                        <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-gray-500">
-                          {uz.interviewQuestions.colActions}
-                        </th>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {qs.map((q, idx) => (
-                      <tr key={q.id} className="align-top hover:bg-gray-50">
-                        <td className="px-4 py-3 text-gray-400">{idx + 1}</td>
-                        <td className="px-4 py-3 text-gray-900">{q.questionText}</td>
-                        <td className="px-4 py-3 text-gray-700">{q.expectedAnswer}</td>
-                        <td className="px-4 py-3 text-gray-500">
-                          {q.rationale ?? <span className="text-gray-300">—</span>}
-                        </td>
-                        {!isReadOnly && (
-                          <td className="px-4 py-3 text-right">
-                            <div className="flex justify-end gap-1">
-                              <button
-                                type="button"
-                                onClick={() => openEdit(q)}
-                                className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-                                aria-label={uz.common.edit}
-                                title={uz.common.edit}
-                              >
-                                <Pencil size={14} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeleteTarget(q)}
-                                className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
-                                aria-label={uz.interviewQuestions.delete}
-                                title={uz.interviewQuestions.delete}
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          ))}
+                {/* Jadval */}
+                {isOpen && (
+                  <div className="border-t border-gray-100 overflow-x-auto">
+                    <table className="w-full table-fixed divide-y divide-gray-200 bg-white text-sm">
+                      <colgroup>
+                        <col className="w-10" />
+                        <col className={isReadOnly ? 'w-1/3' : 'w-[30%]'} />
+                        <col className={isReadOnly ? 'w-1/3' : 'w-[30%]'} />
+                        <col className={isReadOnly ? 'w-1/3' : 'w-[25%]'} />
+                        {!isReadOnly && <col className="w-20" />}
+                      </colgroup>
+                      <thead>
+                        <tr className="bg-gray-50">
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                            №
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                            {uz.interviewQuestions.colQuestion}
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                            Javob
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                            {uz.interviewQuestions.colRationale}
+                          </th>
+                          {!isReadOnly && (
+                            <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-gray-500">
+                              {uz.interviewQuestions.colActions}
+                            </th>
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {qs.map((q, idx) => (
+                          <tr key={q.id} className="align-top hover:bg-gray-50">
+                            <td className="px-4 py-3 text-gray-400">{idx + 1}</td>
+                            <td className="px-4 py-3 text-gray-900">{q.questionText}</td>
+                            <td className="px-4 py-3 text-gray-700">{q.expectedAnswer}</td>
+                            <td className="px-4 py-3 text-gray-500">
+                              {q.rationale ?? <span className="text-gray-300">—</span>}
+                            </td>
+                            {!isReadOnly && (
+                              <td className="px-4 py-3 text-right">
+                                <div className="flex justify-end gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => openEdit(q)}
+                                    className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                                    aria-label={uz.common.edit}
+                                    title={uz.common.edit}
+                                  >
+                                    <Pencil size={14} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeleteTarget(q)}
+                                    className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                                    aria-label={uz.interviewQuestions.delete}
+                                    title={uz.interviewQuestions.delete}
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            );
+          })}
         </div>
       </DataState>
 
