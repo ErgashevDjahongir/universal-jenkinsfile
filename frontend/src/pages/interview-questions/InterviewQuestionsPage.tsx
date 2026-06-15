@@ -102,7 +102,7 @@ export function InterviewQuestionsPage() {
         subject: subjectMap.get(subjectId) ?? ({ id: subjectId, name: subjectId } as Subject),
         questions: qs,
       }))
-      .sort((a, b) => a.subject.name.localeCompare(b.subject.name));
+      .sort((a, b) => Number(a.subject.id) - Number(b.subject.id));
   }, [questions, subjects, subjectFilter, debouncedSearch]);
 
   const totalFiltered = groups.reduce((acc, g) => acc + g.questions.length, 0);

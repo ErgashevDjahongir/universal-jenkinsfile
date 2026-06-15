@@ -43,7 +43,7 @@ export class InterviewQuestionsService {
     const where: FindOptionsWhere<InterviewQuestion> = {};
     if (filter.subjectId) where.subjectId = filter.subjectId;
     if (filter.search) where.questionText = ILike(`%${filter.search}%`);
-    return this.repo.find({ where, order: { createdAt: 'DESC' } });
+    return this.repo.find({ where, order: { id: 'ASC' } });
   }
 
   async findOne(id: string): Promise<InterviewQuestion> {
