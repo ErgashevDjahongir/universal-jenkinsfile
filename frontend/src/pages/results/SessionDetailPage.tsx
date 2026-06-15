@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, StopCircle, X, XCircle } from 'lucide-react';
 import { UserRole } from '@/auth/roles';
 import { useAuth } from '@/auth/useAuth';
-import { Badge, Button, DataState, Modal, PageHeader } from '@/components/ui';
+import { Badge, Button, DataState, Modal, PageHeader, SafeHtml } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import {
   allowRetry,
@@ -359,7 +359,9 @@ export function SessionDetailPage() {
                         }
                       >
                         <td className="px-4 py-3 text-gray-500">{q.orderIndex + 1}</td>
-                        <td className="max-w-xs px-4 py-3 text-gray-900">{q.text}</td>
+                        <td className="max-w-xs px-4 py-3 text-gray-900">
+                          <SafeHtml html={q.text} className="rte-display" />
+                        </td>
                         <td className="px-4 py-3 text-gray-700">{renderGivenAnswer(q)}</td>
                         <td className="px-4 py-3 text-gray-700">{correctAnswerText(q)}</td>
                         <td className="px-4 py-3">

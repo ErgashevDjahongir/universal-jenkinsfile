@@ -11,7 +11,14 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
+    "@tiptap/extension-placeholder": "^3.26.1",
+    "@tiptap/extension-text-align": "^3.26.1",
+    "@tiptap/pm": "^3.26.1",
+    "@tiptap/react": "^3.26.1",
+    "@tiptap/starter-kit": "^3.26.1",
+    "@types/dompurify": "^3.0.5",
     "axios": "^1.7.9",
+    "dompurify": "^3.4.10",
     "lucide-react": "^1.18.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

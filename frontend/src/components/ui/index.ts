@@ -11,3 +11,5 @@ export { Combobox, type ComboboxOption } from './Combobox';
 export { Pagination } from './Pagination';
 export { PageHeader } from './PageHeader';
 export { Avatar } from './Avatar';
+export { RichTextEditor } from './RichTextEditor';
+export { SafeHtml } from './SafeHtml';

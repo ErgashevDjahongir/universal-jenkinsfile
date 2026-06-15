@@ -1,4 +1,4 @@
-import { Select } from '@/components/ui';
+import { Select, SafeHtml } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { cn } from '@/lib/cn';
 import type { AnswerPayload, ExamineeQuestion } from '@/api/sessions';
@@ -35,7 +35,7 @@ export function QuestionView({ question, index, total, value, onChange }: Questi
         </span>
       </div>
 
-      <h2 className="whitespace-pre-line text-base font-medium text-gray-900">{question.text}</h2>
+      <SafeHtml html={question.text} className="rte-display text-base font-medium text-gray-900" />
       {hint && <p className="text-xs text-gray-500">{hint}</p>}
 
       <div className="pt-1">

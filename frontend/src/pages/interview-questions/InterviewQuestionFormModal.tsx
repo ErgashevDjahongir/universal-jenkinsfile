@@ -6,7 +6,8 @@ import {
   type InterviewQuestion,
 } from '@/api/interview-questions';
 import { type Subject } from '@/api/subjects';
-import { Button, Modal, Select } from '@/components/ui';
+import { Button, Modal, Select, RichTextEditor } from '@/components/ui';
+import { sanitizeHtml, isHtmlEmpty } from '@/lib/sanitize';
 import { uz } from '@/i18n/uz';
 
 interface Props {
@@ -36,7 +37,7 @@ export function InterviewQuestionFormModal({ open, onClose, onSaved, initial, su
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!subjectId || !questionText.trim() || !expectedAnswer.trim()) {
+    if (!subjectId || isHtmlEmpty(questionText) || isHtmlEmpty(expectedAnswer)) {
       setError(
         `${uz.interviewQuestions.subjectLabel}, ${uz.interviewQuestions.questionTextLabel} va ${uz.interviewQuestions.expectedAnswerLabel} majburiy`,
       );
@@ -47,9 +48,9 @@ export function InterviewQuestionFormModal({ open, onClose, onSaved, initial, su
     try {
       const payload = {
         subjectId,
-        questionText: questionText.trim(),
-        expectedAnswer: expectedAnswer.trim(),
-        rationale: rationale.trim() || undefined,
+        questionText: sanitizeHtml(questionText),
+        expectedAnswer: sanitizeHtml(expectedAnswer),
+        rationale: isHtmlEmpty(rationale) ? undefined : sanitizeHtml(rationale),
       };
       const result = initial
         ? await updateInterviewQuestion(initial.id, payload)
@@ -117,13 +118,11 @@ export function InterviewQuestionFormModal({ open, onClose, onSaved, initial, su
           <label className="block text-sm font-medium text-gray-700">
             {uz.interviewQuestions.questionTextLabel}
           </label>
-          <textarea
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-            rows={3}
-            placeholder={uz.interviewQuestions.questionTextPlaceholder}
+          <RichTextEditor
             value={questionText}
-            onChange={(e) => setQuestionText(e.target.value)}
-            required
+            onChange={setQuestionText}
+            placeholder={uz.interviewQuestions.questionTextPlaceholder}
+            minRows={3}
           />
         </div>
 
@@ -131,13 +130,11 @@ export function InterviewQuestionFormModal({ open, onClose, onSaved, initial, su
           <label className="block text-sm font-medium text-gray-700">
             {uz.interviewQuestions.expectedAnswerLabel}
           </label>
-          <textarea
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-            rows={4}
-            placeholder={uz.interviewQuestions.expectedAnswerPlaceholder}
+          <RichTextEditor
             value={expectedAnswer}
-            onChange={(e) => setExpectedAnswer(e.target.value)}
-            required
+            onChange={setExpectedAnswer}
+            placeholder={uz.interviewQuestions.expectedAnswerPlaceholder}
+            minRows={4}
           />
         </div>
 
@@ -145,12 +142,11 @@ export function InterviewQuestionFormModal({ open, onClose, onSaved, initial, su
           <label className="block text-sm font-medium text-gray-700">
             {uz.interviewQuestions.rationaleLabel}
           </label>
-          <textarea
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-            rows={3}
-            placeholder={uz.interviewQuestions.rationalePlaceholder}
+          <RichTextEditor
             value={rationale}
-            onChange={(e) => setRationale(e.target.value)}
+            onChange={setRationale}
+            placeholder={uz.interviewQuestions.rationalePlaceholder}
+            minRows={3}
           />
         </div>
 

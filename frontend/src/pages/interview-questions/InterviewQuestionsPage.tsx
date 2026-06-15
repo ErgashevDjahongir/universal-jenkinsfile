@@ -8,7 +8,7 @@ import {
 import { getSubjects, type Subject } from '@/api/subjects';
 import { useAuth } from '@/auth/useAuth';
 import { UserRole } from '@/auth/roles';
-import { Button, DataState, Modal, PageHeader, Select } from '@/components/ui';
+import { Button, DataState, Modal, PageHeader, Select, SafeHtml } from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { InterviewQuestionFormModal } from './InterviewQuestionFormModal';
 
@@ -266,10 +266,18 @@ export function InterviewQuestionsPage() {
                         {qs.map((q, idx) => (
                           <tr key={q.id} className="align-top hover:bg-gray-50">
                             <td className="px-4 py-3 text-gray-400">{idx + 1}</td>
-                            <td className="px-4 py-3 text-gray-900">{q.questionText}</td>
-                            <td className="px-4 py-3 text-gray-700">{q.expectedAnswer}</td>
+                            <td className="px-4 py-3 text-gray-900">
+                              <SafeHtml html={q.questionText} className="rte-display" />
+                            </td>
+                            <td className="px-4 py-3 text-gray-700">
+                              <SafeHtml html={q.expectedAnswer} className="rte-display" />
+                            </td>
                             <td className="px-4 py-3 text-gray-500">
-                              {q.rationale ?? <span className="text-gray-300">—</span>}
+                              {q.rationale ? (
+                                <SafeHtml html={q.rationale} className="rte-display" />
+                              ) : (
+                                <span className="text-gray-300">—</span>
+                              )}
                             </td>
                             {!isReadOnly && (
                               <td className="px-4 py-3 text-right">

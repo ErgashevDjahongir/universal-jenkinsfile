@@ -11,7 +11,8 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { Button, Input, Modal, Select, Badge, PageHeader } from '@/components/ui';
+import { Button, Input, Modal, Select, Badge, PageHeader, RichTextEditor } from '@/components/ui';
+import { sanitizeHtml, isHtmlEmpty } from '@/lib/sanitize';
 import { uz } from '@/i18n/uz';
 import { useAuth } from '@/auth/useAuth';
 import { UserRole } from '@/auth/roles';
@@ -187,7 +188,7 @@ export function QuestionFormPage() {
   function validate(): boolean {
     const errs: Record<string, string> = {};
     if (!subjectId) errs.subjectId = 'Yoʼnalish tanlanishi shart';
-    if (!text.trim()) errs.text = 'Savol matni kiritilishi shart';
+    if (isHtmlEmpty(text)) errs.text = 'Savol matni kiritilishi shart';
     if (type !== 'short_answer' && options.some((o) => !o.text.trim())) {
       errs.options = "Barcha variantlar to'g'rilanishi shart";
     }
@@ -209,7 +210,7 @@ export function QuestionFormPage() {
         subjectId,
         type,
         difficulty,
-        text: text.trim(),
+        text: sanitizeHtml(text),
         points: points ? parseFloat(points) : undefined,
         explanation: explanation.trim() || undefined,
         answerKey: type === 'short_answer' ? answerKey.trim() || undefined : undefined,
@@ -417,13 +418,12 @@ export function QuestionFormPage() {
             <label className="block text-sm font-medium text-gray-700">
               {uz.questions.textLabel}
             </label>
-            <textarea
+            <RichTextEditor
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={setText}
               placeholder={uz.questions.textPlaceholder}
               disabled={isArchived}
-              rows={3}
-              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:bg-gray-50 disabled:text-gray-400"
+              minRows={3}
             />
             {errors.text && <p className="text-sm text-red-600">{errors.text}</p>}
           </div>
