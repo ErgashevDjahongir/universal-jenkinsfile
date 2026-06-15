@@ -197,7 +197,7 @@ export function SessionDetailPage() {
         {review && sess && (
           <div className="space-y-6">
             {/* Header card */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6">
+            <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
@@ -212,19 +212,35 @@ export function SessionDetailPage() {
                     )}
                   </div>
                   <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
-                    <span className="text-gray-500">{uz.sessions.examinee}:</span>
-                    <span className="text-gray-900">{sess.userFullName || sess.userId}</span>
-                    <span className="text-gray-500">{uz.sessions.startedAt}:</span>
-                    <span className="text-gray-900">{formatDate(sess.startedAt)}</span>
-                    <span className="text-gray-500">{uz.sessions.finishedAt}:</span>
-                    <span className="text-gray-900">{formatDate(sess.finishedAt)}</span>
-                    <span className="text-gray-500">{uz.sessions.deadline}:</span>
-                    <span className="text-gray-900">{formatDate(sess.deadlineAt)}</span>
-                    <span className="text-gray-500">Tab:</span>
-                    <span className="text-gray-900">{sess.tabSwitches}</span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {uz.sessions.examinee}:
+                    </span>
+                    <span className="text-gray-900 dark:text-gray-100">
+                      {sess.userFullName || sess.userId}
+                    </span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {uz.sessions.startedAt}:
+                    </span>
+                    <span className="text-gray-900 dark:text-gray-100">
+                      {formatDate(sess.startedAt)}
+                    </span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {uz.sessions.finishedAt}:
+                    </span>
+                    <span className="text-gray-900 dark:text-gray-100">
+                      {formatDate(sess.finishedAt)}
+                    </span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {uz.sessions.deadline}:
+                    </span>
+                    <span className="text-gray-900 dark:text-gray-100">
+                      {formatDate(sess.deadlineAt)}
+                    </span>
+                    <span className="text-gray-500 dark:text-gray-400">Tab:</span>
+                    <span className="text-gray-900 dark:text-gray-100">{sess.tabSwitches}</span>
                   </div>
                   {sess.score !== null && (
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {uz.sessions.score
                         .replace('{score}', sess.score ?? '—')
                         .replace('{max}', sess.maxScore ?? '—')
@@ -276,12 +292,12 @@ export function SessionDetailPage() {
               </div>
 
               {actionError && (
-                <div className="mt-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                <div className="mt-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-400">
                   {actionError}
                 </div>
               )}
               {retryCode && (
-                <div className="mt-3 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+                <div className="mt-3 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300">
                   {uz.sessions.retryCodeIssued.replace('{code}', retryCode)}
                 </div>
               )}
@@ -289,31 +305,39 @@ export function SessionDetailPage() {
 
             {/* Category breakdown */}
             {breakdown.length > 0 && sess.score !== null && (
-              <div className="rounded-lg border border-gray-200 bg-white p-6">
-                <h2 className="mb-4 text-lg font-medium text-gray-900">
+              <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-gray-100">
                   {uz.sessions.questionAnalysis}
                 </h2>
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-200 text-left text-gray-500">
+                      <tr className="border-b border-gray-200 text-left text-gray-500 dark:border-gray-700 dark:text-gray-400">
                         <th className="pb-2 pr-4 font-medium">Tur</th>
                         <th className="pb-2 pr-4 font-medium">Savollar</th>
                         <th className="pb-2 pr-4 font-medium">To'g'ri</th>
                         <th className="pb-2 pr-4 font-medium">Ball</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                       {breakdown.map(([type, stat]) => (
                         <tr key={type}>
-                          <td className="py-2 pr-4 text-gray-700">{type}</td>
-                          <td className="py-2 pr-4 text-gray-900">{stat.total}</td>
+                          <td className="py-2 pr-4 text-gray-700 dark:text-gray-300">{type}</td>
+                          <td className="py-2 pr-4 text-gray-900 dark:text-gray-100">
+                            {stat.total}
+                          </td>
                           <td className="py-2 pr-4">
-                            <span className={stat.correct > 0 ? 'text-green-700' : 'text-gray-500'}>
+                            <span
+                              className={
+                                stat.correct > 0
+                                  ? 'text-green-700 dark:text-green-400'
+                                  : 'text-gray-500 dark:text-gray-400'
+                              }
+                            >
                               {stat.correct}
                             </span>
                           </td>
-                          <td className="py-2 pr-4 text-gray-900">
+                          <td className="py-2 pr-4 text-gray-900 dark:text-gray-100">
                             {stat.awarded.toFixed(1)} / {stat.points.toFixed(1)}
                           </td>
                         </tr>
@@ -325,56 +349,70 @@ export function SessionDetailPage() {
             )}
 
             {/* Per-question table */}
-            <div className="rounded-lg border border-gray-200 bg-white">
-              <div className="border-b border-gray-100 px-6 py-4">
-                <h2 className="text-lg font-medium text-gray-900">{uz.sessions.perQuestion}</h2>
+            <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+              <div className="border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                  {uz.sessions.perQuestion}
+                </h2>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-100 text-sm">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-100 text-sm dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-900">
                     <tr>
-                      <th className="px-4 py-3 text-left font-medium text-gray-500">#</th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-500">Savol</th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-500">
+                      <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
+                        #
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
+                        Savol
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
                         {uz.sessions.givenAnswer}
                       </th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-500">
+                      <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
                         {uz.sessions.correctAnswer}
                       </th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-500">
+                      <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
                         {uz.sessions.awardedPoints}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                     {questions.map((q) => (
                       <tr
                         key={q.sessionQuestionId}
                         className={
                           q.isCorrect === true
-                            ? 'bg-green-50/40'
+                            ? 'bg-green-50/40 dark:bg-green-900/20'
                             : q.isCorrect === false
-                              ? 'bg-red-50/40'
+                              ? 'bg-red-50/40 dark:bg-red-900/20'
                               : ''
                         }
                       >
-                        <td className="px-4 py-3 text-gray-500">{q.orderIndex + 1}</td>
-                        <td className="max-w-xs px-4 py-3 text-gray-900">
+                        <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                          {q.orderIndex + 1}
+                        </td>
+                        <td className="max-w-xs px-4 py-3 text-gray-900 dark:text-gray-100">
                           <SafeHtml html={q.text} className="rte-display" />
                         </td>
-                        <td className="px-4 py-3 text-gray-700">{renderGivenAnswer(q)}</td>
-                        <td className="px-4 py-3 text-gray-700">{correctAnswerText(q)}</td>
+                        <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                          {renderGivenAnswer(q)}
+                        </td>
+                        <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                          {correctAnswerText(q)}
+                        </td>
                         <td className="px-4 py-3">
                           {q.awardedPoints !== null ? (
                             <span
                               className={
-                                parseFloat(q.awardedPoints) > 0 ? 'text-green-700' : 'text-red-600'
+                                parseFloat(q.awardedPoints) > 0
+                                  ? 'text-green-700 dark:text-green-400'
+                                  : 'text-red-600 dark:text-red-400'
                               }
                             >
                               {q.awardedPoints} / {q.points}
                             </span>
                           ) : (
-                            <span className="text-gray-400">—</span>
+                            <span className="text-gray-400 dark:text-gray-500">—</span>
                           )}
                         </td>
                       </tr>
@@ -410,7 +448,7 @@ export function SessionDetailPage() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">{uz.sessions.terminating}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">{uz.sessions.terminating}</p>
       </Modal>
 
       <Modal
@@ -436,7 +474,7 @@ export function SessionDetailPage() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">{uz.sessions.cancelling}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">{uz.sessions.cancelling}</p>
       </Modal>
     </div>
   );

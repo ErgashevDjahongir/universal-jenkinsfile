@@ -204,8 +204,8 @@ export function CandidateDetailPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-48 animate-pulse rounded bg-gray-200" />
-        <div className="h-40 animate-pulse rounded-lg bg-gray-100" />
+        <div className="h-8 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-40 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
       </div>
     );
   }
@@ -216,7 +216,7 @@ export function CandidateDetailPage() {
         <Button variant="ghost" size="sm" onClick={() => navigate('/candidates')}>
           <ArrowLeft size={16} /> {uz.common.back}
         </Button>
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-400">
           {error ?? uz.common.error}
         </div>
         <Button variant="secondary" size="sm" onClick={load}>
@@ -258,28 +258,37 @@ export function CandidateDetailPage() {
       />
 
       {actionError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-400">
           {actionError}
-          <button className="ml-2 text-red-500" onClick={() => setActionError(null)}>
+          <button
+            className="ml-2 text-red-500 dark:text-red-400"
+            onClick={() => setActionError(null)}
+          >
             <X size={14} />
           </button>
         </div>
       )}
 
       {/* Asosiy ma'lumot */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="mb-4 text-lg font-medium text-gray-900">{uz.candidates.infoTitle}</h2>
+      <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+          {uz.candidates.infoTitle}
+        </h2>
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <dt className="text-xs text-gray-500">{uz.candidates.fullNameLabel}</dt>
-            <dd className="mt-0.5 text-sm font-medium text-gray-900">{candidate.fullName}</dd>
+            <dt className="text-xs text-gray-500 dark:text-gray-400">
+              {uz.candidates.fullNameLabel}
+            </dt>
+            <dd className="mt-0.5 text-sm font-medium text-gray-900 dark:text-gray-100">
+              {candidate.fullName}
+            </dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500">{uz.candidates.phoneLabel}</dt>
-            <dd className="mt-0.5 text-sm text-gray-900">{candidate.phone}</dd>
+            <dt className="text-xs text-gray-500 dark:text-gray-400">{uz.candidates.phoneLabel}</dt>
+            <dd className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{candidate.phone}</dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500">{uz.questions.statusLabel}</dt>
+            <dt className="text-xs text-gray-500 dark:text-gray-400">{uz.questions.statusLabel}</dt>
             <dd className="mt-0.5">
               <Badge variant={STATUS_BADGE[candidate.status]}>
                 {STATUS_LABEL[candidate.status]}
@@ -287,15 +296,21 @@ export function CandidateDetailPage() {
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-500">{uz.candidates.registeredAt}</dt>
-            <dd className="mt-0.5 text-sm text-gray-900">{formatDate(candidate.createdAt)}</dd>
+            <dt className="text-xs text-gray-500 dark:text-gray-400">
+              {uz.candidates.registeredAt}
+            </dt>
+            <dd className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">
+              {formatDate(candidate.createdAt)}
+            </dd>
           </div>
         </dl>
       </div>
 
       {/* Hujjatlar */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="mb-4 text-lg font-medium text-gray-900">{uz.candidates.documentsTitle}</h2>
+      <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+          {uz.candidates.documentsTitle}
+        </h2>
         <input
           ref={fileInputRef}
           type="file"
@@ -309,17 +324,21 @@ export function CandidateDetailPage() {
             return (
               <div
                 key={type}
-                className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-4 py-3"
+                className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-700/50"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-700">{label}</div>
+                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {label}
+                  </div>
                   {doc ? (
-                    <div className="text-xs text-gray-500 truncate">
+                    <div className="text-xs text-gray-500 truncate dark:text-gray-400">
                       {doc.originalName} · {formatFileSize(doc.fileSize)} ·{' '}
                       {formatDate(doc.uploadedAt)}
                     </div>
                   ) : (
-                    <div className="text-xs text-gray-400">{uz.candidates.noDoc}</div>
+                    <div className="text-xs text-gray-400 dark:text-gray-500">
+                      {uz.candidates.noDoc}
+                    </div>
                   )}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
@@ -388,14 +407,16 @@ export function CandidateDetailPage() {
             );
           })}
         </div>
-        <p className="mt-2 text-xs text-gray-400">{uz.candidates.docHint}</p>
+        <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">{uz.candidates.docHint}</p>
       </div>
 
       {/* Tayinlov — faqat admin ko'radi */}
       {!isReadOnly && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-900">{uz.candidates.assignmentTitle}</h2>
+            <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+              {uz.candidates.assignmentTitle}
+            </h2>
             {!isReadOnly &&
               (candidate.assignment === null ? (
                 <Button
@@ -422,34 +443,44 @@ export function CandidateDetailPage() {
           {candidate.assignment ? (
             <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <dt className="text-xs text-gray-500">{uz.candidates.assignTitleLabel}</dt>
-                <dd className="mt-0.5 text-sm font-medium text-gray-900">
+                <dt className="text-xs text-gray-500 dark:text-gray-400">
+                  {uz.candidates.assignTitleLabel}
+                </dt>
+                <dd className="mt-0.5 text-sm font-medium text-gray-900 dark:text-gray-100">
                   {candidate.assignment.title}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-gray-500">{uz.candidates.templateNameLabel}</dt>
-                <dd className="mt-0.5 text-sm text-gray-900">
+                <dt className="text-xs text-gray-500 dark:text-gray-400">
+                  {uz.candidates.templateNameLabel}
+                </dt>
+                <dd className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">
                   {candidate.assignment.templateName ?? '—'}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-gray-500">{uz.candidates.startsAtLabel}</dt>
-                <dd className="mt-0.5 text-sm text-gray-900">
+                <dt className="text-xs text-gray-500 dark:text-gray-400">
+                  {uz.candidates.startsAtLabel}
+                </dt>
+                <dd className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">
                   {formatDate(candidate.assignment.startsAt)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-gray-500">{uz.candidates.endsAtLabel}</dt>
-                <dd className="mt-0.5 text-sm text-gray-900">
+                <dt className="text-xs text-gray-500 dark:text-gray-400">
+                  {uz.candidates.endsAtLabel}
+                </dt>
+                <dd className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">
                   {formatDate(candidate.assignment.endsAt)}
                 </dd>
               </div>
               {candidate.assignment.accessCode && (
                 <div className="sm:col-span-2">
-                  <dt className="text-xs text-gray-500">{uz.candidates.accessCodeLabel}</dt>
+                  <dt className="text-xs text-gray-500 dark:text-gray-400">
+                    {uz.candidates.accessCodeLabel}
+                  </dt>
                   <dd className="mt-1 flex items-center gap-2">
-                    <span className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 font-mono text-base font-bold tracking-widest text-blue-700">
+                    <span className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 font-mono text-base font-bold tracking-widest text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                       {candidate.assignment.accessCode}
                     </span>
                     <Button
@@ -477,33 +508,43 @@ export function CandidateDetailPage() {
               )}
               {!canEditAssignment && candidate.result !== null && (
                 <div className="sm:col-span-2">
-                  <p className="text-xs text-yellow-600">{uz.candidates.assignmentStarted}</p>
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                    {uz.candidates.assignmentStarted}
+                  </p>
                 </div>
               )}
             </dl>
           ) : (
-            <p className="text-sm text-gray-400">{uz.candidates.noAssignment}</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">{uz.candidates.noAssignment}</p>
           )}
         </div>
       )}
 
       {/* Natija */}
       {candidate.result && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h2 className="mb-4 text-lg font-medium text-gray-900">{uz.candidates.resultTitle}</h2>
+        <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+          <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+            {uz.candidates.resultTitle}
+          </h2>
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <dt className="text-xs text-gray-500">{uz.candidates.earnedScore}</dt>
-              <dd className="mt-0.5 text-sm font-medium text-gray-900">
+              <dt className="text-xs text-gray-500 dark:text-gray-400">
+                {uz.candidates.earnedScore}
+              </dt>
+              <dd className="mt-0.5 text-sm font-medium text-gray-900 dark:text-gray-100">
                 {candidate.result.score} / {candidate.result.maxScore}
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-gray-500">{uz.reports.percentColumn}</dt>
-              <dd className="mt-0.5 text-sm text-gray-900">{candidate.result.percent}%</dd>
+              <dt className="text-xs text-gray-500 dark:text-gray-400">
+                {uz.reports.percentColumn}
+              </dt>
+              <dd className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">
+                {candidate.result.percent}%
+              </dd>
             </div>
             <div>
-              <dt className="text-xs text-gray-500">{uz.dashboard.passed}</dt>
+              <dt className="text-xs text-gray-500 dark:text-gray-400">{uz.dashboard.passed}</dt>
               <dd className="mt-0.5">
                 <Badge variant={candidate.result.passed ? 'success' : 'danger'}>
                   {candidate.result.passed ? uz.dashboard.passed : uz.dashboard.failed}
@@ -512,16 +553,20 @@ export function CandidateDetailPage() {
             </div>
             {candidate.result.correctCount !== null && candidate.result.totalCount !== null && (
               <div>
-                <dt className="text-xs text-gray-500">{uz.candidates.correctAnswers}</dt>
-                <dd className="mt-0.5 text-sm text-gray-900">
+                <dt className="text-xs text-gray-500 dark:text-gray-400">
+                  {uz.candidates.correctAnswers}
+                </dt>
+                <dd className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">
                   {candidate.result.correctCount} / {candidate.result.totalCount} ta
                 </dd>
               </div>
             )}
             {candidate.result.finishedAt && (
               <div>
-                <dt className="text-xs text-gray-500">{uz.sessions.finishedAt}</dt>
-                <dd className="mt-0.5 text-sm text-gray-900">
+                <dt className="text-xs text-gray-500 dark:text-gray-400">
+                  {uz.sessions.finishedAt}
+                </dt>
+                <dd className="mt-0.5 text-sm text-gray-900 dark:text-gray-100">
                   {formatDate(candidate.result.finishedAt)}
                 </dd>
               </div>

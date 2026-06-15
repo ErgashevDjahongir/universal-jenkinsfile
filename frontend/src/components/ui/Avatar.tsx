@@ -24,6 +24,7 @@ export function Avatar({ name, className }: AvatarProps) {
       aria-hidden="true"
       className={cn(
         'flex h-9 w-9 shrink-0 select-none items-center justify-center rounded-full bg-gray-200 text-xs font-semibold uppercase text-gray-600',
+        'dark:bg-gray-700 dark:text-gray-300',
         className,
       )}
     >

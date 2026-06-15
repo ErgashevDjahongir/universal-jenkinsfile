@@ -47,7 +47,6 @@ export function ProfilePage() {
       setNext('');
       setConfirm('');
       if (isMustChange) {
-        // Sessiyani yangilash uchun chiqib qayta kiring
         await logout();
         navigate('/login', { replace: true });
       }
@@ -67,24 +66,24 @@ export function ProfilePage() {
       <PageHeader title={uz.profile.title} />
 
       {isMustChange && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
           {uz.profile.mustChangeNotice}
         </div>
       )}
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="mb-4 text-base font-medium text-gray-900">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <h2 className="mb-4 text-base font-medium text-gray-900 dark:text-gray-100">
           {uz.profile.changePasswordTitle}
         </h2>
 
         {success && !isMustChange && (
-          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300">
             {uz.profile.success}
           </div>
         )}
 
         {error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-400">
             {error}
           </div>
         )}

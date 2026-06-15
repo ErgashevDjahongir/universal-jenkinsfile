@@ -11,8 +11,12 @@ export function StartPage() {
       </div>
 
       <Card>
-        <h2 className="text-center text-2xl font-bold text-gray-900">{uz.test.entryTitle}</h2>
-        <p className="mt-1 text-center text-sm text-gray-500">{uz.test.entrySubtitle}</p>
+        <h2 className="text-center text-2xl font-bold text-gray-900 dark:text-gray-100">
+          {uz.test.entryTitle}
+        </h2>
+        <p className="mt-1 text-center text-sm text-gray-500 dark:text-gray-400">
+          {uz.test.entrySubtitle}
+        </p>
         <CandidateCodeForm />
       </Card>
     </div>

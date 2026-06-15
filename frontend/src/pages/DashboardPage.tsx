@@ -14,9 +14,11 @@ interface StatCardProps {
 
 function StatCard({ label, value }: StatCardProps) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="mt-1 text-3xl font-semibold text-gray-900">{value.toLocaleString('ru-RU')}</p>
+    <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+      <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+      <p className="mt-1 text-3xl font-semibold text-gray-900 dark:text-gray-100">
+        {value.toLocaleString('ru-RU')}
+      </p>
     </div>
   );
 }
@@ -78,8 +80,8 @@ export function DashboardPage() {
     return (
       <div className="space-y-4">
         <PageHeader title={uz.dashboard.title} />
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <p className="text-sm text-gray-600">
+        <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             {uz.auth.welcome}, {user?.firstName}!
           </p>
         </div>
@@ -114,32 +116,34 @@ export function DashboardPage() {
             </div>
 
             {/* Active sessions */}
-            <div className="rounded-lg border border-gray-200 bg-white">
-              <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                <h2 className="text-lg font-medium text-gray-900">{uz.dashboard.activeSessions}</h2>
+            <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+              <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                  {uz.dashboard.activeSessions}
+                </h2>
                 <Button variant="ghost" size="sm" onClick={() => navigate('/sessions')}>
                   {uz.sessions.monitoringTitle} →
                 </Button>
               </div>
               {stats.activeSessions.length === 0 ? (
-                <p className="px-4 py-6 text-center text-sm text-gray-500">
+                <p className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                   {uz.dashboard.noActiveSessions}
                 </p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50">
-                        <th className="px-4 py-2 text-left font-medium text-gray-600">
+                      <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
                           {uz.sessions.examinee}
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-600">
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
                           {uz.assignments.title}
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-600">
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
                           {uz.sessions.timeLeft}
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-600">
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
                           {uz.sessions.tabSwitchesHeader}
                         </th>
                         <th className="px-4 py-2" />
@@ -150,21 +154,26 @@ export function DashboardPage() {
                         void tick;
                         const secs = remainingSeconds(row.deadlineAt);
                         return (
-                          <tr key={row.sessionId} className="border-b border-gray-50 last:border-0">
-                            <td className="px-4 py-2 text-gray-900">
+                          <tr
+                            key={row.sessionId}
+                            className="border-b border-gray-50 last:border-0 dark:border-gray-700"
+                          >
+                            <td className="px-4 py-2 text-gray-900 dark:text-gray-100">
                               <div className="flex items-center gap-3">
                                 <Avatar name={row.fullName || `ID: ${row.userId}`} />
                                 <span>{row.fullName || `ID: ${row.userId}`}</span>
                               </div>
                             </td>
-                            <td className="px-4 py-2 text-gray-700">{row.assignmentTitle}</td>
+                            <td className="px-4 py-2 text-gray-700 dark:text-gray-300">
+                              {row.assignmentTitle}
+                            </td>
                             <td
-                              className={`px-4 py-2 font-mono ${secs < 300 ? 'text-red-600' : 'text-gray-700'}`}
+                              className={`px-4 py-2 font-mono ${secs < 300 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}
                             >
                               {formatTime(secs)}
                             </td>
                             <td
-                              className={`px-4 py-2 ${row.tabSwitches > 0 ? 'text-yellow-700' : 'text-gray-500'}`}
+                              className={`px-4 py-2 ${row.tabSwitches > 0 ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500 dark:text-gray-400'}`}
                             >
                               {row.tabSwitches}
                             </td>
@@ -187,35 +196,37 @@ export function DashboardPage() {
             </div>
 
             {/* Recent results */}
-            <div className="rounded-lg border border-gray-200 bg-white">
-              <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                <h2 className="text-lg font-medium text-gray-900">{uz.dashboard.recentResults}</h2>
+            <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+              <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                  {uz.dashboard.recentResults}
+                </h2>
                 <Button variant="ghost" size="sm" onClick={() => navigate('/reports')}>
                   {uz.reports.title} →
                 </Button>
               </div>
               {stats.recentResults.length === 0 ? (
-                <p className="px-4 py-6 text-center text-sm text-gray-500">
+                <p className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                   {uz.dashboard.noRecentResults}
                 </p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50">
-                        <th className="px-4 py-2 text-left font-medium text-gray-600">
+                      <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
                           {uz.reports.nameColumn}
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-600">
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
                           {uz.assignments.title}
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-600">
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
                           {uz.reports.scoreColumn}
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-600">
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
                           {uz.reports.passedColumn}
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-600">
+                        <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
                           {uz.sessions.finishedAt}
                         </th>
                         <th className="px-4 py-2" />
@@ -223,18 +234,23 @@ export function DashboardPage() {
                     </thead>
                     <tbody>
                       {stats.recentResults.map((row) => (
-                        <tr key={row.sessionId} className="border-b border-gray-50 last:border-0">
-                          <td className="px-4 py-2 text-gray-900">
+                        <tr
+                          key={row.sessionId}
+                          className="border-b border-gray-50 last:border-0 dark:border-gray-700"
+                        >
+                          <td className="px-4 py-2 text-gray-900 dark:text-gray-100">
                             <div className="flex items-center gap-3">
                               <Avatar name={row.fullName || `ID: ${row.userId}`} />
                               <span>{row.fullName || `ID: ${row.userId}`}</span>
                             </div>
                           </td>
-                          <td className="px-4 py-2 text-gray-700">{row.assignmentTitle}</td>
-                          <td className="px-4 py-2 text-gray-700">
+                          <td className="px-4 py-2 text-gray-700 dark:text-gray-300">
+                            {row.assignmentTitle}
+                          </td>
+                          <td className="px-4 py-2 text-gray-700 dark:text-gray-300">
                             {formatScore(row.score, row.maxScore)}
                             {row.percent && (
-                              <span className="ml-1 text-xs text-gray-400">
+                              <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">
                                 ({formatPercent(row.percent)})
                               </span>
                             )}
@@ -245,10 +261,12 @@ export function DashboardPage() {
                                 {row.passed ? uz.dashboard.passed : uz.dashboard.failed}
                               </Badge>
                             ) : (
-                              <span className="text-gray-400">—</span>
+                              <span className="text-gray-400 dark:text-gray-500">—</span>
                             )}
                           </td>
-                          <td className="px-4 py-2 text-gray-500">{formatDate(row.finishedAt)}</td>
+                          <td className="px-4 py-2 text-gray-500 dark:text-gray-400">
+                            {formatDate(row.finishedAt)}
+                          </td>
                           <td className="px-4 py-2">
                             <Button
                               variant="ghost"

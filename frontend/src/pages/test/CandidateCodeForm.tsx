@@ -85,8 +85,8 @@ export function CandidateCodeForm() {
       />
 
       {showRegistration && (
-        <div className="space-y-4 border-t border-gray-100 pt-4">
-          <p className="text-sm text-gray-600">{uz.test.registrationHint}</p>
+        <div className="space-y-4 border-t border-gray-100 pt-4 dark:border-gray-700">
+          <p className="text-sm text-gray-600 dark:text-gray-400">{uz.test.registrationHint}</p>
           <Input
             label={uz.test.lastNameLabel}
             placeholder={uz.test.lastNamePlaceholder}
@@ -119,7 +119,7 @@ export function CandidateCodeForm() {
         </div>
       )}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       <Button type="submit" className="w-full" loading={submitting} disabled={submitting}>
         {submitting ? uz.test.entering : uz.test.enter}
