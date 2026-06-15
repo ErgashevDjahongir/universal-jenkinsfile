@@ -1,6 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 import { CandidateStatus } from '../../common/enums/candidate-status.enum';
+import { SessionStatus } from '../../common/enums/session-status.enum';
 import { TemplateStatus } from '../../common/enums/template-status.enum';
 import { CandidatesService, UploadedDocument } from './candidates.service';
 import { CandidateView } from './dto/candidate-filter.dto';
@@ -12,8 +13,45 @@ jest.mock('node:fs/promises', () => ({
   unlink: jest.fn().mockResolvedValue(undefined),
 }));
 
+/** andWhere/where shartlarini yozib boruvchi soxta QueryBuilder. */
+interface RecordingQb {
+  innerJoin: jest.Mock;
+  leftJoin: jest.Mock;
+  where: jest.Mock;
+  andWhere: jest.Mock;
+  orderBy: jest.Mock;
+  getMany: jest.Mock;
+  calls: { method: string; args: unknown[] }[];
+}
+
+function makeRecordingQb(result: unknown[]): RecordingQb {
+  const calls: { method: string; args: unknown[] }[] = [];
+  const qb = {
+    calls,
+    getMany: jest.fn().mockResolvedValue(result),
+  } as unknown as RecordingQb;
+  for (const m of ['innerJoin', 'leftJoin', 'where', 'andWhere', 'orderBy'] as const) {
+    qb[m] = jest.fn((...args: unknown[]) => {
+      calls.push({ method: m, args });
+      return qb;
+    });
+  }
+  return qb;
+}
+
 interface Mocks {
-  candidates: { findOne: jest.Mock; find: jest.Mock; create: jest.Mock; save: jest.Mock };
+  candidates: {
+    findOne: jest.Mock;
+    find: jest.Mock;
+    create: jest.Mock;
+    save: jest.Mock;
+    update: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
+  /** candidates.createQueryBuilder har chaqirilganda yaratilgan qb'lar (tartib bo'yicha). */
+  candidateQbs: RecordingQb[];
+  /** Keyingi candidates QB.getMany qaytaradigan natija (reconcile/findAll uchun). */
+  setCandidateRows: (rows: unknown[]) => void;
   documents: { findOne: jest.Mock; find: jest.Mock; create: jest.Mock; save: jest.Mock };
   assignments: {
     findOne: jest.Mock;
@@ -22,7 +60,7 @@ interface Mocks {
     save: jest.Mock;
   };
   codes: { findOneOrFail: jest.Mock };
-  sessions: { findOne: jest.Mock; count: jest.Mock };
+  sessions: { findOne: jest.Mock; count: jest.Mock; find: jest.Mock };
   templates: { findOne: jest.Mock };
   audit: { log: jest.Mock };
   dataSource: { transaction: jest.Mock };
@@ -39,6 +77,8 @@ function build(): { service: CandidatesService; mocks: Mocks } {
     create: (_e: unknown, obj: unknown) => obj,
     save: managerSave,
   };
+  const candidateQbs: RecordingQb[] = [];
+  let candidateRows: unknown[] = [];
   const mocks: Mocks = {
     candidates: {
       findOne: jest.fn(),
@@ -49,6 +89,16 @@ function build(): { service: CandidatesService; mocks: Mocks } {
         .mockImplementation((x: unknown) =>
           Promise.resolve({ id: '1', ...(x as Record<string, unknown>) }),
         ),
+      update: jest.fn().mockResolvedValue({ affected: 1 }),
+      createQueryBuilder: jest.fn(() => {
+        const qb = makeRecordingQb(candidateRows);
+        candidateQbs.push(qb);
+        return qb;
+      }),
+    },
+    candidateQbs,
+    setCandidateRows: (rows: unknown[]) => {
+      candidateRows = rows;
     },
     documents: {
       findOne: jest.fn(),
@@ -83,7 +133,7 @@ function build(): { service: CandidatesService; mocks: Mocks } {
       save: jest.fn().mockImplementation((x: unknown) => Promise.resolve(x)),
     },
     codes: { findOneOrFail: jest.fn().mockResolvedValue({ id: '99', code: 'CAND0001' }) },
-    sessions: { findOne: jest.fn(), count: jest.fn().mockResolvedValue(0) },
+    sessions: { findOne: jest.fn(), count: jest.fn().mockResolvedValue(0), find: jest.fn() },
     templates: { findOne: jest.fn() },
     audit: { log: jest.fn().mockResolvedValue(undefined) },
     dataSource: {
@@ -317,42 +367,128 @@ describe('CandidatesService.updateAssignment', () => {
 });
 
 describe('CandidatesService.findAll — view filtri', () => {
-  it('view=current faqat pending va in_progress ni qaytaradi', async () => {
+  /** findAll asosiy so'rovi — reconcile qb #0 dan keyin yaratiladi (qb #1). */
+  function listQb(mocks: Mocks): RecordingQb {
+    return mocks.candidateQbs[mocks.candidateQbs.length - 1];
+  }
+
+  function andWhereParams(qb: RecordingQb): Record<string, unknown> {
+    const merged: Record<string, unknown> = {};
+    for (const c of qb.calls) {
+      if (c.method === 'andWhere' && c.args[1] && typeof c.args[1] === 'object') {
+        Object.assign(merged, c.args[1] as Record<string, unknown>);
+      }
+    }
+    return merged;
+  }
+
+  function andWhereSql(qb: RecordingQb): string[] {
+    return qb.calls.filter((c) => c.method === 'andWhere').map((c) => c.args[0] as string);
+  }
+
+  it('view=current: pending+in_progress VA tugash sanasi o‘tmaganlar (sana sharti bilan)', async () => {
     const { service, mocks } = build();
-    const assignmentQb = {
-      createQueryBuilder: jest.fn().mockReturnValue({
-        where: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([]),
-      }),
-    };
-    Object.assign(mocks.assignments, assignmentQb);
-    mocks.candidates.find.mockResolvedValue([]);
 
     await service.findAll({ view: CandidateView.CURRENT });
 
-    const whereArg = mocks.candidates.find.mock.calls[0][0].where;
-    // status maydoni In() operatori bo'lishi kerak
-    expect(whereArg.status).toBeDefined();
-    // TypeORM In() natijasi FindOperator obyekti; qiymatlarini tekshiramiz
-    const values: CandidateStatus[] = (whereArg.status as { value: CandidateStatus[] }).value;
-    expect(values).toContain(CandidateStatus.PENDING);
-    expect(values).toContain(CandidateStatus.IN_PROGRESS);
-    expect(values).not.toContain(CandidateStatus.COMPLETED);
-    expect(values).not.toContain(CandidateStatus.NO_SHOW);
+    const qb = listQb(mocks);
+    const values = andWhereParams(qb).current as CandidateStatus[];
+    expect(values).toEqual([CandidateStatus.PENDING, CandidateStatus.IN_PROGRESS]);
+    // Tugash sanasi o'tmagan yoki tayinlovsiz — server vaqti (NOW()) bilan.
+    expect(andWhereSql(qb).some((s) => s.includes('ends_at >= NOW()'))).toBe(true);
   });
 
-  it('view=archived faqat completed va no_show ni qaytaradi', async () => {
+  it('view=archived: faqat completed+no_show (sana sharti qo‘ymaydi)', async () => {
     const { service, mocks } = build();
-    mocks.candidates.find.mockResolvedValue([]);
 
     await service.findAll({ view: CandidateView.ARCHIVED });
 
-    const whereArg = mocks.candidates.find.mock.calls[0][0].where;
-    const values: CandidateStatus[] = (whereArg.status as { value: CandidateStatus[] }).value;
-    expect(values).toContain(CandidateStatus.COMPLETED);
-    expect(values).toContain(CandidateStatus.NO_SHOW);
-    expect(values).not.toContain(CandidateStatus.PENDING);
-    expect(values).not.toContain(CandidateStatus.IN_PROGRESS);
+    const qb = listQb(mocks);
+    const values = andWhereParams(qb).archived as CandidateStatus[];
+    expect(values).toEqual([CandidateStatus.COMPLETED, CandidateStatus.NO_SHOW]);
+    expect(andWhereSql(qb).some((s) => s.includes('ends_at'))).toBe(false);
+  });
+
+  it('hasAssignment: tayinlovsizlarni chiqarib tashlaydi (a.id IS NOT NULL)', async () => {
+    const { service, mocks } = build();
+
+    await service.findAll({ hasAssignment: true });
+
+    expect(andWhereSql(listQb(mocks)).some((s) => s.includes('a.id IS NOT NULL'))).toBe(true);
+  });
+
+  it('ro‘yxat so‘ralganda holatlar avval yangilanadi (reconcile chaqiriladi)', async () => {
+    const { service } = build();
+    const spy = jest.spyOn(service, 'reconcileExpiredCandidates');
+
+    await service.findAll({ view: CandidateView.CURRENT });
+
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('CandidatesService.reconcileExpiredCandidates', () => {
+  it('muddati o‘tgan kandidat yo‘q bo‘lsa 0 qaytaradi', async () => {
+    const { service, mocks } = build();
+    mocks.setCandidateRows([]);
+
+    await expect(service.reconcileExpiredCandidates()).resolves.toBe(0);
+    expect(mocks.candidates.update).not.toHaveBeenCalled();
+  });
+
+  it('o‘zi yakunlagan (COMPLETED) sessiya bor → completed', async () => {
+    const { service, mocks } = build();
+    mocks.setCandidateRows([{ id: '1', status: CandidateStatus.IN_PROGRESS }]);
+    mocks.sessions.find.mockResolvedValue([{ candidateId: '1' }]);
+
+    await service.reconcileExpiredCandidates();
+
+    expect(mocks.candidates.update).toHaveBeenCalledWith(
+      { id: '1' },
+      { status: CandidateStatus.COMPLETED },
+    );
+    expect(mocks.audit.log).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'candidate.auto_completed', entityId: '1', userId: null }),
+    );
+  });
+
+  it('sessiya yo‘q → no_show (topshirmagan)', async () => {
+    const { service, mocks } = build();
+    mocks.setCandidateRows([{ id: '2', status: CandidateStatus.PENDING }]);
+    mocks.sessions.find.mockResolvedValue([]);
+
+    await service.reconcileExpiredCandidates();
+
+    expect(mocks.candidates.update).toHaveBeenCalledWith(
+      { id: '2' },
+      { status: CandidateStatus.NO_SHOW },
+    );
+  });
+
+  it('faqat vaqt tugagan (expired/terminated) sessiya → no_show, completed EMAS', async () => {
+    const { service, mocks } = build();
+    mocks.setCandidateRows([{ id: '3', status: CandidateStatus.IN_PROGRESS }]);
+    // COMPLETED bo'yicha so'rov hech narsa topmaydi (expired/terminated hisobga olinmaydi).
+    mocks.sessions.find.mockResolvedValue([]);
+
+    await service.reconcileExpiredCandidates();
+
+    expect(mocks.candidates.update).toHaveBeenCalledWith(
+      { id: '3' },
+      { status: CandidateStatus.NO_SHOW },
+    );
+    // sessions.find faqat COMPLETED holatini so'raydi.
+    expect(mocks.sessions.find.mock.calls[0][0].where.status).toBe(SessionStatus.COMPLETED);
+  });
+
+  it('holat allaqachon mos bo‘lsa update chaqirmaydi (idempotent)', async () => {
+    const { service, mocks } = build();
+    mocks.setCandidateRows([{ id: '5', status: CandidateStatus.NO_SHOW }]);
+    mocks.sessions.find.mockResolvedValue([]);
+
+    await service.reconcileExpiredCandidates();
+
+    expect(mocks.candidates.update).not.toHaveBeenCalled();
   });
 });
 

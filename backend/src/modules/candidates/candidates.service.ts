@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { mkdir, unlink, writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { join, resolve } from 'node:path';
-import { DataSource, EntityManager, ILike, In, QueryFailedError, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, QueryFailedError, Repository } from 'typeorm';
 import { CandidateStatus } from '../../common/enums/candidate-status.enum';
 import { DocumentType } from '../../common/enums/document-type.enum';
 import { SessionStatus } from '../../common/enums/session-status.enum';
@@ -156,23 +156,43 @@ export class CandidatesService {
   }
 
   async findAll(filter: CandidateFilterDto): Promise<CandidateListRow[]> {
-    const statusFilter = this.resolveStatusFilter(filter);
-    const rows = await this.candidates.find({
-      where: {
-        ...statusFilter,
-        ...(filter.search
-          ? {
-              fullName: ILike(`%${filter.search.replace(/%/g, '\\%').replace(/_/g, '\\_')}%`),
-            }
-          : {}),
-      },
-      order: { id: 'DESC' },
-    });
+    // Ro'yxat so'ralganda holatlarni yangilaymiz — rejalashtirilgan cron'ga
+    // qo'shimcha ishonchlilik (tugash sanasi o'tganlar darhol joriy ro'yxatdan tushadi).
+    await this.reconcileExpiredCandidates();
+
+    const qb = this.candidates
+      .createQueryBuilder('c')
+      .leftJoin(TestAssignment, 'a', 'a.candidate_id = c.id');
+
+    if (filter.view === CandidateView.CURRENT) {
+      // Joriy: hali yakunlanmagan holatlar VA tugash sanasi o'tmagan (yoki tayinlovsiz).
+      qb.andWhere('c.status IN (:...current)', {
+        current: [CandidateStatus.PENDING, CandidateStatus.IN_PROGRESS],
+      }).andWhere('(a.id IS NULL OR a.ends_at >= NOW())');
+    } else if (filter.view === CandidateView.ARCHIVED) {
+      // O'tganlar (natijalar): tugash sanasi o'tib, holat yakunlangan/topshirmagan.
+      qb.andWhere('c.status IN (:...archived)', {
+        archived: [CandidateStatus.COMPLETED, CandidateStatus.NO_SHOW],
+      });
+    } else if (filter.status) {
+      qb.andWhere('c.status = :status', { status: filter.status });
+    }
+
+    if (filter.hasAssignment) {
+      qb.andWhere('a.id IS NOT NULL');
+    }
+
+    if (filter.search) {
+      const term = `%${filter.search.replace(/%/g, '\\%').replace(/_/g, '\\_')}%`;
+      qb.andWhere('c.full_name ILIKE :term', { term });
+    }
+
+    const rows = await qb.orderBy('c.id', 'DESC').getMany();
     if (rows.length === 0) {
       return [];
     }
     const assignmentByCandidate = await this.loadAssignmentsByCandidate(rows.map((c) => c.id));
-    const result = rows.map((c) => ({
+    return rows.map((c) => ({
       id: c.id,
       fullName: c.fullName,
       phone: c.phone,
@@ -180,7 +200,63 @@ export class CandidatesService {
       createdAt: c.createdAt,
       assignment: assignmentByCandidate.get(c.id) ?? null,
     }));
-    return filter.hasAssignment ? result.filter((r) => r.assignment !== null) : result;
+  }
+
+  /**
+   * Tugash sanasi o'tgan, hali aktiv (`pending`/`in_progress`) topshiruvchilarni
+   * yakuniy holatga o'tkazadi (TZ §G). Rejalashtirilgan cron va ro'yxat so'rovi chaqiradi.
+   *
+   * Qoida: faqat o'zi yakunlagan (`COMPLETED`) sessiya = test topshirgan → `completed`.
+   * Aks holda (sessiya yo'q, boshlanmagan, vaqt tugagan `expired`, `terminated`) → `no_show`.
+   * Status o'zgarishi audit jurnaliga yoziladi. O'zgartirilgan yozuvlar sonini qaytaradi.
+   */
+  async reconcileExpiredCandidates(): Promise<number> {
+    const expired = await this.candidates
+      .createQueryBuilder('c')
+      .innerJoin(TestAssignment, 'a', 'a.candidate_id = c.id')
+      .where('a.ends_at < NOW()')
+      .andWhere('c.status IN (:...statuses)', {
+        statuses: [CandidateStatus.PENDING, CandidateStatus.IN_PROGRESS],
+      })
+      .getMany();
+
+    if (expired.length === 0) {
+      return 0;
+    }
+
+    const candidateIds = expired.map((c) => c.id);
+    // Faqat o'zi yakunlagan sessiya = haqiqatan test topshirgan.
+    const completedSessions = await this.sessions.find({
+      where: {
+        candidateId: In(candidateIds),
+        status: SessionStatus.COMPLETED,
+        isPreview: false,
+      },
+      select: { candidateId: true },
+    });
+    const completedSet = new Set(
+      completedSessions.map((s) => s.candidateId).filter((id): id is string => id !== null),
+    );
+
+    let changed = 0;
+    for (const candidate of expired) {
+      const newStatus = completedSet.has(candidate.id)
+        ? CandidateStatus.COMPLETED
+        : CandidateStatus.NO_SHOW;
+      if (candidate.status === newStatus) {
+        continue;
+      }
+      await this.candidates.update({ id: candidate.id }, { status: newStatus });
+      await this.audit.log({
+        userId: null,
+        action: `candidate.auto_${newStatus}`,
+        entity: 'candidate',
+        entityId: candidate.id,
+        details: { previousStatus: candidate.status, reason: 'assignment_ended' },
+      });
+      changed += 1;
+    }
+    return changed;
   }
 
   async findOne(id: string): Promise<CandidateDetail> {
@@ -468,22 +544,6 @@ export class CandidatesService {
   }
 
   // ---- yordamchilar ----
-
-  /**
-   * `view` yoki `status` filtrini TypeORM WHERE shartiga aylantiradi.
-   * `view` berilsa `status` e'tiborga olinmaydi.
-   */
-  private resolveStatusFilter(filter: CandidateFilterDto): {
-    status?: CandidateStatus | ReturnType<typeof In>;
-  } {
-    if (filter.view === CandidateView.CURRENT) {
-      return { status: In([CandidateStatus.PENDING, CandidateStatus.IN_PROGRESS]) };
-    }
-    if (filter.view === CandidateView.ARCHIVED) {
-      return { status: In([CandidateStatus.COMPLETED, CandidateStatus.NO_SHOW]) };
-    }
-    return filter.status ? { status: filter.status } : {};
-  }
 
   private async getOrFail(id: string): Promise<Candidate> {
     const candidate = await this.candidates.findOne({ where: { id } });

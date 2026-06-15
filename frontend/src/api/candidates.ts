@@ -84,8 +84,11 @@ export interface CandidateAssignmentResult {
   code: { id: string; code: string };
 }
 
+export type CandidateView = 'current' | 'archived';
+
 export interface CandidateFilter {
   status?: CandidateStatus;
+  view?: CandidateView;
   search?: string;
 }
 

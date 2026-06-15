@@ -20,6 +20,7 @@ import {
   getCandidates,
   type CandidateListRow,
   type CandidateStatus,
+  type CandidateView,
 } from '@/api/candidates';
 import { CandidateFormModal } from './CandidateFormModal';
 
@@ -46,6 +47,7 @@ export function CandidatesPage() {
   const [candidates, setCandidates] = useState<CandidateListRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<CandidateView>('current');
   const [statusFilter, setStatusFilter] = useState<CandidateStatus | ''>('');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -65,7 +67,7 @@ export function CandidatesPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getCandidates();
+      const data = await getCandidates({ view });
       setCandidates(data);
       setPage(1);
     } catch {
@@ -73,7 +75,7 @@ export function CandidatesPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [view]);
 
   useEffect(() => {
     void load();
@@ -102,6 +104,13 @@ export function CandidatesPage() {
   }, [candidates]);
 
   const paged = filtered.slice((page - 1) * PAGE_LIMIT, page * PAGE_LIMIT);
+
+  function changeView(next: CandidateView) {
+    if (next === view) return;
+    setView(next);
+    setStatusFilter('');
+    setPage(1);
+  }
 
   async function handleDelete() {
     if (!deleteTarget) return;
@@ -222,8 +231,34 @@ export function CandidatesPage() {
         </div>
       )}
 
+      {/* Joriy / O'tganlar bo'limi — tugash sanasi bo'yicha ajratiladi */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1">
+          {(
+            [
+              ['current', uz.candidates.viewCurrent],
+              ['archived', uz.candidates.viewArchived],
+            ] as const
+          ).map(([v, label]) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => changeView(v)}
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+                view === v ? 'bg-white text-blue-700' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500">
+          {view === 'current' ? uz.candidates.viewCurrentHint : uz.candidates.viewArchivedHint}
+        </p>
+      </div>
+
       {/* Bugungi ko'rinish — ekspert uchun bosh sahifa vazifasini bajaradi */}
-      {isReadOnly && (
+      {isReadOnly && view === 'current' && (
         <div className="rounded-lg border border-gray-200 bg-white p-5">
           <h2 className="mb-4 text-base font-semibold text-gray-800">
             {uz.candidates.todaySection}
@@ -251,12 +286,6 @@ export function CandidatesPage() {
                     count: todayCandidates.filter((c) => c.status === 'in_progress').length,
                     color: 'bg-blue-50 border-blue-200 text-blue-700',
                     value: 'in_progress' as CandidateStatus,
-                  },
-                  {
-                    label: uz.candidates.statusCompleted,
-                    count: todayCandidates.filter((c) => c.status === 'completed').length,
-                    color: 'bg-green-50 border-green-200 text-green-700',
-                    value: 'completed' as CandidateStatus,
                   },
                 ] as const
               ).map(({ label, count, color, value }) => (
@@ -296,10 +325,17 @@ export function CandidatesPage() {
               onChange={(e) => setStatusFilter(e.target.value as CandidateStatus | '')}
             >
               <option value="">{uz.candidates.allStatuses}</option>
-              <option value="pending">{uz.candidates.statusPending}</option>
-              <option value="in_progress">{uz.candidates.statusInProgress}</option>
-              <option value="completed">{uz.candidates.statusCompleted}</option>
-              <option value="no_show">{uz.candidates.statusNoShow}</option>
+              {view === 'current' ? (
+                <>
+                  <option value="pending">{uz.candidates.statusPending}</option>
+                  <option value="in_progress">{uz.candidates.statusInProgress}</option>
+                </>
+              ) : (
+                <>
+                  <option value="completed">{uz.candidates.statusCompleted}</option>
+                  <option value="no_show">{uz.candidates.statusNoShow}</option>
+                </>
+              )}
             </Select>
           </div>
         </div>
