@@ -122,7 +122,7 @@ export function InterviewQuestionFormModal({ open, onClose, onSaved, initial, su
         </Select>
 
         <div className="space-y-1.5">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             {uz.interviewQuestions.questionTextLabel}
           </label>
           <RichTextEditor
@@ -134,7 +134,7 @@ export function InterviewQuestionFormModal({ open, onClose, onSaved, initial, su
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             {uz.interviewQuestions.expectedAnswerLabel}
           </label>
           <RichTextEditor
@@ -146,7 +146,7 @@ export function InterviewQuestionFormModal({ open, onClose, onSaved, initial, su
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             {uz.interviewQuestions.rationaleLabel}
           </label>
           <RichTextEditor
@@ -157,7 +157,7 @@ export function InterviewQuestionFormModal({ open, onClose, onSaved, initial, su
           />
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       </form>
     </Modal>
   );

@@ -160,7 +160,7 @@ function QuestionPickerModal({ open, alreadySelected, onConfirm, onClose }: Pick
       className="max-w-3xl"
       footer={
         <>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             {uz.templates.pickerSelected.replace('{count}', String(selected.size))}
           </span>
           <Button
@@ -224,18 +224,18 @@ function QuestionPickerModal({ open, alreadySelected, onConfirm, onClose }: Pick
           </Select>
         </div>
 
-        <div className="max-h-80 overflow-y-auto rounded-lg border border-gray-200">
+        <div className="max-h-80 overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-700">
           {loading ? (
-            <p className="p-4 text-sm text-gray-500">{uz.common.loading}</p>
+            <p className="p-4 text-sm text-gray-500 dark:text-gray-400">{uz.common.loading}</p>
           ) : questions.length === 0 ? (
-            <p className="p-4 text-sm text-gray-500">{uz.questions.emptyText}</p>
+            <p className="p-4 text-sm text-gray-500 dark:text-gray-400">{uz.questions.emptyText}</p>
           ) : (
             <table className="w-full text-sm">
               <tbody>
                 {questions.map((q) => (
                   <tr
                     key={q.id}
-                    className="cursor-pointer border-b border-gray-100 hover:bg-gray-50"
+                    className="cursor-pointer border-b border-gray-100 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
                     onClick={() => toggle(q.id)}
                   >
                     <td className="px-3 py-2 w-8">
@@ -244,11 +244,13 @@ function QuestionPickerModal({ open, alreadySelected, onConfirm, onClose }: Pick
                         checked={selected.has(q.id)}
                         onChange={() => toggle(q.id)}
                         onClick={(e) => e.stopPropagation()}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 dark:border-gray-600 dark:bg-gray-700"
                       />
                     </td>
-                    <td className="px-3 py-2 text-gray-900 line-clamp-2">{q.text}</td>
-                    <td className="px-3 py-2 text-gray-500 whitespace-nowrap">
+                    <td className="px-3 py-2 text-gray-900 line-clamp-2 dark:text-gray-100">
+                      {q.text}
+                    </td>
+                    <td className="px-3 py-2 text-gray-500 whitespace-nowrap dark:text-gray-400">
                       {q.difficulty} · {q.points} ball
                     </td>
                   </tr>
@@ -506,7 +508,7 @@ export function TemplateFormPage() {
 
   if (loadingInit) {
     return (
-      <div className="flex items-center justify-center py-16 text-sm text-gray-500">
+      <div className="flex items-center justify-center py-16 text-sm text-gray-500 dark:text-gray-400">
         {uz.common.loading}
       </div>
     );
@@ -544,20 +546,22 @@ export function TemplateFormPage() {
       />
 
       {saveError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-400">
           {saveError}
         </div>
       )}
 
       {isReadonly && (
-        <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 dark:border-yellow-500/40 dark:bg-yellow-500/10 dark:text-yellow-300">
           Faol yoki arxivlangan shablon tahrirlanmaydi.
         </div>
       )}
 
       {/* 1. Asosiy ma'lumot */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
-        <h2 className="text-lg font-medium text-gray-900">{uz.templates.sectionBasic}</h2>
+      <section className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800 space-y-4">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          {uz.templates.sectionBasic}
+        </h2>
         <Input
           label={uz.templates.titleLabel}
           placeholder={uz.templates.titlePlaceholder}
@@ -566,11 +570,11 @@ export function TemplateFormPage() {
           disabled={isReadonly}
         />
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             {uz.templates.descriptionLabel}
           </label>
           <textarea
-            className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+            className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400"
             rows={2}
             placeholder={uz.templates.descriptionPlaceholder}
             value={fields.description}
@@ -581,8 +585,10 @@ export function TemplateFormPage() {
       </section>
 
       {/* 2. Vaqt va urinishlar */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
-        <h2 className="text-lg font-medium text-gray-900">{uz.templates.sectionTiming}</h2>
+      <section className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800 space-y-4">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          {uz.templates.sectionTiming}
+        </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Input
             label={uz.templates.timeLimitLabel}
@@ -613,8 +619,10 @@ export function TemplateFormPage() {
       </section>
 
       {/* 3. Navigatsiya va tartiblash */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
-        <h2 className="text-lg font-medium text-gray-900">{uz.templates.sectionBehavior}</h2>
+      <section className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800 space-y-4">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          {uz.templates.sectionBehavior}
+        </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Select
             label={uz.templates.navigationLabel}
@@ -636,14 +644,14 @@ export function TemplateFormPage() {
           ).map(([key, label]) => (
             <label
               key={key}
-              className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"
+              className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer dark:text-gray-300"
             >
               <input
                 type="checkbox"
                 checked={fields[key] as boolean}
                 onChange={(e) => setField(key, e.target.checked)}
                 disabled={isReadonly}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 dark:border-gray-600 dark:bg-gray-700"
               />
               {label}
             </label>
@@ -652,8 +660,10 @@ export function TemplateFormPage() {
       </section>
 
       {/* 4. Baholash */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
-        <h2 className="text-lg font-medium text-gray-900">{uz.templates.sectionScoring}</h2>
+      <section className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800 space-y-4">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          {uz.templates.sectionScoring}
+        </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label={uz.templates.passingScoreLabel}
@@ -667,23 +677,23 @@ export function TemplateFormPage() {
           />
         </div>
         <div className="flex flex-wrap gap-6">
-          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer dark:text-gray-300">
             <input
               type="checkbox"
               checked={fields.partialScoring}
               onChange={(e) => setField('partialScoring', e.target.checked)}
               disabled={isReadonly}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600"
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 dark:border-gray-600 dark:bg-gray-700"
             />
             {uz.templates.partialScoringLabel}
           </label>
-          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer dark:text-gray-300">
             <input
               type="checkbox"
               checked={fields.negativeMarking}
               onChange={(e) => setField('negativeMarking', e.target.checked)}
               disabled={isReadonly}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600"
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 dark:border-gray-600 dark:bg-gray-700"
             />
             {uz.templates.negativeMarkingLabel}
           </label>
@@ -704,8 +714,10 @@ export function TemplateFormPage() {
       </section>
 
       {/* 5. Natija va xavfsizlik */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
-        <h2 className="text-lg font-medium text-gray-900">{uz.templates.sectionVisibility}</h2>
+      <section className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800 space-y-4">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          {uz.templates.sectionVisibility}
+        </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Select
             label={uz.templates.resultVisibilityLabel}
@@ -729,9 +741,11 @@ export function TemplateFormPage() {
       </section>
 
       {/* 6. Baholash shkalasi */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
+      <section className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium text-gray-900">{uz.templates.sectionGradeScale}</h2>
+          <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+            {uz.templates.sectionGradeScale}
+          </h2>
           {!isReadonly && (
             <Button
               variant="secondary"
@@ -745,7 +759,9 @@ export function TemplateFormPage() {
           )}
         </div>
         {gradeScale.length === 0 ? (
-          <p className="text-sm text-gray-500">Baholash shkalasi belgilanmagan (ixtiyoriy)</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Baholash shkalasi belgilanmagan (ixtiyoriy)
+          </p>
         ) : (
           <div className="space-y-2">
             {gradeScale.map((row, i) => (
@@ -797,11 +813,13 @@ export function TemplateFormPage() {
       </section>
 
       {/* 7. Savollar */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6 space-y-6">
-        <h2 className="text-lg font-medium text-gray-900">{uz.templates.sectionQuestions}</h2>
+      <section className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800 space-y-6">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          {uz.templates.sectionQuestions}
+        </h2>
 
         {/* Savol hisob */}
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           {uz.templates.questionCount
             .replace('{total}', String(fixedItems.length + totalAuto))
             .replace('{fixed}', String(fixedItems.length))
@@ -811,7 +829,7 @@ export function TemplateFormPage() {
         {/* Qo'lda tanlangan savollar */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-700">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {uz.templates.fixedQuestionsTitle}
             </h3>
             {!isReadonly && (
@@ -827,16 +845,22 @@ export function TemplateFormPage() {
             )}
           </div>
           {fixedItems.length === 0 ? (
-            <p className="text-sm text-gray-400">{uz.templates.fixedQuestionsEmpty}</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">
+              {uz.templates.fixedQuestionsEmpty}
+            </p>
           ) : (
             <div className="space-y-2">
               {fixedItems.map((f, i) => (
                 <div
                   key={f.questionId}
-                  className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2"
+                  className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40 px-3 py-2"
                 >
-                  <span className="text-xs text-gray-400 w-5 shrink-0">{i + 1}.</span>
-                  <span className="flex-1 text-sm text-gray-800 line-clamp-1">{f.text}</span>
+                  <span className="text-xs text-gray-400 w-5 shrink-0 dark:text-gray-500">
+                    {i + 1}.
+                  </span>
+                  <span className="flex-1 text-sm text-gray-800 line-clamp-1 dark:text-gray-200">
+                    {f.text}
+                  </span>
                   <div className="w-28 shrink-0">
                     <input
                       type="number"
@@ -846,7 +870,7 @@ export function TemplateFormPage() {
                       value={f.pointsOverride}
                       onChange={(e) => updateFixedOverride(i, e.target.value)}
                       disabled={isReadonly}
-                      className="block w-full rounded border border-gray-300 px-2 py-1 text-xs text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none"
+                      className="block w-full rounded border border-gray-300 px-2 py-1 text-xs text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400"
                     />
                   </div>
                   {!isReadonly && (
@@ -869,7 +893,7 @@ export function TemplateFormPage() {
         {/* Avtomatik tanlash qoidalari */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-700">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {uz.templates.selectionRulesTitle}
             </h3>
             {!isReadonly && (
@@ -885,13 +909,15 @@ export function TemplateFormPage() {
             )}
           </div>
           {rules.length === 0 ? (
-            <p className="text-sm text-gray-400">{uz.templates.selectionRuleEmpty}</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">
+              {uz.templates.selectionRuleEmpty}
+            </p>
           ) : (
             <div className="space-y-3">
               {rules.map((rule, i) => (
                 <div
                   key={i}
-                  className="grid grid-cols-2 gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 sm:grid-cols-4"
+                  className="grid grid-cols-2 gap-3 rounded-lg border border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40 p-3 sm:grid-cols-4"
                 >
                   <Select
                     label={i === 0 ? uz.templates.selectionSubjectLabel : undefined}
@@ -962,9 +988,11 @@ export function TemplateFormPage() {
 
       {/* Faollashtirish (faqat draft, faqat tahrirlash rejimi) */}
       {isEdit && isDraft && (
-        <section className="rounded-lg border border-blue-100 bg-blue-50 p-6 space-y-4">
-          <h2 className="text-lg font-medium text-gray-900">{uz.templates.activate}</h2>
-          <p className="text-sm text-gray-600">
+        <section className="rounded-lg border border-blue-100 bg-blue-50 p-6 space-y-4 dark:border-blue-500/30 dark:bg-blue-500/10">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+            {uz.templates.activate}
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             Faollashtirishdan avval bank tekshiruvi o'tkazish tavsiya etiladi.
           </p>
 
@@ -991,7 +1019,7 @@ export function TemplateFormPage() {
           </div>
 
           {activateError && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-400">
               {activateError}
             </div>
           )}
@@ -1000,8 +1028,8 @@ export function TemplateFormPage() {
             <div
               className={`rounded-lg border px-4 py-3 text-sm ${
                 shortages.length === 0
-                  ? 'border-green-200 bg-green-50 text-green-700'
-                  : 'border-yellow-200 bg-yellow-50 text-yellow-800'
+                  ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-500/40 dark:bg-green-500/10 dark:text-green-400'
+                  : 'border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-500/40 dark:bg-yellow-500/10 dark:text-yellow-300'
               }`}
             >
               {shortages.length === 0 ? (

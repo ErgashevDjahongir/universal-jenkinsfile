@@ -296,15 +296,17 @@ export function QuestionFormPage() {
       />
 
       {errors.global && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-400">
           {errors.global}
         </p>
       )}
 
       {/* Holat va o'tishlar */}
       {question && (
-        <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3">
-          <span className="text-sm text-gray-500">{uz.questions.statusLabel}:</span>
+        <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {uz.questions.statusLabel}:
+          </span>
           <Badge
             variant={
               question.status === 'active'
@@ -364,7 +366,7 @@ export function QuestionFormPage() {
         </div>
       )}
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
         <div className="space-y-5">
           {/* Fan */}
           <Select
@@ -415,7 +417,7 @@ export function QuestionFormPage() {
 
           {/* Savol matni */}
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {uz.questions.textLabel}
             </label>
             <RichTextEditor
@@ -452,7 +454,7 @@ export function QuestionFormPage() {
           {/* Kategoriyalar */}
           {categories.length > 0 && (
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {uz.questions.categoriesLabel}
               </label>
               <div className="flex flex-wrap gap-2">
@@ -465,7 +467,7 @@ export function QuestionFormPage() {
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                       selectedCategoryIds.includes(c.id)
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                     } disabled:cursor-not-allowed disabled:opacity-50`}
                   >
                     {c.name}
@@ -503,7 +505,7 @@ export function QuestionFormPage() {
         </div>
 
         {!isArchived && (
-          <div className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-4">
+          <div className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-4 dark:border-gray-700">
             <Button
               variant="secondary"
               size="icon"
@@ -528,11 +530,15 @@ export function QuestionFormPage() {
 
       {/* Rasm biriktirish (faqat tahrirlash rejimida) */}
       {isEdit && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h2 className="mb-4 text-base font-medium text-gray-900">{uz.questions.attachments}</h2>
+        <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+          <h2 className="mb-4 text-base font-medium text-gray-900 dark:text-gray-100">
+            {uz.questions.attachments}
+          </h2>
 
           {attachments.length === 0 ? (
-            <p className="mb-4 text-sm text-gray-400">{uz.questions.noAttachments}</p>
+            <p className="mb-4 text-sm text-gray-400 dark:text-gray-500">
+              {uz.questions.noAttachments}
+            </p>
           ) : (
             <div className="mb-4 flex flex-wrap gap-3">
               {attachments.map((att) => (
@@ -540,7 +546,7 @@ export function QuestionFormPage() {
                   key={att.id}
                   src={`/api/uploads/questions/${att.filePath.split('/').pop()}`}
                   alt="Savol rasmi"
-                  className="h-24 w-24 rounded-lg border border-gray-200 object-cover"
+                  className="h-24 w-24 rounded-lg border border-gray-200 object-cover dark:border-gray-700"
                 />
               ))}
             </div>
@@ -565,7 +571,9 @@ export function QuestionFormPage() {
               >
                 <ImagePlus size={16} />
               </Button>
-              <span className="text-xs text-gray-400">{uz.questions.uploadImageHint}</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">
+                {uz.questions.uploadImageHint}
+              </span>
               {errors.upload && <span className="text-xs text-red-600">{errors.upload}</span>}
             </div>
           )}
@@ -595,7 +603,7 @@ export function QuestionFormPage() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">{uz.templates.archiving}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">{uz.templates.archiving}</p>
       </Modal>
     </div>
   );
@@ -634,7 +642,9 @@ function OptionsEditor({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">{uz.questions.optionsLabel}</label>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        {uz.questions.optionsLabel}
+      </label>
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="space-y-2">
@@ -652,7 +662,7 @@ function OptionsEditor({
                 className={`mt-2 h-4 w-4 shrink-0 rounded-full border-2 transition-colors ${
                   opt.isCorrect
                     ? 'border-green-600 bg-green-600'
-                    : 'border-gray-300 bg-white hover:border-green-400'
+                    : 'border-gray-300 bg-white hover:border-green-400 dark:border-gray-500 dark:bg-gray-700 dark:hover:border-green-400'
                 } disabled:cursor-not-allowed disabled:opacity-50`}
               />
             )}
@@ -665,7 +675,7 @@ function OptionsEditor({
                 value={opt.orderIndex + 1}
                 disabled={disabled}
                 onChange={(e) => onUpdate(i, 'orderIndex', parseInt(e.target.value, 10) - 1)}
-                className="mt-1.5 w-12 rounded border border-gray-300 px-2 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none disabled:bg-gray-50"
+                className="mt-1.5 w-12 rounded border border-gray-300 px-2 py-1.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:disabled:bg-gray-800"
                 aria-label={uz.questions.orderIndexLabel}
               />
             )}
@@ -677,7 +687,7 @@ function OptionsEditor({
               disabled={disabled || isTrueFalse}
               onChange={(e) => onUpdate(i, 'text', e.target.value)}
               placeholder={`${i + 1}-variant`}
-              className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:bg-gray-50 disabled:text-gray-500"
+              className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:bg-gray-50 disabled:text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400 dark:disabled:bg-gray-800 dark:disabled:text-gray-400"
             />
 
             {/* Match pair */}
@@ -688,7 +698,7 @@ function OptionsEditor({
                 disabled={disabled}
                 onChange={(e) => onUpdate(i, 'matchPair', e.target.value)}
                 placeholder={uz.questions.matchPairLabel}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:bg-gray-50"
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400 dark:disabled:bg-gray-800"
               />
             )}
 

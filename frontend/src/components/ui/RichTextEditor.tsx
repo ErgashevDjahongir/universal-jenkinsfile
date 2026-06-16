@@ -37,8 +37,8 @@ function ToolbarBtn({
       className={cn(
         'flex h-7 w-7 items-center justify-center rounded transition-colors',
         active
-          ? 'bg-blue-100 text-blue-700'
-          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800',
+          ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300'
+          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-gray-100',
       )}
     >
       {children}
@@ -88,14 +88,14 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, minRows
   return (
     <div
       className={cn(
-        'rounded-lg border bg-white',
+        'rounded-lg border bg-white dark:bg-gray-700',
         disabled
-          ? 'border-gray-200 bg-gray-50'
-          : 'border-gray-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/30',
+          ? 'border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-800'
+          : 'border-gray-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/30 dark:border-gray-600 dark:focus-within:border-blue-400',
       )}
     >
       {!disabled && (
-        <div className="flex items-center gap-0.5 border-b border-gray-100 px-2 py-1">
+        <div className="flex items-center gap-0.5 border-b border-gray-100 px-2 py-1 dark:border-gray-600">
           <ToolbarBtn
             active={editor?.isActive('bold')}
             onClick={() => editor?.chain().focus().toggleBold().run()}
@@ -110,7 +110,7 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, minRows
           >
             <Italic size={13} />
           </ToolbarBtn>
-          <div className="mx-1.5 h-4 w-px bg-gray-200" />
+          <div className="mx-1.5 h-4 w-px bg-gray-200 dark:bg-gray-600" />
           <ToolbarBtn
             active={editor?.isActive({ textAlign: 'left' })}
             onClick={() => editor?.chain().focus().setTextAlign('left').run()}
@@ -144,7 +144,7 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, minRows
       <EditorContent
         editor={editor}
         style={{ minHeight: `${minRows * 1.625}rem` }}
-        className="rte-editor px-3 py-2 text-sm text-gray-900"
+        className="rte-editor px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
       />
     </div>
   );
