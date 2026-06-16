@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   Archive,
   ArrowLeft,
@@ -75,25 +75,38 @@ function buildOptionDtos(type: QuestionType, options: OptionRow[]): QuestionOpti
   }));
 }
 
+interface CarryState {
+  subjectId?: string;
+  type?: QuestionType;
+  difficulty?: DifficultyLevel;
+  points?: string;
+  categoryIds?: string[];
+}
+
 export function QuestionFormPage() {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const { state: navState } = useLocation() as { state: CarryState | null };
   const { user } = useAuth();
   const isAdmin = user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.ADMIN;
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  const [subjectId, setSubjectId] = useState('');
-  const [type, setType] = useState<QuestionType>('single_choice');
-  const [difficulty, setDifficulty] = useState<DifficultyLevel>('medium');
+  const [subjectId, setSubjectId] = useState(navState?.subjectId ?? '');
+  const [type, setType] = useState<QuestionType>(navState?.type ?? 'single_choice');
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>(navState?.difficulty ?? 'medium');
   const [text, setText] = useState('');
-  const [points, setPoints] = useState('');
+  const [points, setPoints] = useState(navState?.points ?? '');
   const [explanation, setExplanation] = useState('');
   const [answerKey, setAnswerKey] = useState('');
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
-  const [options, setOptions] = useState<OptionRow[]>(defaultOptions('single_choice'));
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
+    navState?.categoryIds ?? [],
+  );
+  const [options, setOptions] = useState<OptionRow[]>(
+    defaultOptions(navState?.type ?? 'single_choice'),
+  );
 
   const [question, setQuestion] = useState<Question | null>(null);
   const [attachments, setAttachments] = useState<QuestionAttachment[]>([]);
@@ -238,8 +251,19 @@ export function QuestionFormPage() {
       };
       if (isEdit && id) {
         const updated = await updateQuestion(id, dto);
-        setQuestion(updated);
-        setOptions(optionRowsFromQuestion(updated));
+        if (addAnother) {
+          const carry: CarryState = {
+            subjectId,
+            type,
+            difficulty,
+            points: points || undefined,
+            categoryIds: selectedCategoryIds.length ? selectedCategoryIds : undefined,
+          };
+          navigate('/questions/new', { state: carry });
+        } else {
+          setQuestion(updated);
+          setOptions(optionRowsFromQuestion(updated));
+        }
       } else {
         const created = await createQuestion(dto);
         if (addAnother) {
