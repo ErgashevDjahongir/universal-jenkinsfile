@@ -79,6 +79,7 @@ export interface QuestionFilter {
   status?: QuestionStatus;
   difficulty?: DifficultyLevel;
   type?: QuestionType;
+  search?: string;
 }
 
 export interface PaginatedQuestions {

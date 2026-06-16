@@ -42,7 +42,7 @@ describe('Full workflow (e2e)', () => {
   let expertLogin: string;
 
   // 6 savol (0=SC, 1=MC, 2=TF, 3=MAT, 4=ORD, 5=SA)
-  let questionIds: string[] = [];
+  const questionIds: string[] = [];
   let iqId: string;
 
   let insufficientTemplateId: string;

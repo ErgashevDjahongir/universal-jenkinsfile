@@ -148,6 +148,9 @@ export class QuestionsService {
         { categoryId: filter.categoryId },
       );
     }
+    if (filter.search?.trim()) {
+      qb.andWhere('q.text ILIKE :search', { search: `%${filter.search.trim()}%` });
+    }
 
     // To'liq son (LIMIT/OFFSET'dan oldin); join'lar tufayli getManyAndCount o'rniga alohida.
     const total = await qb.getCount();

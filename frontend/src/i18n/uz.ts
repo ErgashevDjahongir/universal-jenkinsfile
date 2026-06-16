@@ -416,6 +416,7 @@ export const uz = {
     categoriesPlaceholder: 'Kategoriya tanlang (ixtiyoriy)',
     saveAndAddAnother: "Saqlash va yana qo'shish",
     savedNotice: 'Savol saqlandi',
+    searchPlaceholder: 'Savol matnida qidirish…',
   },
   users: {
     title: 'Foydalanuvchilar',

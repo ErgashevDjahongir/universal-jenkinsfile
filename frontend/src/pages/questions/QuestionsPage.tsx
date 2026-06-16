@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Pencil, Plus } from 'lucide-react';
+import { BookOpen, Pencil, Plus, Search } from 'lucide-react';
 import {
   Button,
   Badge,
@@ -66,6 +66,8 @@ export function QuestionsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [filter, setFilter] = useState<QuestionFilter>({});
+  const [searchInput, setSearchInput] = useState('');
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [page, setPage] = useState(1);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [total, setTotal] = useState(0);
@@ -124,6 +126,14 @@ export function QuestionsPage() {
   useEffect(() => {
     void loadQuestions();
   }, [loadQuestions]);
+
+  function handleSearchChange(value: string) {
+    setSearchInput(value);
+    clearTimeout(searchDebounce.current ?? undefined);
+    searchDebounce.current = setTimeout(() => {
+      setFilterField('search', value.trim() || undefined);
+    }, 400);
+  }
 
   // Filtr o'zgarsa — 1-sahifaga qaytamiz.
   function setFilterField<K extends keyof QuestionFilter>(key: K, value: QuestionFilter[K]) {
@@ -245,6 +255,19 @@ export function QuestionsPage() {
         <p className="mb-3 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
           {uz.questions.filtersLabel}
         </p>
+        <div className="relative mb-3">
+          <Search
+            size={15}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+          />
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder={uz.questions.searchPlaceholder}
+            className="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400"
+          />
+        </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <Select
             label={uz.questions.subjectLabel}

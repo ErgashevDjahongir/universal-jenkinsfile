@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNumberString, IsOptional } from 'class-validator';
+import { IsEnum, IsNumberString, IsOptional, IsString, MaxLength } from 'class-validator';
 import { DifficultyLevel } from '../../../common/enums/difficulty-level.enum';
 import { QuestionStatus } from '../../../common/enums/question-status.enum';
 import { QuestionType } from '../../../common/enums/question-type.enum';
@@ -29,6 +29,12 @@ export class QuestionFilterDto {
   @IsOptional()
   @IsEnum(QuestionType)
   type?: QuestionType;
+
+  @ApiPropertyOptional({ description: 'Savol matnida qidiruv (case-insensitive, qisman moslik).' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  search?: string;
 
   @ApiPropertyOptional({ description: 'Sahifa raqami (1-dan). Berilmasa — 1.' })
   @IsOptional()
