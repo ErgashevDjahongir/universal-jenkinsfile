@@ -12,6 +12,8 @@ interface Props {
   placeholder?: string;
   disabled?: boolean;
   minRows?: number;
+  /** Qiymat ortgan sayin tahrirlovchiga fokus beriladi (0 — fokus bermaydi). */
+  focusSignal?: number;
 }
 
 function ToolbarBtn({
@@ -46,7 +48,14 @@ function ToolbarBtn({
   );
 }
 
-export function RichTextEditor({ value, onChange, placeholder, disabled, minRows = 3 }: Props) {
+export function RichTextEditor({
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  minRows = 3,
+  focusSignal = 0,
+}: Props) {
   const lastEmitted = useRef(value);
 
   const editor = useEditor({
@@ -84,6 +93,10 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, minRows
   useEffect(() => {
     editor?.setEditable(!disabled);
   }, [editor, disabled]);
+
+  useEffect(() => {
+    if (editor && focusSignal > 0 && !disabled) editor.commands.focus('end');
+  }, [editor, focusSignal, disabled]);
 
   return (
     <div

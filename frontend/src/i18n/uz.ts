@@ -414,6 +414,8 @@ export const uz = {
     falseOption: "Noto'g'ri",
     categoriesLabel: 'Kategoriyalar',
     categoriesPlaceholder: 'Kategoriya tanlang (ixtiyoriy)',
+    saveAndAddAnother: "Saqlash va yana qo'shish",
+    savedNotice: 'Savol saqlandi',
   },
   users: {
     title: 'Foydalanuvchilar',

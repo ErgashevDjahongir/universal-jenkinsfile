@@ -103,7 +103,12 @@ export function QuestionFormPage() {
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [archiveConfirm, setArchiveConfirm] = useState(false);
+  const [savedNotice, setSavedNotice] = useState(false);
+  const [focusSignal, setFocusSignal] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
+  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => clearTimeout(noticeTimer.current ?? undefined), []);
 
   useEffect(() => {
     getSubjects()
@@ -202,7 +207,21 @@ export function QuestionFormPage() {
     return Object.keys(errs).length === 0;
   }
 
-  async function handleSave() {
+  // Joriy savol matni va variantlarini yangi savol uchun tozalaydi;
+  // yo'nalish, tur, qiyinlik, ball va kategoriya saqlanib qoladi.
+  function resetForNextQuestion() {
+    setText('');
+    setExplanation('');
+    setAnswerKey('');
+    setOptions(defaultOptions(type));
+    setErrors({});
+    setSavedNotice(true);
+    setFocusSignal((n) => n + 1);
+    clearTimeout(noticeTimer.current ?? undefined);
+    noticeTimer.current = setTimeout(() => setSavedNotice(false), 3000);
+  }
+
+  async function handleSave(addAnother = false) {
     if (!validate()) return;
     setSaving(true);
     try {
@@ -223,7 +242,11 @@ export function QuestionFormPage() {
         setOptions(optionRowsFromQuestion(updated));
       } else {
         const created = await createQuestion(dto);
-        navigate(`/questions/${created.id}/edit`, { replace: true });
+        if (addAnother) {
+          resetForNextQuestion();
+        } else {
+          navigate(`/questions/${created.id}/edit`, { replace: true });
+        }
       }
     } catch {
       setErrors({ global: uz.common.error });
@@ -298,6 +321,16 @@ export function QuestionFormPage() {
       {errors.global && (
         <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-400">
           {errors.global}
+        </p>
+      )}
+
+      {savedNotice && (
+        <p
+          role="status"
+          className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700 dark:border-green-500/40 dark:bg-green-500/10 dark:text-green-400"
+        >
+          <CheckCircle size={15} />
+          {uz.questions.savedNotice}
         </p>
       )}
 
@@ -426,8 +459,9 @@ export function QuestionFormPage() {
               placeholder={uz.questions.textPlaceholder}
               disabled={isArchived}
               minRows={3}
+              focusSignal={focusSignal}
             />
-            {errors.text && <p className="text-sm text-red-600">{errors.text}</p>}
+            {errors.text && <p className="text-sm text-red-600 dark:text-red-400">{errors.text}</p>}
           </div>
 
           {/* Ball va tushuntirish */}
@@ -515,6 +549,17 @@ export function QuestionFormPage() {
             >
               <X size={16} />
             </Button>
+            {!isEdit && (
+              <Button
+                variant="secondary"
+                size="sm"
+                loading={saving}
+                onClick={() => void handleSave(true)}
+              >
+                <Plus size={15} />
+                {uz.questions.saveAndAddAnother}
+              </Button>
+            )}
             <Button
               size="icon"
               title={uz.common.save}
