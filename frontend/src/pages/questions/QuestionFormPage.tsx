@@ -324,16 +324,6 @@ export function QuestionFormPage() {
         </p>
       )}
 
-      {savedNotice && (
-        <p
-          role="status"
-          className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700 dark:border-green-500/40 dark:bg-green-500/10 dark:text-green-400"
-        >
-          <CheckCircle size={15} />
-          {uz.questions.savedNotice}
-        </p>
-      )}
-
       {/* Holat va o'tishlar / Yana qo'shish */}
       {(!isEdit || question) && (
         <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
@@ -413,6 +403,16 @@ export function QuestionFormPage() {
                 </Button>
               )}
             </>
+          )}
+
+          {savedNotice && (
+            <span
+              role="status"
+              className="ml-auto flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400"
+            >
+              <CheckCircle size={14} />
+              {uz.questions.savedNotice}
+            </span>
           )}
         </div>
       )}
