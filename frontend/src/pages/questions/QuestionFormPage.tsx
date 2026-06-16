@@ -306,15 +306,39 @@ export function QuestionFormPage() {
       <PageHeader
         title={isEdit ? uz.questions.edit : uz.questions.add}
         actions={
-          <Button
-            variant="secondary"
-            size="icon"
-            title={uz.common.back}
-            aria-label={uz.common.back}
-            onClick={() => navigate('/questions')}
-          >
-            <ArrowLeft size={16} />
-          </Button>
+          <>
+            {!isArchived && !isEdit && (
+              <Button
+                variant="secondary"
+                size="sm"
+                loading={saving}
+                onClick={() => void handleSave(true)}
+              >
+                <Plus size={15} />
+                {uz.questions.saveAndAddAnother}
+              </Button>
+            )}
+            {!isArchived && (
+              <Button
+                size="icon"
+                title={uz.common.save}
+                aria-label={uz.common.save}
+                loading={saving}
+                onClick={() => void handleSave()}
+              >
+                <Save size={16} />
+              </Button>
+            )}
+            <Button
+              variant="secondary"
+              size="icon"
+              title={uz.common.back}
+              aria-label={uz.common.back}
+              onClick={() => navigate('/questions')}
+            >
+              <ArrowLeft size={16} />
+            </Button>
+          </>
         }
       />
 
@@ -537,40 +561,6 @@ export function QuestionFormPage() {
             />
           )}
         </div>
-
-        {!isArchived && (
-          <div className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-4 dark:border-gray-700">
-            <Button
-              variant="secondary"
-              size="icon"
-              title={uz.common.cancel}
-              aria-label={uz.common.cancel}
-              onClick={() => navigate('/questions')}
-            >
-              <X size={16} />
-            </Button>
-            {!isEdit && (
-              <Button
-                variant="secondary"
-                size="sm"
-                loading={saving}
-                onClick={() => void handleSave(true)}
-              >
-                <Plus size={15} />
-                {uz.questions.saveAndAddAnother}
-              </Button>
-            )}
-            <Button
-              size="icon"
-              title={uz.common.save}
-              aria-label={uz.common.save}
-              loading={saving}
-              onClick={() => void handleSave()}
-            >
-              <Save size={16} />
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Rasm biriktirish (faqat tahrirlash rejimida) */}
