@@ -179,7 +179,11 @@ export function QuestionsPage() {
     {
       key: 'points',
       header: uz.questions.pointsLabel,
-      render: (q) => <span className="text-sm text-gray-700 dark:text-gray-300">{q.points}</span>,
+      render: (q) => (
+        <span className="text-sm text-gray-700 dark:text-gray-300">
+          {Number(q.points) % 1 === 0 ? Math.trunc(Number(q.points)) : q.points}
+        </span>
+      ),
     },
     {
       key: 'actions',

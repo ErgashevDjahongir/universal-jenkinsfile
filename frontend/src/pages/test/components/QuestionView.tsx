@@ -31,7 +31,14 @@ export function QuestionView({ question, index, total, value, onChange }: Questi
             .replace('{total}', String(total))}
         </span>
         <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-400">
-          {uz.test.pointsValue.replace('{points}', question.points)}
+          {uz.test.pointsValue.replace(
+            '{points}',
+            String(
+              Number(question.points) % 1 === 0
+                ? Math.trunc(Number(question.points))
+                : question.points,
+            ),
+          )}
         </span>
       </div>
 
