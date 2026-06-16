@@ -54,3 +54,23 @@ body,
 .dark .rte-display * {
   color: inherit !important;
 }
+
+/* Bosiladigan elementlarda kursor — butun ilova bo'yicha izchil. */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']),
+input[type='checkbox'],
+input[type='radio'],
+select,
+label:has(input[type='checkbox']),
+label:has(input[type='radio']),
+a[href] {
+  cursor: pointer;
+}
+
+button:disabled,
+[role='button'][aria-disabled='true'],
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+}
