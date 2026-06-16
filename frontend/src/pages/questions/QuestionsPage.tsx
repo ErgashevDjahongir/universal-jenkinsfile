@@ -1,7 +1,16 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Pencil, Plus } from 'lucide-react';
-import { Button, Badge, Select, Table, Pagination, PageHeader, type Column } from '@/components/ui';
+import {
+  Button,
+  Badge,
+  Select,
+  Table,
+  Pagination,
+  PageHeader,
+  SafeHtml,
+  type Column,
+} from '@/components/ui';
 import { uz } from '@/i18n/uz';
 import { useAuth } from '@/auth/useAuth';
 import { UserRole } from '@/auth/roles';
@@ -127,9 +136,19 @@ export function QuestionsPage() {
       key: 'text',
       header: 'Savol matni',
       render: (q) => (
-        <span className="line-clamp-2 max-w-xs text-sm text-gray-900 dark:text-gray-100">
-          {q.text}
-        </span>
+        <div className="group relative max-w-xs">
+          <SafeHtml
+            html={q.text}
+            className="rte-display line-clamp-2 text-sm text-gray-900 dark:text-gray-100"
+          />
+          {/* To'liq mazmun tooltip */}
+          <div className="pointer-events-none absolute left-0 top-full z-50 mt-1 hidden w-80 rounded-lg border border-gray-200 bg-white p-3 shadow-lg group-hover:block dark:border-gray-700 dark:bg-gray-800">
+            <SafeHtml
+              html={q.text}
+              className="rte-display text-sm text-gray-800 dark:text-gray-200"
+            />
+          </div>
+        </div>
       ),
     },
     {
