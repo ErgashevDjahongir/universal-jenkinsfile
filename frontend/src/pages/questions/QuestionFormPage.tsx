@@ -325,97 +325,95 @@ export function QuestionFormPage() {
       )}
 
       {/* Holat va o'tishlar / Yana qo'shish */}
-      {(!isEdit || question) && (
-        <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-          {/* Yangi savol qo'shish rejimi: faqat "Yana qo'shish" ko'rinadi */}
-          {!isEdit && (
-            <Button
-              variant="secondary"
-              size="sm"
-              loading={saving}
-              onClick={() => void handleSave(true)}
-            >
-              <Plus size={15} />
-              {uz.questions.addAnother}
-            </Button>
-          )}
-
-          {/* Tahrirlash rejimi: holat badge + o'tish tugmalari */}
-          {question && (
-            <>
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                {uz.questions.statusLabel}:
-              </span>
-              <Badge
-                variant={
-                  question.status === 'active'
-                    ? 'success'
-                    : question.status === 'approved'
-                      ? 'warning'
-                      : question.status === 'archived'
-                        ? 'danger'
-                        : 'neutral'
-                }
-              >
-                {
-                  uz.questions[
-                    `status${question.status.charAt(0).toUpperCase() + question.status.slice(1)}` as
-                      | 'statusDraft'
-                      | 'statusApproved'
-                      | 'statusActive'
-                      | 'statusArchived'
-                  ]
-                }
-              </Badge>
-              {canApprove && (
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  title={uz.questions.approve}
-                  aria-label={uz.questions.approve}
-                  loading={transitioning}
-                  onClick={() => void handleTransition('approve')}
-                >
-                  <CheckCircle size={15} />
-                </Button>
-              )}
-              {canActivate && (
-                <Button
-                  size="icon"
-                  title={uz.questions.activate}
-                  aria-label={uz.questions.activate}
-                  loading={transitioning}
-                  onClick={() => void handleTransition('activate')}
-                >
-                  <Power size={15} />
-                </Button>
-              )}
-              {canArchive && (
-                <Button
-                  size="icon"
-                  variant="danger"
-                  title={uz.questions.archive}
-                  aria-label={uz.questions.archive}
-                  loading={transitioning}
-                  onClick={() => setArchiveConfirm(true)}
-                >
-                  <Archive size={15} />
-                </Button>
-              )}
-            </>
-          )}
-
-          {savedNotice && (
-            <span
-              role="status"
-              className="ml-auto flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400"
-            >
-              <CheckCircle size={14} />
-              {uz.questions.savedNotice}
+      <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
+        {/* Tahrirlash rejimi: holat badge + o'tish tugmalari */}
+        {question && (
+          <>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {uz.questions.statusLabel}:
             </span>
-          )}
-        </div>
-      )}
+            <Badge
+              variant={
+                question.status === 'active'
+                  ? 'success'
+                  : question.status === 'approved'
+                    ? 'warning'
+                    : question.status === 'archived'
+                      ? 'danger'
+                      : 'neutral'
+              }
+            >
+              {
+                uz.questions[
+                  `status${question.status.charAt(0).toUpperCase() + question.status.slice(1)}` as
+                    | 'statusDraft'
+                    | 'statusApproved'
+                    | 'statusActive'
+                    | 'statusArchived'
+                ]
+              }
+            </Badge>
+            {canApprove && (
+              <Button
+                size="icon"
+                variant="secondary"
+                title={uz.questions.approve}
+                aria-label={uz.questions.approve}
+                loading={transitioning}
+                onClick={() => void handleTransition('approve')}
+              >
+                <CheckCircle size={15} />
+              </Button>
+            )}
+            {canActivate && (
+              <Button
+                size="icon"
+                title={uz.questions.activate}
+                aria-label={uz.questions.activate}
+                loading={transitioning}
+                onClick={() => void handleTransition('activate')}
+              >
+                <Power size={15} />
+              </Button>
+            )}
+            {canArchive && (
+              <Button
+                size="icon"
+                variant="danger"
+                title={uz.questions.archive}
+                aria-label={uz.questions.archive}
+                loading={transitioning}
+                onClick={() => setArchiveConfirm(true)}
+              >
+                <Archive size={15} />
+              </Button>
+            )}
+          </>
+        )}
+
+        {!isArchived && (
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={saving}
+            className="ml-auto"
+            onClick={() => void handleSave(true)}
+          >
+            <Plus size={15} />
+            {uz.questions.addAnother}
+          </Button>
+        )}
+
+        {savedNotice && (
+          <span
+            role="status"
+            className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400"
+          >
+            <CheckCircle size={14} />
+            {uz.questions.savedNotice}
+          </span>
+        )}
+      </div>
 
       <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
         <div className="space-y-5">
