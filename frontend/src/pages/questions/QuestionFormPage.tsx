@@ -306,39 +306,15 @@ export function QuestionFormPage() {
       <PageHeader
         title={isEdit ? uz.questions.edit : uz.questions.add}
         actions={
-          <>
-            {!isArchived && !isEdit && (
-              <Button
-                variant="secondary"
-                size="sm"
-                loading={saving}
-                onClick={() => void handleSave(true)}
-              >
-                <Plus size={15} />
-                {uz.questions.saveAndAddAnother}
-              </Button>
-            )}
-            {!isArchived && (
-              <Button
-                size="icon"
-                title={uz.common.save}
-                aria-label={uz.common.save}
-                loading={saving}
-                onClick={() => void handleSave()}
-              >
-                <Save size={16} />
-              </Button>
-            )}
-            <Button
-              variant="secondary"
-              size="icon"
-              title={uz.common.back}
-              aria-label={uz.common.back}
-              onClick={() => navigate('/questions')}
-            >
-              <ArrowLeft size={16} />
-            </Button>
-          </>
+          <Button
+            variant="secondary"
+            size="icon"
+            title={uz.common.back}
+            aria-label={uz.common.back}
+            onClick={() => navigate('/questions')}
+          >
+            <ArrowLeft size={16} />
+          </Button>
         }
       />
 
@@ -358,67 +334,85 @@ export function QuestionFormPage() {
         </p>
       )}
 
-      {/* Holat va o'tishlar */}
-      {question && (
+      {/* Holat va o'tishlar / Yana qo'shish */}
+      {(!isEdit || question) && (
         <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {uz.questions.statusLabel}:
-          </span>
-          <Badge
-            variant={
-              question.status === 'active'
-                ? 'success'
-                : question.status === 'approved'
-                  ? 'warning'
-                  : question.status === 'archived'
-                    ? 'danger'
-                    : 'neutral'
-            }
-          >
-            {
-              uz.questions[
-                `status${question.status.charAt(0).toUpperCase() + question.status.slice(1)}` as
-                  | 'statusDraft'
-                  | 'statusApproved'
-                  | 'statusActive'
-                  | 'statusArchived'
-              ]
-            }
-          </Badge>
-          {canApprove && (
+          {/* Yangi savol qo'shish rejimi: faqat "Yana qo'shish" ko'rinadi */}
+          {!isEdit && (
             <Button
-              size="icon"
               variant="secondary"
-              title={uz.questions.approve}
-              aria-label={uz.questions.approve}
-              loading={transitioning}
-              onClick={() => void handleTransition('approve')}
+              size="sm"
+              loading={saving}
+              onClick={() => void handleSave(true)}
             >
-              <CheckCircle size={15} />
+              <Plus size={15} />
+              {uz.questions.addAnother}
             </Button>
           )}
-          {canActivate && (
-            <Button
-              size="icon"
-              title={uz.questions.activate}
-              aria-label={uz.questions.activate}
-              loading={transitioning}
-              onClick={() => void handleTransition('activate')}
-            >
-              <Power size={15} />
-            </Button>
-          )}
-          {canArchive && (
-            <Button
-              size="icon"
-              variant="danger"
-              title={uz.questions.archive}
-              aria-label={uz.questions.archive}
-              loading={transitioning}
-              onClick={() => setArchiveConfirm(true)}
-            >
-              <Archive size={15} />
-            </Button>
+
+          {/* Tahrirlash rejimi: holat badge + o'tish tugmalari */}
+          {question && (
+            <>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {uz.questions.statusLabel}:
+              </span>
+              <Badge
+                variant={
+                  question.status === 'active'
+                    ? 'success'
+                    : question.status === 'approved'
+                      ? 'warning'
+                      : question.status === 'archived'
+                        ? 'danger'
+                        : 'neutral'
+                }
+              >
+                {
+                  uz.questions[
+                    `status${question.status.charAt(0).toUpperCase() + question.status.slice(1)}` as
+                      | 'statusDraft'
+                      | 'statusApproved'
+                      | 'statusActive'
+                      | 'statusArchived'
+                  ]
+                }
+              </Badge>
+              {canApprove && (
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  title={uz.questions.approve}
+                  aria-label={uz.questions.approve}
+                  loading={transitioning}
+                  onClick={() => void handleTransition('approve')}
+                >
+                  <CheckCircle size={15} />
+                </Button>
+              )}
+              {canActivate && (
+                <Button
+                  size="icon"
+                  title={uz.questions.activate}
+                  aria-label={uz.questions.activate}
+                  loading={transitioning}
+                  onClick={() => void handleTransition('activate')}
+                >
+                  <Power size={15} />
+                </Button>
+              )}
+              {canArchive && (
+                <Button
+                  size="icon"
+                  variant="danger"
+                  title={uz.questions.archive}
+                  aria-label={uz.questions.archive}
+                  loading={transitioning}
+                  onClick={() => setArchiveConfirm(true)}
+                >
+                  <Archive size={15} />
+                </Button>
+              )}
+            </>
           )}
         </div>
       )}
@@ -561,6 +555,15 @@ export function QuestionFormPage() {
             />
           )}
         </div>
+
+        {!isArchived && (
+          <div className="mt-6 flex justify-end border-t border-gray-100 pt-4 dark:border-gray-700">
+            <Button size="sm" loading={saving} onClick={() => void handleSave()}>
+              <Save size={15} />
+              {uz.common.save}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Rasm biriktirish (faqat tahrirlash rejimida) */}

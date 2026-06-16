@@ -415,6 +415,7 @@ export const uz = {
     categoriesLabel: 'Kategoriyalar',
     categoriesPlaceholder: 'Kategoriya tanlang (ixtiyoriy)',
     saveAndAddAnother: "Saqlash va yana qo'shish",
+    addAnother: "Yana qo'shish",
     savedNotice: 'Savol saqlandi',
     searchPlaceholder: 'Savol matnida qidirish…',
   },
