@@ -1,0 +1,124 @@
+# E-TEST — PRODUCTION infratuzilma (lokal tarmoq, ~100 bir vaqtdagi test topshiruvchi).
+#
+# Ishga tushirish:
+#   cp .env.prod.example .env          # va barcha "O'ZGARTIRING" qatorlarini to'ldiring
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Tashqariga faqat frontend (Nginx) 80-portda ochiladi. PostgreSQL, Redis va backend
+# faqat ichki `etest_net` tarmog'ida — tashqi portga chiqarilmaydi.
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: etest_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    # ~100 sessiya uchun ulanishlar va bufer oshirildi
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=150"
+      - "-c"
+      - "shared_buffers=256MB"
+    volumes:
+      # PG 18 image'ida ma'lumotlar /var/lib/postgresql ostidagi major-versiya
+      # subkatalogida saqlanadi (dev compose bilan bir xil).
+      - etest_pgdata:/var/lib/postgresql
+    networks: [etest_net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: etest_redis
+    restart: unless-stopped
+    # Faqat ichki tarmoqda, port ochilmaydi — shu sababli parol shart emas.
+    # noeviction: sessiya/refresh kalitlari xotira to'lganda jim o'chib ketmasin.
+    command:
+      [
+        "redis-server",
+        "--save",
+        "60",
+        "1",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+        "--loglevel",
+        "warning",
+      ]
+    volumes:
+      - etest_redisdata:/data
+    networks: [etest_net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: etest-backend:prod
+    container_name: etest_backend
+    restart: unless-stopped
+    # Maxfiy qiymatlar (.env): JWT_SECRET, DB_PASSWORD, SEED_ADMIN_*, CORS_ORIGIN ...
+    env_file: .env
+    # Konteyner ichidagi tarmoq manzillari .env'dagi qiymatlardan ustun turadi:
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      API_PREFIX: api
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - etest_uploads:/app/uploads
+    networks: [etest_net]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Relative '/api' — brauzer Nginx origin'i bilan ishlaydi, Nginx backend'ga proxy qiladi
+        VITE_API_URL: /api
+    image: etest-frontend:prod
+    container_name: etest_frontend
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    networks: [etest_net]
+    depends_on:
+      backend:
+        condition: service_healthy
+
+networks:
+  etest_net:
+    driver: bridge
+
+volumes:
+  etest_pgdata:
+  etest_redisdata:
+  etest_uploads:

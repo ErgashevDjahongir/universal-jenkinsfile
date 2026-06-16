@@ -19,6 +19,10 @@ export const dataSourceOptions = {
   // Migratsiyalar qo'lda boshqariladi; sxema hech qachon avtomatik sinxronlanmaydi.
   synchronize: false,
   migrationsRun: false,
+  // Ulanish hovuzi — productionda ~100 bir vaqtdagi foydalanuvchi uchun (env orqali).
+  extra: {
+    max: parseInt(process.env.DB_POOL_MAX ?? '20', 10),
+  },
   logging: process.env.NODE_ENV === 'development' ? ['error', 'warn', 'migration'] : ['error'],
 } satisfies DataSourceOptions;
 
