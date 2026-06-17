@@ -162,8 +162,10 @@ export function SessionsPage() {
         <div className="flex items-center gap-3">
           <Avatar name={r.fullName || String(r.userId)} />
           <div>
-            <div className="font-medium text-gray-900">{r.fullName || r.userId}</div>
-            <div className="text-xs text-gray-500">
+            <div className="font-medium text-gray-900 dark:text-gray-100">
+              {r.fullName || r.userId}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
               {r.isPreview
                 ? uz.sessions.preview
                 : `${r.attemptNumber}-${uz.sessions.attempt.replace('{n}', '')}`}

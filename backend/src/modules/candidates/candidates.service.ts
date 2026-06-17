@@ -165,15 +165,11 @@ export class CandidatesService {
       .leftJoin(TestAssignment, 'a', 'a.candidate_id = c.id');
 
     if (filter.view === CandidateView.CURRENT) {
-      // Joriy: hali yakunlanmagan holatlar VA tugash sanasi o'tmagan (yoki tayinlovsiz).
-      qb.andWhere('c.status IN (:...current)', {
-        current: [CandidateStatus.PENDING, CandidateStatus.IN_PROGRESS],
-      }).andWhere('(a.id IS NULL OR a.ends_at >= NOW())');
+      // Joriy: tayinlov muddati bugun yoki kelajakda (yoki tayinlovsiz).
+      qb.andWhere('(a.id IS NULL OR DATE(a.ends_at) >= CURRENT_DATE)');
     } else if (filter.view === CandidateView.ARCHIVED) {
-      // O'tganlar (natijalar): tugash sanasi o'tib, holat yakunlangan/topshirmagan.
-      qb.andWhere('c.status IN (:...archived)', {
-        archived: [CandidateStatus.COMPLETED, CandidateStatus.NO_SHOW],
-      });
+      // O'tganlar: tayinlov muddati kecha yoki undan oldin.
+      qb.andWhere('a.id IS NOT NULL').andWhere('DATE(a.ends_at) < CURRENT_DATE');
     } else if (filter.status) {
       qb.andWhere('c.status = :status', { status: filter.status });
     }

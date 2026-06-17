@@ -332,17 +332,10 @@ export function CandidatesPage() {
               onChange={(e) => setStatusFilter(e.target.value as CandidateStatus | '')}
             >
               <option value="">{uz.candidates.allStatuses}</option>
-              {view === 'current' ? (
-                <>
-                  <option value="pending">{uz.candidates.statusPending}</option>
-                  <option value="in_progress">{uz.candidates.statusInProgress}</option>
-                </>
-              ) : (
-                <>
-                  <option value="completed">{uz.candidates.statusCompleted}</option>
-                  <option value="no_show">{uz.candidates.statusNoShow}</option>
-                </>
-              )}
+              <option value="pending">{uz.candidates.statusPending}</option>
+              <option value="in_progress">{uz.candidates.statusInProgress}</option>
+              <option value="completed">{uz.candidates.statusCompleted}</option>
+              <option value="no_show">{uz.candidates.statusNoShow}</option>
             </Select>
           </div>
         </div>
