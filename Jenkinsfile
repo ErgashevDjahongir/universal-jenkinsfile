@@ -5,27 +5,23 @@ pipeline {
     options {
         timestamps()
         disableConcurrentBuilds()
-        skipDefaultCheckout(true)
-        timeout(time: 60, unit: 'MINUTES')
-    }
-
-    triggers {
-        pollSCM('H/5 * * * *')
     }
 
     parameters {
         string(
             name: 'DAST_TARGET_URL',
             defaultValue: '',
-            description: 'Ixtiyoriy: test/staging ilovaning URL manzili, masalan https://test.example.uz'
+            description: 'Ixtiyoriy: ZAP tekshiruvi uchun test server URL manzili'
         )
     }
 
     environment {
-        BACKEND_IMAGE   = 'examproject-backend'
-        FRONTEND_IMAGE  = 'examproject-frontend'
+        BACKEND_IMAGE = 'devsecops-demo-backend'
+        FRONTEND_IMAGE = 'devsecops-demo-frontend'
+
+        REPORT_DIR = 'reports'
         DEPENDENCY_DATA = '/opt/devsecops/dependency-data-clean'
-        TRIVY_CACHE     = '/opt/devsecops/trivy-cache'
+        TRIVY_CACHE = '/opt/devsecops/trivy-cache'
     }
 
     stages {
@@ -36,8 +32,6 @@ pipeline {
                 sh '''
                     set -eu
                     mkdir -p reports
-                    echo "Project: examproject"
-                    git status --short
                     test -f backend/package.json
                     test -f frontend/package.json
                     test -f backend/Dockerfile
@@ -50,7 +44,9 @@ pipeline {
             steps {
                 sh '''
                     set -eu
+                    mkdir -p reports
 
+                    set +e
                     docker run --rm \
                       -v "$WORKSPACE:/src" \
                       -w /src \
@@ -61,6 +57,15 @@ pipeline {
                       --output /src/reports/semgrep.json \
                       /src
 
+                    rc=$?
+                    set -e
+
+                    # Semgrep: 1 — topilmalar bor;
+                    # 2 yoki undan yuqori — ishga tushirish xatosi.
+                    if [ "$rc" -gt 1 ]; then
+                        exit "$rc"
+                    fi
+
                     test -s reports/semgrep.json
                 '''
             }
@@ -70,6 +75,7 @@ pipeline {
             steps {
                 sh '''
                     set -eu
+                    mkdir -p reports
 
                     docker run --rm \
                       -v "$WORKSPACE:/src" \
@@ -95,6 +101,7 @@ pipeline {
                       -w /app \
                       node:20-bookworm \
                       sh -lc '
+                        set -e
                         npm ci
                         npm test -- --runInBand
                         npm run build
@@ -113,6 +120,7 @@ pipeline {
                       -w /app \
                       node:20-bookworm \
                       sh -lc '
+                        set -e
                         npm ci
                         npm run build
                       '
@@ -124,10 +132,10 @@ pipeline {
             steps {
                 sh '''
                     set -eu
+                    mkdir -p reports
 
                     test -d "$DEPENDENCY_DATA" || {
-                        echo "ERROR: Dependency-Check data papkasi mavjud emas:"
-                        echo "$DEPENDENCY_DATA"
+                        echo "ERROR: Dependency-Check bazasi topilmadi: $DEPENDENCY_DATA"
                         exit 1
                     }
 
@@ -140,29 +148,29 @@ pipeline {
                       --scan /src/frontend \
                       --format JSON \
                       --out /src/reports \
-                      --noupdate
+                      --noupdate \
+                      --disableYarnAudit
 
                     test -s reports/dependency-check-report.json
-
                     python3 -m json.tool \
-                      reports/dependency-check-report.json \
-                      > /dev/null
+                      reports/dependency-check-report.json > /dev/null
+
+                    echo "Dependency-Check hisoboti yaratildi."
                 '''
             }
         }
 
-        stage('Docker Compose Validation') {
+        stage('Docker Compose - Validate') {
             steps {
                 sh '''
                     set -eu
 
-                    if [ -f docker-compose.yml ]; then
-                        docker compose -f docker-compose.yml config --quiet
-                    fi
+                    docker compose \
+                      -f docker-compose.yml \
+                      -f docker-compose.prod.yml \
+                      config -q
 
-                    if [ -f docker-compose.prod.yml ]; then
-                        docker compose -f docker-compose.prod.yml config --quiet
-                    fi
+                    echo "Docker Compose konfiguratsiyasi to'g'ri."
                 '''
             }
         }
@@ -173,13 +181,13 @@ pipeline {
                     set -eu
 
                     docker build \
-                      -f backend/Dockerfile \
                       -t "$BACKEND_IMAGE:$BUILD_NUMBER" \
+                      -f backend/Dockerfile \
                       backend
 
                     docker build \
-                      -f frontend/Dockerfile \
                       -t "$FRONTEND_IMAGE:$BUILD_NUMBER" \
+                      -f frontend/Dockerfile \
                       frontend
                 '''
             }
@@ -189,26 +197,32 @@ pipeline {
             steps {
                 sh '''
                     set -eu
+                    mkdir -p reports "$TRIVY_CACHE"
 
-                    mkdir -p "$TRIVY_CACHE" reports
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      -v "$WORKSPACE/reports:/reports" \
+                      -v "$TRIVY_CACHE:/root/.cache/" \
+                      aquasec/trivy:latest \
+                      image \
+                      --scanners vuln \
+                      --format json \
+                      --output "/reports/trivy-backend.json" \
+                      "$BACKEND_IMAGE:$BUILD_NUMBER"
 
-                    for IMAGE in \
-                      "$BACKEND_IMAGE:$BUILD_NUMBER" \
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      -v "$WORKSPACE/reports:/reports" \
+                      -v "$TRIVY_CACHE:/root/.cache/" \
+                      aquasec/trivy:latest \
+                      image \
+                      --scanners vuln \
+                      --format json \
+                      --output "/reports/trivy-frontend.json" \
                       "$FRONTEND_IMAGE:$BUILD_NUMBER"
-                    do
-                        SAFE_NAME=$(echo "$IMAGE" | tr ':/' '--')
 
-                        docker run --rm \
-                          -v "$TRIVY_CACHE:/root/.cache/" \
-                          -v "$WORKSPACE/reports:/reports" \
-                          aquasec/trivy:latest \
-                          image \
-                          --format json \
-                          --output "/reports/trivy-${SAFE_NAME}.json" \
-                          "$IMAGE"
-
-                        test -s "reports/trivy-${SAFE_NAME}.json"
-                    done
+                    test -s reports/trivy-backend.json
+                    test -s reports/trivy-frontend.json
                 '''
             }
         }
@@ -224,59 +238,14 @@ pipeline {
                 sh '''
                     set -eu
 
-                    TARGET="$DAST_TARGET_URL"
-
-                    case "$TARGET" in
-                        http://*|https://*) ;;
-                        *)
-                            echo "ERROR: DAST_TARGET_URL http:// yoki https:// bilan boshlanishi kerak."
-                            exit 1
-                            ;;
-                    esac
-
-                    mkdir -p "$WORKSPACE/reports/.zap"
-                    chmod 777 "$WORKSPACE/reports/.zap"
-
-                    set +e
                     docker run --rm \
-                      -v "$WORKSPACE/reports/.zap:/zap/wrk/:rw" \
+                      -v "$WORKSPACE/reports:/zap/wrk:rw" \
                       ghcr.io/zaproxy/zaproxy:stable \
                       zap-baseline.py \
-                      -t "$TARGET" \
-                      -J zap-report.json
-                    ZAP_EXIT=$?
-                    set -e
-
-                    if [ -s "$WORKSPACE/reports/.zap/zap-report.json" ]; then
-                        cp "$WORKSPACE/reports/.zap/zap-report.json" \
-                           "$WORKSPACE/reports/zap-report.json"
-                    fi
-
-                    if [ ! -s "$WORKSPACE/reports/zap-report.json" ]; then
-                        echo "ERROR: ZAP JSON hisoboti yaratilmadi."
-                        exit 1
-                    fi
-
-                    python3 -m json.tool \
-                      "$WORKSPACE/reports/zap-report.json" \
-                      > /dev/null
-
-                    case "$ZAP_EXIT" in
-                        0)
-                            echo "ZAP: skanerlash yakunlandi."
-                            ;;
-                        1)
-                            echo "ZAP: ogohlantirishlar mavjud. Hisobotni tekshiring."
-                            ;;
-                        2|3)
-                            echo "ZAP: xavfsizlik muammolari topildi yoki mavjud ogohlantirishlar bilan birga xatolar aniqlandi."
-                            exit "$ZAP_EXIT"
-                            ;;
-                        *)
-                            echo "ERROR: ZAP exit code: $ZAP_EXIT"
-                            exit 1
-                            ;;
-                    esac
+                      -t "$DAST_TARGET_URL" \
+                      -J zap-report.json \
+                      -r zap-report.html \
+                      -I
                 '''
             }
         }
@@ -289,23 +258,8 @@ pipeline {
                 allowEmptyArchive: true,
                 fingerprint: true
             )
-        }
 
-        success {
-            echo 'DevSecOps pipeline muvaffaqiyatli yakunlandi.'
-        }
-
-        failure {
-            echo 'Pipeline muvaffaqiyatsiz. Build loglari va mavjud hisobotlarni tekshiring.'
-        }
-
-        cleanup {
-            sh '''
-                docker image rm \
-                  "$BACKEND_IMAGE:$BUILD_NUMBER" \
-                  "$FRONTEND_IMAGE:$BUILD_NUMBER" \
-                  >/dev/null 2>&1 || true
-            '''
+            echo 'Pipeline yakunlandi. Mavjud xavfsizlik hisobotlari Jenkins Artifacts bo‘limida saqlanadi.'
         }
     }
 }
